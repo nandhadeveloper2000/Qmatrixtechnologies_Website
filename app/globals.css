@@ -1,0 +1,406 @@
+@import "tailwindcss";
+
+/* =========================
+   ROOT TOKENS
+========================= */
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  --primary: #082a5e;
+  --secondary: #9116a1;
+
+  --primary-light: #4d6a95;
+  --secondary-light: #a724e4;
+  --primary-dark: #082a5e;
+  --tg-common-color-blue: #a724e4;
+  --tg-common-color-indigo: #9b51e0;
+  --tg-common-color-purple: #8121fb;
+  --tg-common-color-pink: #d63384;
+  --tg-common-color-red: #ff2e2e;
+  --tg-common-color-orange: #fd7e14;
+  --tg-common-color-yellow: #fab123;
+  --tg-common-color-green: #12bb6a;
+  --tg-common-color-teal: #219653;
+  --tg-common-color-cyan: #0dcaf0;
+  --tg-common-color-white: #fff;
+  --tg-common-color-gray: #e7effc;
+  --tg-common-color-gray-2: #f4f7fb;
+  --tg-common-color-gray-3: #f5f7fb;
+  --tg-common-color-dark: #061e43;
+  --tg-common-color-black: #000;
+
+  --tg-body-color: #39557e;
+  --tg-heading-color: #082a5e;
+
+  --tg-theme-primary: #9116a1;
+  --tg-theme-secondary: #ac13c0;
+
+  --tg-border-1: #ececec;
+  --tg-border-2: #d0dae9;
+  --tg-border-3: #e2e2e2;
+  --tg-border-4: #d7dce3;
+  --tg-border-5: #2f466a;
+
+  --nav-height: 86px;
+  --nav-link: #334155;
+  --nav-link-active: var(--secondary);
+  --nav-underline: var(--secondary);
+
+  --font-body: "Hind", sans-serif;
+  --font-heading: "Lexend Deca", sans-serif;
+}
+
+/* Tailwind v4 tokens */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary);
+  --color-secondary: var(--secondary);
+
+  --font-sans: var(--font-body);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+    "Liberation Mono", "Courier New", monospace;
+}
+
+/* =========================
+   DARK (system) - optional
+========================= */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+/* =========================
+   BASE
+========================= */
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+}
+
+/* =========================
+   KEYFRAMES (keep outside layers for stability)
+========================= */
+@keyframes floatY {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes spinSlow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Continuous premium shine for button */
+@keyframes btnShine {
+  0% {
+    left: -60%;
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  50% {
+    left: 120%;
+    opacity: 0;
+  }
+  100% {
+    left: 120%;
+    opacity: 0;
+  }
+}
+@keyframes badgeSweep {
+  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  15% { opacity: 0.9; }
+  50% { opacity: 0.9; }
+  100% { transform: translateX(260%) skewX(-18deg); opacity: 0; }
+}
+
+.animate-badgeSweep {
+  animation: badgeSweep 1.6s ease-in-out infinite;
+}
+/* =========================
+   UTILITIES (custom classes used in Hero)
+========================= */
+@layer utilities {
+   /* ---------- IMAGE SHINE (on hover) ---------- */
+  .shine-card {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .shine-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -120%;
+    width: 55%;
+    height: 100%;
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 0) 0%,
+      rgba(255, 255, 255, 0.35) 100%
+    );
+    transform: skewX(-25deg);
+  }
+
+  .group:hover .shine-card::before {
+    animation: shineSweep 0.9s ease-out;
+  }
+
+  @keyframes shineSweep {
+    0% {
+      left: -120%;
+    }
+    100% {
+      left: 140%;
+    }
+  }
+
+  /* image hover zoom */
+  .course-img {
+    transition: transform 500ms ease;
+    will-change: transform;
+  }
+
+  .group:hover .course-img {
+    transform: scale(1.08);
+  }
+
+  /* ---------- TITLE UNDERLINE (on hover) ---------- */
+  .title-underline {
+    display: inline;
+    background-image: linear-gradient(#082a5e, #082a5e),
+      linear-gradient(#082a5e, #082a5e);
+    background-size: 0% 2px, 0 2px;
+    background-position: 100% 100%, 0 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.4s linear;
+  }
+
+  .group:hover .title-underline {
+    background-size: 0 2px, 100% 2px;
+  }
+  @keyframes testi-marquee {
+    0% {
+      transform: translate3d(0, 0, 0);
+    }
+    100% {
+      transform: translate3d(-50%, 0, 0);
+    }
+  }
+
+  .animate-testi-marquee {
+    animation: testi-marquee 28s linear infinite;
+    will-change: transform;
+  }
+
+  /* pause on hover (same as your InstagramFeed) */
+  .pause-on-hover:hover {
+    animation-play-state: paused;
+  }
+
+  /* premium tilt animation on cards (separate from marquee) */
+  @keyframes testi-tilt {
+    0%,
+    100% {
+      transform: rotateZ(0deg);
+    }
+    50% {
+      transform: rotateZ(-1deg);
+    }
+  }
+
+  .testi-tilt {
+    animation: testi-tilt 5s ease-in-out infinite;
+  }
+
+  .testi-tilt2 {
+    animation: testi-tilt 6s ease-in-out infinite reverse;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-testi-marquee,
+    .testi-tilt,
+    .testi-tilt2 {
+      animation: none !important;
+    }
+  }
+  .floating {
+    animation: floatY 3s ease-in-out infinite;
+    will-change: transform;
+  }
+
+  .spin-slow {
+    animation: spinSlow 10s linear infinite;
+    will-change: transform;
+  }
+
+  .animate-rotate {
+    animation: spinSlow 2.8s linear infinite;
+    will-change: transform;
+  }
+    .marquee-track {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  width: max-content;
+  animation: marquee 22s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 100s linear infinite;
+}
+
+
+  /* Optional: pause on hover */
+  .marquee-track:hover {
+    animation-play-state: paused;
+  }
+  @keyframes badgeSweep {
+    0% {
+      transform: translateX(-120%) skewX(-18deg);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.9;
+    }
+    50% {
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(260%) skewX(-18deg);
+      opacity: 0;
+    }
+  }
+
+  .animate-badgeSweep {
+    animation: badgeSweep 1.6s ease-in-out infinite;
+  }
+
+}
+
+
+  
+  /* LUMINAR BUTTON */
+  .btn {
+    @apply relative select-none inline-flex items-center justify-center cursor-pointer border-0 text-white text-[13px] font-semibold tracking-[0.08em] uppercase px-6 py-3 rounded-xl whitespace-nowrap overflow-hidden transition-all duration-300 ease-out;
+
+    background: linear-gradient(to bottom, #8354ce 0%, #9900cc 65%);
+    box-shadow: 0 10px 22px rgba(145, 22, 161, 0.18);
+  }
+
+  .btn:hover {
+    @apply -translate-y-[1px] brightness-110;
+    background: linear-gradient(to bottom, #8121fb 0%, #9900cc 65%);
+    box-shadow: 0 14px 28px rgba(145, 22, 161, 0.22);
+  }
+
+  .btn:active {
+    @apply translate-y-0 brightness-95;
+  }
+
+  .btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px rgb(145 22 161 / 0.22);
+  }
+
+  /* ✅ Shine (continuous, premium) */
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: -60%;
+  width: 40%;
+  height: 140%;
+  transform: skewX(-20deg);
+  background: rgba(255, 255, 255, 0.28);
+  filter: blur(2px);
+  opacity: 0;
+}
+
+/* Shine only when hovering */
+.btn-shine:hover::after {
+  animation: btnShine 1.2s ease-in-out forwards;
+  opacity: 1;
+}
+
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  animation: scroll 30s linear infinite;
+}
+/* WhySection node positions (desktop only) */
+.whyNode { position: absolute; z-index: 20; transform: translate(-25%, -50%); }
+
+.whyNode--1 { left: 82%; top: 22%; }
+.whyNode--2 { left: 90%; top: 40%; }
+.whyNode--3 { left: 90%; top: 60%; }
+.whyNode--4 { left: 82%; top: 78%; }
+
+@media (max-width: 1023px) {
+  .whyNode { display: none; }
+}
+
+@keyframes autoShine {
+  0% {
+    transform: translateX(-140%) skewX(-12deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  55% {
+    transform: translateX(520%) skewX(-12deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(520%) skewX(-12deg);
+    opacity: 0;
+  }
+}
+.animate-float {
+  animation: floaty 5s ease-in-out infinite;
+}
