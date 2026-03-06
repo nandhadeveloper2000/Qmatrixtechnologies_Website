@@ -1,6 +1,8 @@
 [build]
   command = "npm run build"
-# publish = "out"       # remove this line when using @netlify/plugin-nextjs
+
+[build.environment]
+  NODE_VERSION = "18"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
