@@ -1,30 +1,7 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import { type CSSProperties } from "react";
-import {
-  ClassicEditor,
-  Essentials,
-  Paragraph,
-  Bold,
-  Italic,
-  Underline,
-  List,
-  Link,
-  Heading,
-  BlockQuote,
-  Undo,
-  type EditorConfig,
-} from "ckeditor5";
-import "ckeditor5/ckeditor5.css";
-
-const CKEditor = dynamic(
-  async () => {
-    const mod = await import("@ckeditor/ckeditor5-react");
-    return mod.CKEditor;
-  },
-  { ssr: false }
-);
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import type { EditorConfig } from "ckeditor5";
 
 type Props = {
   label?: string;
@@ -34,40 +11,11 @@ type Props = {
   minHeight?: number;
 };
 
-const editorConfig: EditorConfig = {
-  licenseKey: "GPL",
-  plugins: [
-    Essentials,
-    Paragraph,
-    Bold,
-    Italic,
-    Underline,
-    List,
-    Link,
-    Heading,
-    BlockQuote,
-    Undo,
-  ],
-  toolbar: {
-    items: [
-      "heading",
-      "|",
-      "bold",
-      "italic",
-      "underline",
-      "|",
-      "bulletedList",
-      "numberedList",
-      "|",
-      "link",
-      "blockQuote",
-      "|",
-      "undo",
-      "redo",
-    ],
-    shouldNotGroupWhenFull: true,
-  },
-  placeholder: "Write here...",
+type CKEditorReactModule = typeof import("@ckeditor/ckeditor5-react");
+type CKEditorCoreModule = typeof import("ckeditor5");
+
+type EditorLike = {
+  getData: () => string;
 };
 
 export default function CompactRichTextEditor({
@@ -77,6 +25,108 @@ export default function CompactRichTextEditor({
   placeholder,
   minHeight = 120,
 }: Props) {
+  const [mounted, setMounted] = useState(false);
+  const [CKEditorComponent, setCKEditorComponent] =
+    useState<CKEditorReactModule["CKEditor"] | null>(null);
+  const [editorClass, setEditorClass] =
+    useState<CKEditorCoreModule["ClassicEditor"] | null>(null);
+  const [editorConfig, setEditorConfig] = useState<EditorConfig | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadEditor() {
+      try {
+        const [{ CKEditor }, ckeditor] = await Promise.all([
+          import("@ckeditor/ckeditor5-react"),
+          import("ckeditor5"),
+        ]);
+
+        if (!active) return;
+
+        const {
+          ClassicEditor,
+          Essentials,
+          Paragraph,
+          Bold,
+          Italic,
+          Underline,
+          List,
+          Link,
+          Heading,
+          BlockQuote,
+          Undo,
+        } = ckeditor;
+
+        const config: EditorConfig = {
+          licenseKey: "GPL",
+          plugins: [
+            Essentials,
+            Paragraph,
+            Bold,
+            Italic,
+            Underline,
+            List,
+            Link,
+            Heading,
+            BlockQuote,
+            Undo,
+          ],
+          toolbar: {
+            items: [
+              "heading",
+              "|",
+              "bold",
+              "italic",
+              "underline",
+              "|",
+              "bulletedList",
+              "numberedList",
+              "|",
+              "link",
+              "blockQuote",
+              "|",
+              "undo",
+              "redo",
+            ],
+            shouldNotGroupWhenFull: true,
+          },
+          placeholder: placeholder || "Write here...",
+        };
+
+        setCKEditorComponent(() => CKEditor);
+        setEditorClass(() => ClassicEditor);
+        setEditorConfig(config);
+      } catch (error) {
+        console.error("Failed to load CKEditor:", error);
+      }
+    }
+
+    if (mounted) {
+      void loadEditor();
+    }
+
+    return () => {
+      active = false;
+    };
+  }, [mounted, placeholder]);
+
+  const wrapperStyle = useMemo(
+    () =>
+      ({
+        "--editor-min-height": `${minHeight}px`,
+      }) as CSSProperties,
+    [minHeight]
+  );
+
+  const isReady = Boolean(
+    mounted && CKEditorComponent && editorClass && editorConfig
+  );
+
   return (
     <div className="w-full">
       {label ? (
@@ -87,23 +137,22 @@ export default function CompactRichTextEditor({
 
       <div
         className="rich-editor overflow-hidden rounded-2xl border border-slate-300 bg-white transition focus-within:border-violet-600 focus-within:ring-4 focus-within:ring-violet-100"
-        style={
-          {
-            ["--editor-min-height"]: `${minHeight}px`,
-          } as CSSProperties
-        }
+        style={wrapperStyle}
       >
-        <CKEditor
-          editor={ClassicEditor}
-          config={{
-            ...editorConfig,
-            placeholder: placeholder || "Write here...",
-          }}
-          data={value || ""}
-          onChange={(_, editor) => {
-            onChange(editor.getData());
-          }}
-        />
+        {isReady && CKEditorComponent && editorClass && editorConfig ? (
+          <CKEditorComponent
+            editor={editorClass}
+            config={editorConfig}
+            data={value || ""}
+            onChange={(_event: unknown, editor: EditorLike) => {
+              onChange(editor.getData());
+            }}
+          />
+        ) : (
+          <div className="px-4 py-3 text-sm text-slate-500" style={{ minHeight }}>
+            Loading editor...
+          </div>
+        )}
       </div>
 
       <style jsx global>{`

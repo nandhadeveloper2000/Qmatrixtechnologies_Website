@@ -215,6 +215,10 @@ export default function BlogForm({
 
   const isEdit = useMemo(() => Boolean(initialData?._id), [initialData]);
 
+  useEffect(() => {
+    setForm(toFormState(initialData));
+  }, [initialData]);
+
   const progressItems = useMemo(
     () => [
       {
@@ -264,6 +268,8 @@ export default function BlogForm({
   );
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const sectionIds = progressItems.map((item) => item.id);
 
     const handler = () => {
@@ -692,7 +698,7 @@ export default function BlogForm({
                   type="submit"
                   disabled={submitting || uploading}
                   onClick={() => setSubmitMode("default")}
-                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting
                     ? "Saving..."
