@@ -1,13 +1,32 @@
-// app/components/Home/CoursesSection.tsx
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookOpen, Clock } from "lucide-react";
 import { motion, MotionConfig, type Variants, useInView } from "framer-motion";
 
-import { coursesData, filters, type Filter } from "@/app/(site)/data/courses";
+import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
+
+type CourseCategory = "New One" | "Recommended" | "Most Placed";
+
+type Course = {
+  _id: string;
+  title: string;
+  slug: string;
+  category: CourseCategory;
+  duration: string;
+  modulesCount: string;
+  rating: number;
+  coverImage?: {
+    url: string;
+    alt?: string;
+  };
+};
+
+type Filter = "All Courses" | CourseCategory;
+
+const filters: Filter[] = ["All Courses", "New One", "Recommended", "Most Placed"];
 
 const EASE_OUT: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -32,21 +51,54 @@ const popIn: Variants = {
 };
 
 export default function CoursesSection() {
+  const [courses, setCourses] = useState<Course[]>([]);
   const [activeFilter, setActiveFilter] = useState<Filter>("All Courses");
-
-  const filteredCourses = useMemo(() => {
-    if (activeFilter === "All Courses") return coursesData;
-    return coursesData.filter((c) => c.category === activeFilter);
-  }, [activeFilter]);
+  const [loading, setLoading] = useState(true);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.25 });
+
+  /* ---------------- FETCH COURSES ---------------- */
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const endpoint = SummaryApi.public_courses;
+
+        const res = await fetch(`${baseURL}${endpoint.url}`, {
+          method: endpoint.method,
+          cache: "no-store",
+        });
+
+        const data = await res.json();
+
+        const courseList = data?.data || data?.courses || [];
+
+        setCourses(courseList);
+      } catch (error) {
+        console.error("Failed to load courses", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, []);
+
+  /* ---------------- FILTER ---------------- */
+
+  const filteredCourses = useMemo(() => {
+    if (activeFilter === "All Courses") return courses;
+    return courses.filter((c) => c.category === activeFilter);
+  }, [activeFilter, courses]);
 
   return (
     <MotionConfig reducedMotion="never">
       <section className="bg-[#f5f6fa] py-16">
         <div ref={sectionRef} className="mx-auto max-w-6xl px-4">
-          {/* Header */}
+
+          {/* HEADER */}
+
           <motion.div
             variants={container}
             initial="hidden"
@@ -55,7 +107,7 @@ export default function CoursesSection() {
           >
             <motion.div variants={fadeUp}>
               <p className="mb-3 inline-block rounded-full bg-secondary/10 px-3 py-1 text-xs text-secondary">
-                10+ Unique Online &amp; Offline Courses
+                10+ Unique Online & Offline Courses
               </p>
 
               <h2 className="text-3xl font-bold text-gray-800">
@@ -70,7 +122,6 @@ export default function CoursesSection() {
               {filters.map((filter) => (
                 <button
                   key={filter}
-                  type="button"
                   onClick={() => setActiveFilter(filter)}
                   className={`transition pb-1 ${
                     activeFilter === filter
@@ -84,121 +135,100 @@ export default function CoursesSection() {
             </motion.div>
           </motion.div>
 
-          {/* Grid */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate={inView ? "show" : "hidden"}
-            className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
-          >
-            {filteredCourses.map((course, index) => (
-              <motion.article
-                key={course.path}
-                variants={popIn}
-                className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-300 hover:shadow-2xl"
-              >
-                {/* ✅ Make image area clickable */}
-                <Link
-                  href={`/course-detail/${course.path}`}
-                  aria-label={`Open ${course.title} course detail`}
-                  className="block"
-                >
-                  <div className="relative h-56 overflow-hidden">
-                    {/* Shine overlay */}
-                    <div className="shine-card absolute inset-0 z-2" />
+          {/* LOADING */}
 
-                    {/* Image */}
-                    <motion.div
-                      initial={{ opacity: 0, scale: 1.25 }}
-                      animate={
-                        inView
-                          ? { opacity: 1, scale: 1 }
-                          : { opacity: 0, scale: 1.25 }
-                      }
-                      transition={{ duration: 1.1, ease: EASE_OUT }}
-                      className="absolute inset-0 z-1"
-                    >
+          {loading && (
+            <div className="text-center text-gray-500 py-12">
+              Loading courses...
+            </div>
+          )}
+
+          {/* COURSES GRID */}
+
+          {!loading && (
+            <motion.div
+              variants={container}
+              initial="hidden"
+              animate={inView ? "show" : "hidden"}
+              className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3"
+            >
+              {filteredCourses.map((course, index) => (
+                <motion.article
+                  key={course._id}
+                  variants={popIn}
+                  className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-300 hover:shadow-2xl"
+                >
+
+                  {/* IMAGE */}
+
+                  <Link href={`/course-detail/${course.slug}`} className="block">
+                    <div className="relative h-56 overflow-hidden">
                       <Image
-                        src={course.image}
-                        alt={course.title}
+                        src={course.coverImage?.url || "/placeholder.jpg"}
+                        alt={course.coverImage?.alt || course.title}
                         fill
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        className="course-img object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        sizes="(max-width:768px) 100vw, 33vw"
                         priority={index < 3}
                       />
-                    </motion.div>
 
-                    {/* Badge */}
-                    <span
-                      className={`absolute bottom-4 left-4 z-3 overflow-hidden rounded-md border border-white/20 px-3 py-1.5 text-xs font-medium tracking-wide text-white shadow-lg backdrop-blur-md ${
-                        course.category === "Recommended"
-                          ? "bg-linear-to-r from-secondary to-[#a724e4]"
-                          : course.category === "Most Placed"
-                          ? "bg-linear-to-r from-emerald-500 to-green-600"
-                          : "bg-linear-to-r from-primary to-secondary"
-                      }`}
-                    >
-                      <span className="absolute inset-0 w-[40%] bg-linear-to-r from-transparent via-white/70 to-transparent animate-badgeSweep" />
-                      <span className="relative z-10">{course.category}</span>
-                    </span>
-                  </div>
-                </Link>
+                      {/* CATEGORY BADGE */}
 
-                {/* Content */}
-                <motion.div
-                  initial={{ opacity: 0, y: 22 }}
-                  animate={inView ? { opacity: 1, y: 0 } : { opacity: 0, y: 22 }}
-                  transition={{ duration: 0.9, ease: EASE_OUT }}
-                  className="flex flex-1 flex-col p-5"
-                >
-                  <div className="mb-3 flex items-center gap-4 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <BookOpen size={14} />
-                      {course.modules}
+                      <span className="absolute bottom-4 left-4 rounded-md bg-secondary px-3 py-1 text-xs text-white shadow">
+                        {course.category}
+                      </span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Clock size={14} />
-                      {course.duration}
+                  </Link>
+
+                  {/* CONTENT */}
+
+                  <div className="flex flex-1 flex-col p-5">
+
+                    <div className="mb-3 flex items-center gap-4 text-sm text-gray-500">
+                      <div className="flex items-center gap-1">
+                        <BookOpen size={14} />
+                        {course.modulesCount}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <Clock size={14} />
+                        {course.duration}
+                      </div>
                     </div>
+
+                    <h3 className="mb-2 text-base font-semibold text-[#082A5E]">
+                      <Link href={`/course-detail/${course.slug}`}>
+                        {course.title}
+                      </Link>
+                    </h3>
+
+                    <div className="mb-2 text-sm text-yellow-400">
+                      ★★★★★
+                      <span className="ml-2 text-xs text-gray-500">
+                        ({course.rating})
+                      </span>
+                    </div>
+
+                    <p className="mb-4 text-xs text-gray-500">
+                      🏆 100% Placement assistance
+                    </p>
+
+                    <div className="mt-auto text-center">
+                      <Link
+                        href={`/course-detail/${course.slug}`}
+                        className="text-sm font-medium text-secondary hover:underline"
+                      >
+                        See More →
+                      </Link>
+                    </div>
+
                   </div>
-
-                  {/* ✅ Make title clickable */}
-                  <h3 className="mb-2 text-base font-semibold text-[#082A5E]">
-                    <Link
-                      href={`/course-detail/${course.path}`}
-                      className="title-underline inline-block"
-                    >
-                      {course.title}
-                    </Link>
-                  </h3>
-
-                  <div className="mb-2 flex items-center text-sm text-yellow-400">
-                    ★★★★★
-                    <span className="ml-2 text-xs text-gray-500">
-                      ({course.rating})
-                    </span>
-                  </div>
-
-                  <p className="mb-4 text-xs text-gray-500">
-                    🏆 100% Placement assistance
-                  </p>
-
-                  <div className="mt-auto text-center">
-                    {/* ✅ “See More” opens details */}
-                    <Link
-                      href={`/course-detail/${course.path}`}
-                      className="text-sm font-medium text-secondary transition hover:underline"
-                    >
-                      See More →
-                    </Link>
-                  </div>
-                </motion.div>
-              </motion.article>
-            ))}
-          </motion.div>
+                </motion.article>
+              ))}
+            </motion.div>
+          )}
         </div>
       </section>
     </MotionConfig>
-    
   );
 }

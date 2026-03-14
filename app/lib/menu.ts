@@ -7,7 +7,7 @@ export type AdminMenuItem = {
 };
 
 export const adminMenu: AdminMenuItem[] = [
-  { label: "Dashboard", href: "/admin/dashboard", roles: ["ADMIN", "EMPLOYEE"] },
+  { label: "Dashboard", href: "/admin/dashboard", roles: ["ADMIN", "USER"] },
   { label: "Users", href: "/admin/users", roles: ["ADMIN"] },
   { label: "Employees", href: "/admin/employees", roles: ["ADMIN"] },
 ];

@@ -18,6 +18,11 @@ const SummaryApi = {
     method: "POST",
   },
 
+  logout: {
+    url: "/auth/logout",
+    method: "POST",
+  },
+
   master_all_shopowners: {
     url: "/master/all-shopowners",
     method: "GET",
@@ -40,7 +45,7 @@ const SummaryApi = {
 
   updateUser: (id: string) => ({
     url: `/users/${id}`,
-   method: "PUT",
+    method: "PUT",
   }),
 
   uploadUserAvatar: (id: string) => ({
@@ -97,39 +102,43 @@ const SummaryApi = {
     url: `/courses/${slug}`,
     method: "GET",
   }),
+
   admin_blogs: {
     url: "/blogs/public",
     method: "GET",
   },
-blogs: {
-  url: "/blogs/public",
-  method: "GET",
-},
-admin_blog_by_id: (id: string) => ({
-  url: `/blogs/admin/${id}`,
-  method: "GET",
-}),
 
-create_blog: {
-  url: "/blogs",
-  method: "POST",
-},
+  blogs: {
+    url: "/blogs/public",
+    method: "GET",
+  },
 
-update_blog: (id: string) => ({
-  url: `/blogs/${id}`,
- method: "PUT",
-}),
+  admin_blog_by_id: (id: string) => ({
+    url: `/blogs/admin/${id}`,
+    method: "GET",
+  }),
 
-delete_blog: (id: string) => ({
-  url: `/blogs/${id}`,
-  method: "DELETE",
-}),
+  create_blog: {
+    url: "/blogs",
+    method: "POST",
+  },
 
-public_blog_by_slug: (slug: string) => ({
-  url: `/blogs/public/${slug}`,
-  method: "GET",
-}),
- public_page_seo: (pageKey: string) => ({
+  update_blog: (id: string) => ({
+    url: `/blogs/${id}`,
+    method: "PUT",
+  }),
+
+  delete_blog: (id: string) => ({
+    url: `/blogs/${id}`,
+    method: "DELETE",
+  }),
+
+  public_blog_by_slug: (slug: string) => ({
+    url: `/blogs/public/${slug}`,
+    method: "GET",
+  }),
+
+  public_page_seo: (pageKey: string) => ({
     url: `/page-seo/public/${pageKey}`,
     method: "GET",
   }),
@@ -148,6 +157,7 @@ public_blog_by_slug: (slug: string) => ({
     url: `/page-seo/admin/${pageKey}`,
     method: "DELETE",
   }),
+
   admin_page_seo_by_key: (pageKey: string) => ({
     url: `/page-seo/admin/${pageKey}`,
     method: "GET",
@@ -157,6 +167,7 @@ public_blog_by_slug: (slug: string) => ({
     url: `/page-seo/admin/${pageKey}`,
     method: "PUT",
   }),
+
   create_enquiry: {
     url: "/enquiries",
     method: "POST",
@@ -169,27 +180,53 @@ public_blog_by_slug: (slug: string) => ({
 
   update_enquiry: (id: string) => ({
     url: `/enquiries/${id}`,
-   method: "PUT",
+    method: "PUT",
   }),
 
   delete_enquiry: (id: string) => ({
     url: `/enquiries/${id}`,
     method: "DELETE",
   }),
+
   admin_enquiries: {
-  url: "/enquiries",
-  method: "GET",
-},
+    url: "/enquiries",
+    method: "GET",
+  },
 
-admin_enquiry_update: (id: string) => ({
-  url: `/enquiries/${id}`,
- method: "PUT",
-}),
+  admin_enquiry_update: (id: string) => ({
+    url: `/enquiries/${id}`,
+    method: "PUT",
+  }),
 
-admin_enquiry_delete: (id: string) => ({
-  url: `/enquiries/${id}`,
-  method: "DELETE",
-}),
+  admin_enquiry_delete: (id: string) => ({
+    url: `/enquiries/${id}`,
+    method: "DELETE",
+  }),
+
+  contact_create: {
+    url: "/contact/create",
+    method: "POST",
+  },
+
+  contact_all: {
+    url: "/contact/all",
+    method: "GET",
+  },
+
+  contact_by_id: (id: string) => ({
+    url: `/contact/${id}`,
+    method: "GET",
+  }),
+
+  contact_status_update: (id: string) => ({
+    url: `/contact/${id}/status`,
+    method: "PATCH",
+  }),
+
+  contact_reply: (id: string) => ({
+    url: `/contact/${id}/reply`,
+    method: "POST",
+  }),
 };
 
 export default SummaryApi;

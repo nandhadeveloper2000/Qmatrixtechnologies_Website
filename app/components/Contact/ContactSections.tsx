@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
+import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
 import {
   Mail,
   Phone,
@@ -11,38 +12,121 @@ import {
   Twitter,
 } from "lucide-react";
 
+type FormState = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  countryCode: string;
+  phone: string;
+  message: string;
+};
+
+const initialForm: FormState = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  countryCode: "+91",
+  phone: "",
+  message: "",
+};
+
 export default function ContactLayout() {
+  const [form, setForm] = useState<FormState>(initialForm);
+  const [loading, setLoading] = useState(false);
+  const [successMsg, setSuccessMsg] = useState("");
+  const [errorMsg, setErrorMsg] = useState("");
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setSuccessMsg("");
+    setErrorMsg("");
+
+    try {
+      const endpoint = SummaryApi.contact_create;
+
+      const res = await fetch(`${baseURL}${endpoint.url}`, {
+        method: endpoint.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data?.message || "Failed to send message");
+      }
+
+      setSuccessMsg("Your message has been sent successfully.");
+      setForm(initialForm);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Something went wrong";
+      setErrorMsg(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="w-full bg-[#F4F5FB]">
       <div className="mx-auto max-w-6xl px-4 py-12">
         <div className="grid gap-8 lg:grid-cols-[1.35fr_0.65fr] lg:items-start">
-          {/* LEFT: BIG FORM CARD */}
           <div className="rounded-[26px] bg-white p-6 shadow-[0_18px_55px_rgba(16,24,40,0.10)] ring-1 ring-black/5 sm:p-8">
             <h2 className="text-xl font-extrabold text-primary sm:text-2xl">
               Send us a message
             </h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-              Do you have a question? Need help choosing the right course? Feel free to
-              contact us.
+              Do you have a question? Need help choosing the right course? Feel
+              free to contact us.
             </p>
 
-            <form className="mt-7 grid gap-5 sm:grid-cols-2">
-              <LightInput label="First Name" placeholder="Enter your first name" />
-              <LightInput label="Last Name" placeholder="Enter your last name" />
+            <form onSubmit={handleSubmit} className="mt-7 grid gap-5 sm:grid-cols-2">
+              <LightInput
+                label="First Name"
+                name="firstName"
+                placeholder="Enter your first name"
+                value={form.firstName}
+                onChange={handleChange}
+              />
+
+              <LightInput
+                label="Last Name"
+                name="lastName"
+                placeholder="Enter your last name"
+                value={form.lastName}
+                onChange={handleChange}
+              />
 
               <div className="sm:col-span-1">
-                <LightInput label="Email" placeholder="Enter your email" />
+                <LightInput
+                  label="Email"
+                  name="email"
+                  placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                />
               </div>
 
-              {/* Contact Details (country code + phone) */}
               <div className="sm:col-span-1">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Contact Details
                 </label>
                 <div className="flex h-11 overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-2 focus-within:ring-slate-200">
                   <select
+                    name="countryCode"
                     className="h-full w-23 border-r border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
-                    defaultValue="+91"
+                    value={form.countryCode}
+                    onChange={handleChange}
                   >
                     <option value="+91">+91</option>
                     <option value="+1">+1</option>
@@ -50,43 +134,55 @@ export default function ContactLayout() {
                     <option value="+971">+971</option>
                   </select>
                   <input
+                    name="phone"
                     className="h-full flex-1 bg-white px-3 text-sm text-slate-900 outline-none"
                     placeholder="Enter your contact number"
+                    value={form.phone}
+                    onChange={handleChange}
                   />
                 </div>
               </div>
 
-              {/* Message */}
               <div className="sm:col-span-2">
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Message
                 </label>
                 <textarea
+                  name="message"
                   rows={5}
                   className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
                   placeholder="Enter your message"
+                  value={form.message}
+                  onChange={handleChange}
                 />
               </div>
 
-              {/* Button aligned like reference (right aligned) */}
+              {successMsg ? (
+                <div className="sm:col-span-2 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+                  {successMsg}
+                </div>
+              ) : null}
+
+              {errorMsg ? (
+                <div className="sm:col-span-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+                  {errorMsg}
+                </div>
+              ) : null}
+
               <div className="sm:col-span-2 flex justify-end pt-2">
                 <button
-                  type="button"
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary
-                  px-7 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(8,42,94,0.25)]
-                  hover:brightness-110 active:scale-[0.99]"
+                  type="submit"
+                  disabled={loading}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(8,42,94,0.25)] hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  Send a Message <ArrowRight className="h-4 w-4" />
+                  {loading ? "Sending..." : "Send a Message"}
+                  <ArrowRight className="h-4 w-4" />
                 </button>
               </div>
             </form>
           </div>
 
-          {/* RIGHT: HELP CARD */}
-          <aside className="rounded-[26px]    bg-linear-to-b
-          from-[#082a5e]
-          via-[#a724e4]
-          to-[#8121fb] p-6 text-white shadow-[0_18px_55px_rgba(2,6,23,0.25)] ring-1 ring-white/10 sm:p-7">
+          <aside className="rounded-[26px] bg-linear-to-b from-[#082a5e] via-[#a724e4] to-[#8121fb] p-6 text-white shadow-[0_18px_55px_rgba(2,6,23,0.25)] ring-1 ring-white/10 sm:p-7">
             <h3 className="text-lg font-extrabold leading-snug">
               Hi! We are always here <br /> to help you.
             </h3>
@@ -131,15 +227,29 @@ export default function ContactLayout() {
   );
 }
 
-/* ---------------- Helpers ---------------- */
-
-function LightInput({ label, placeholder }: { label: string; placeholder: string }) {
+function LightInput({
+  label,
+  name,
+  placeholder,
+  value,
+  onChange,
+}: {
+  label: string;
+  name: string;
+  placeholder: string;
+  value: string;
+  onChange: React.ChangeEventHandler<HTMLInputElement>;
+}) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-800">{label}</label>
+      <label className="mb-2 block text-sm font-semibold text-slate-800">
+        {label}
+      </label>
       <input
-        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none
-        focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
         placeholder={placeholder}
       />
     </div>
@@ -172,8 +282,7 @@ function SocialIcon({ children }: { children: React.ReactNode }) {
   return (
     <button
       type="button"
-      className="grid h-11 w-11 place-items-center rounded-full bg-white/10 ring-1 ring-white/15
-      hover:bg-white/15 active:scale-[0.98]"
+      className="grid h-11 w-11 place-items-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:scale-[0.98]"
       aria-label="social"
     >
       {children}

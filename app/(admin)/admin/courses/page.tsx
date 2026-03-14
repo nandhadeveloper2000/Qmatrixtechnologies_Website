@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import Protected from "@/app/components/admin/Protected";
 import SummaryApi from "@/app/constants/SummaryApi";
 import { apiFetch } from "@/app/lib/apiFetch";
-import type { ICourse } from "@/app/types/course";
+import type { Course } from "@/app/types/course";
 
 type ApiError = {
   message?: string;
@@ -15,6 +15,12 @@ type ApiError = {
 type CourseCreator = {
   name?: string;
   role?: string;
+};
+
+type AdminCoursesResponse = {
+  success?: boolean;
+  data?: Course[];
+  courses?: Course[];
 };
 
 function getErrorMessage(error: unknown, fallback: string) {
@@ -37,7 +43,7 @@ function isCourseCreator(value: unknown): value is CourseCreator {
 }
 
 export default function AdminCoursesPage() {
-  const [courses, setCourses] = useState<ICourse[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [error, setError] = useState("");
@@ -61,12 +67,18 @@ export default function AdminCoursesPage() {
       setLoading(true);
       setError("");
 
-      const res = await apiFetch<{ success: boolean; data: ICourse[] }>(
+      const res = await apiFetch<AdminCoursesResponse>(
         SummaryApi.admin_courses.url,
         { method: SummaryApi.admin_courses.method }
       );
 
-      setCourses(Array.isArray(res.data) ? res.data : []);
+      const courseList = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.courses)
+        ? res.courses
+        : [];
+
+      setCourses(courseList);
     } catch (error: unknown) {
       setError(getErrorMessage(error, "Failed to fetch courses"));
     } finally {
@@ -87,8 +99,10 @@ export default function AdminCoursesPage() {
       setDeletingId(id);
       setError("");
 
-      await apiFetch(SummaryApi.delete_course(id).url, {
-        method: SummaryApi.delete_course(id).method,
+      const endpoint = SummaryApi.delete_course(id);
+
+      await apiFetch(endpoint.url, {
+        method: endpoint.method,
       });
 
       await loadCourses();
@@ -128,7 +142,7 @@ export default function AdminCoursesPage() {
               />
               <Link
                 href="/admin/courses/create"
-                className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01]"
+                className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01]"
               >
                 + Add Course
               </Link>
@@ -266,7 +280,7 @@ export default function AdminCoursesPage() {
                           <div className="flex justify-end gap-2">
                             {course._id ? (
                               <Link
-                                href={`/admin/courses/edit/${course._id}`}
+                                href={`/admin/courses/${course._id}/edit`}
                                 className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                               >
                                 Edit
@@ -278,9 +292,10 @@ export default function AdminCoursesPage() {
                             )}
 
                             <button
+                              type="button"
                               onClick={() => handleDelete(course._id)}
                               disabled={deletingId === course._id || !course._id}
-                              className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:opacity-50"
+                              className="rounded-xl border border-red-200 px-3 py-2 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               {deletingId === course._id ? "Deleting..." : "Delete"}
                             </button>

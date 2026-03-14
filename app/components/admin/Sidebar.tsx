@@ -10,6 +10,7 @@ import {
   ChevronRight,
   Blocks,
   MessageSquare,
+  Contact,
 } from "lucide-react";
 import Image from "next/image";
 import { cldPublic } from "@/app/lib/cloudinary";
@@ -17,6 +18,7 @@ import { cldPublic } from "@/app/lib/cloudinary";
 const nav = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { label: "Users", href: "/admin/users", icon: Users },
+  { label: "Contact", href: "/admin/contact-messages",icon:Contact},
   { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare  },
   { label: "Courses", href: "/admin/courses", icon: BookOpen },
   { label: "Blogs", href:"/admin/blogs", icon:Blocks},

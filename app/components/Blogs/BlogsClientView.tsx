@@ -232,8 +232,6 @@ export default function BlogsClientView({ blogs }: Props) {
           </div>
         )}
       </section>
-
-      <NewsletterCTA />
     </>
   );
 }

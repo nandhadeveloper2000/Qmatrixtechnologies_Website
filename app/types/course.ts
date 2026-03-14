@@ -1,34 +1,39 @@
 export type CourseCategory = "New One" | "Recommended" | "Most Placed";
 export type CourseMode = "Online" | "Offline" | "Online/Offline";
 
-export interface ICourseImage {
+export interface CourseImage {
   url: string;
   public_id?: string | null;
   alt?: string;
 }
 
-export interface ICourseModule {
+export interface CourseFeature {
+  title: string;
+  description: string;
+}
+
+export interface CourseModule {
   title: string;
   topics: string[];
 }
 
-export interface ICourseTrainer {
-  name: string;
-  role?: string;
-  bio?: string;
-  experience?: string;
-  linkedin?: string;
-  image?: ICourseImage | null;
+export interface CourseInterviewQuestion {
+  question: string;
+  answer: string;
 }
 
-export interface ICourseReview {
-  name: string;
-  rating: number;
-  comment: string;
+export interface CourseFaq {
+  question: string;
+  answer: string;
+}
+
+export interface CourseCreator {
+  _id?: string;
+  name?: string;
   role?: string;
 }
 
-export interface ICourse {
+export interface Course {
   _id?: string;
   title: string;
   slug: string;
@@ -36,10 +41,9 @@ export interface ICourse {
 
   shortDesc?: string;
   description?: string;
-  overview?: string;
 
-  coverImage?: ICourseImage | null;
-  galleryImages?: ICourseImage[];
+  coverImage?: CourseImage | null;
+  galleryImages?: CourseImage[];
 
   duration?: string;
   modulesCount?: string;
@@ -53,18 +57,31 @@ export interface ICourse {
   admissionFee?: number | null;
   placementSupport?: boolean;
 
-  features?: string[];
-  support?: string[];
-  curriculum?: ICourseModule[];
-  trainers?: ICourseTrainer[];
-  reviews?: ICourseReview[];
+  whatYouWillLearn?: string[];
+  features?: CourseFeature[];
+  supportAndCareer?: string[];
+  curriculum?: CourseModule[];
+  interviewQuestions?: CourseInterviewQuestion[];
+  faq?: CourseFaq[];
 
   isFeatured?: boolean;
   isPublished?: boolean;
-  publishedAt?: string | null;
 
-  createdBy?: string;
-  updatedBy?: string;
+  createdBy?: CourseCreator | string | null;
+
+  publishedAt?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface CoursesListResponse {
+  success?: boolean;
+  data?: Course[];
+  courses?: Course[];
+}
+
+export interface CourseSingleResponse {
+  success?: boolean;
+  data?: Course | null;
+  course?: Course | null;
 }

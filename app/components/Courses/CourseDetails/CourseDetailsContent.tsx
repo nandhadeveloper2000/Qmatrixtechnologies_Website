@@ -1,18 +1,26 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import type { Course } from "@/app/(site)/data/courses";
+import type { Course } from "@/app/types/course";
 import { ChevronDown } from "lucide-react";
 
-type TabKey = "overview" | "modules" | "features" | "trainers" | "review";
+type TabKey =
+  | "overview"
+  | "modules"
+  | "features"
+  | "questions";
 
 const tabs: { key: TabKey; label: string }[] = [
   { key: "overview", label: "Overview" },
   { key: "modules", label: "Modules" },
   { key: "features", label: "Features" },
-  { key: "trainers", label: "Trainers" },
-  { key: "review", label: "Review" },
+  { key: "questions", label: "Interview Q&A" },
 ];
+
+function stripHtml(html?: string) {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
 
 export default function CourseDetailsContent({ course }: { course: Course }) {
   const [active, setActive] = useState<TabKey>("overview");
@@ -25,13 +33,12 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
     const el = document.getElementById(id);
     if (!el) return;
 
-    const offset = (tabBarRef.current?.offsetHeight ?? 64) + 110; // ✅ header+tabs offset
+    const offset = (tabBarRef.current?.offsetHeight ?? 64) + 110;
     const top = el.getBoundingClientRect().top + window.scrollY - offset;
 
     window.scrollTo({ top, behavior: "smooth" });
   };
 
-  // auto-active tab on scroll
   useEffect(() => {
     const els = sectionIds
       .map((id) => document.getElementById(id))
@@ -58,32 +65,30 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
   }, [sectionIds]);
 
   return (
-    <section className="bg-[#F4F5FB] z-50">
+    <section className="z-50 bg-[#F4F5FB]">
       <div className="mx-auto -mt-28 grid max-w-7xl gap-6 px-4 pb-12 md:grid-cols-[340px_1fr]">
-        {/* SIDEBAR */}
         <aside
-          className="h-fit rounded-[26px] border border-black/10 bg-white p-6
-          shadow-[0_18px_60px_rgba(16,24,40,0.14)]
-          md:sticky md:top-24"
+          className="h-fit rounded-[26px] border border-black/10 bg-white p-6 shadow-[0_18px_60px_rgba(16,24,40,0.14)] md:sticky md:top-24"
         >
           <button className="w-full rounded-2xl bg-linear-to-r from-[#7C3AED] to-[#A21CAF] px-4 py-3.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110 active:scale-[0.99]">
             APPLY NOW
           </button>
 
           <p className="mt-2 text-center text-xs text-gray-500">
-            🧡 100% Placement assistance 🧡
+            🧡 {course.placementSupport ? "100% Placement assistance" : "Career support"} 🧡
           </p>
 
           <div className="mt-5 space-y-3 text-sm">
-            <SideRow label="Duration" value={course.duration} />
-            <SideRow label="Session Duration" value="2 Hours/day" />
-            <SideRow label="Class Schedule" value="Monday to Friday" />
-            <SideRow label="Mode" value="Offline/Online" />
+            <SideRow label="Duration" value={course.duration || "TBA"} />
+            <SideRow label="Session Duration" value={course.sessionDuration || "2 Hours/day"} />
+            <SideRow label="Class Schedule" value={course.classSchedule || "Monday to Friday"} />
+            <SideRow label="Mode" value={course.mode || "Offline/Online"} />
 
             {showMore && (
               <>
-                <SideRow label="Enrolled" value="1800+" />
-                <SideRow label="Batch Size" value="Limited" />
+                <SideRow label="Modules" value={course.modulesCount || "TBA"} />
+                <SideRow label="Enrolled" value={course.enrolled || "TBA"} />
+                {course.batchSize && <SideRow label="Batch Size" value={course.batchSize} />}
               </>
             )}
           </div>
@@ -110,16 +115,13 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
           </button>
         </aside>
 
-        {/* CONTENT */}
         <div className="min-w-0 z-10">
-          {/* Big OUTER CARD */}
           <div className="rounded-[28px] border border-black/10 bg-white shadow-[0_18px_55px_rgba(16,24,40,0.12)]">
-            {/* TABS */}
             <div
               ref={tabBarRef}
               className="sticky top-20 z-20 rounded-t-[28px] bg-white/92 px-5 pt-5 backdrop-blur"
             >
-              <div className="rounded-full bg-[#F3F4F8] p-1.5 ring-1 ring-black/5 overflow-x-auto">
+              <div className="overflow-x-auto rounded-full bg-[#F3F4F8] p-1.5 ring-1 ring-black/5">
                 <div className="flex min-w-max gap-1">
                   {tabs.map((t) => {
                     const isActive = active === t.key;
@@ -128,7 +130,7 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
                         key={t.key}
                         onClick={() => scrollTo(t.key)}
                         className={[
-                          "rounded-full px-6 py-2.5 text-sm font-medium transition whitespace-nowrap",
+                          "whitespace-nowrap rounded-full px-6 py-2.5 text-sm font-medium transition",
                           isActive
                             ? "bg-linear-to-r from-[#7C3AED] to-[#A21CAF] text-white shadow-sm"
                             : "text-gray-600 hover:bg-white/70",
@@ -142,26 +144,23 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
               </div>
             </div>
 
-            {/* BODY */}
-            <div className="px-5 pb-8 pt-5 z-50">
-              {/* Overview */}
+            <div className="z-50 px-5 pb-8 pt-5">
               <ContentSection id="overview" title="What you’ll learn">
-                <p className="text-sm leading-7 text-gray-600">
-                  {course.overview ??
-                    "This program focuses on fundamentals and practical job-ready skills with hands-on projects, real-world use cases, and interview preparation."}
-                </p>
+                {!!course.description && (
+                  <p className="text-sm leading-7 text-gray-600">
+                    {stripHtml(course.description)}
+                  </p>
+                )}
 
-                <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                  {(course.features ?? []).slice(0, 8).map((item) => (
-                    <LearnChip key={item} text={item} />
-                  ))}
-                  {(course.support ?? []).map((item) => (
-                    <LearnChip key={item} text={item} />
-                  ))}
-                </div>
+                {!!course.whatYouWillLearn?.length && (
+                  <div className="mt-5 grid gap-3 sm:grid-cols-2">
+                    {course.whatYouWillLearn.map((item, index) => (
+                      <LearnChip key={`${item}-${index}`} text={item.replace(/•/g, "").trim()} />
+                    ))}
+                  </div>
+                )}
               </ContentSection>
 
-              {/* Modules */}
               <ContentSection id="modules" title="Course Content">
                 <div className="space-y-3">
                   {(course.curriculum ?? []).map((m) => (
@@ -197,47 +196,61 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
                 </div>
               </ContentSection>
 
-              {/* Features */}
               <ContentSection id="features" title="Features">
                 <div className="grid gap-3 sm:grid-cols-2">
-                  {(course.features ?? []).map((f) => (
+                  {(course.features ?? []).map((f, index) => (
                     <div
-                      key={f}
+                      key={`${f.title}-${index}`}
                       className="rounded-2xl border border-black/10 bg-white p-4 shadow-sm"
                     >
-                      <p className="text-sm font-semibold text-gray-900">{f}</p>
+                      <p className="text-sm font-semibold text-gray-900">{f.title}</p>
                       <p className="mt-1 text-xs leading-6 text-gray-600">
-                        Hands-on tasks + real scenarios to make this skill production-ready.
+                        {stripHtml(f.description)}
                       </p>
                     </div>
                   ))}
                 </div>
 
-                {!!course.support?.length && (
+                {!!course.supportAndCareer?.length && (
                   <>
                     <h3 className="mt-7 text-base font-semibold text-gray-900">
                       Support & Career
                     </h3>
                     <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                      {course.support.map((s) => (
-                        <LearnChip key={s} text={s} />
+                      {course.supportAndCareer.map((s, index) => (
+                        <LearnChip key={`${s}-${index}`} text={s} />
                       ))}
                     </div>
                   </>
                 )}
               </ContentSection>
 
-              {/* Trainers */}
-              <ContentSection id="trainers" title="Trainers">
-                <div className="rounded-2xl border border-black/10 bg-white p-4 text-sm text-gray-600 shadow-sm">
-                  Add trainer cards here (name, role, experience, LinkedIn, etc.).
-                </div>
-              </ContentSection>
+              <ContentSection id="questions" title="Interview Questions">
+                <div className="space-y-3">
+                  {(course.interviewQuestions ?? []).map((item, index) => (
+                    <details
+                      key={`${item.question}-${index}`}
+                      className="group rounded-2xl border border-black/10 bg-white px-4 py-4 shadow-sm"
+                    >
+                      <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+                        <span className="text-sm font-semibold text-gray-900">
+                          {item.question}
+                        </span>
+                        <span className="grid h-9 w-9 place-items-center rounded-full bg-[#F3F4F8] text-gray-700 ring-1 ring-black/5 transition group-open:rotate-180">
+                          <ChevronDown className="h-4 w-4" />
+                        </span>
+                      </summary>
+                      <div className="mt-3 text-sm leading-7 text-gray-600">
+                        {stripHtml(item.answer)}
+                      </div>
+                    </details>
+                  ))}
 
-              {/* Review */}
-              <ContentSection id="review" title="Review">
-                <div className="rounded-2xl border border-black/10 bg-white p-4 text-sm text-gray-600 shadow-sm">
-                  Add reviews/ratings component here (stars, testimonials, Google reviews).
+                  {!course.interviewQuestions?.length && (
+                    <div className="rounded-2xl border border-black/10 bg-white p-4 text-sm text-gray-600">
+                      Interview questions will be updated soon.
+                    </div>
+                  )}
                 </div>
               </ContentSection>
             </div>
@@ -248,7 +261,6 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
   );
 }
 
-/* ---------- Premium Sidebar Row ---------- */
 function SideRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-center justify-between gap-3 rounded-xl bg-[#F3F4F8] px-3.5 py-2.5 ring-1 ring-black/5">
@@ -260,7 +272,6 @@ function SideRow({ label, value }: { label: string; value: string }) {
   );
 }
 
-/* ---------- Content Section inside big card ---------- */
 function ContentSection({
   id,
   title,
@@ -273,8 +284,7 @@ function ContentSection({
   return (
     <section
       id={id}
-      className="mb-7 rounded-[22px] border border-black/10 bg-white p-6
-      shadow-[0_10px_30px_rgba(16,24,40,0.06)]"
+      className="mb-7 rounded-[22px] border border-black/10 bg-white p-6 shadow-[0_10px_30px_rgba(16,24,40,0.06)]"
     >
       <h2 className="text-[18px] font-semibold text-gray-900">{title}</h2>
       <div className="mt-4">{children}</div>
@@ -282,14 +292,9 @@ function ContentSection({
   );
 }
 
-/* ---------- Overview chip like screenshot ---------- */
 function LearnChip({ text }: { text: string }) {
   return (
-    <div
-      className="flex items-center gap-3 rounded-[18px]
-      border border-black/10 bg-white px-4 py-3
-      shadow-[0_10px_22px_rgba(16,24,40,0.06)]"
-    >
+    <div className="flex items-center gap-3 rounded-[18px] border border-black/10 bg-white px-4 py-3 shadow-[0_10px_22px_rgba(16,24,40,0.06)]">
       <span className="h-2.5 w-2.5 rounded-full bg-[#16BB05]" />
       <p className="text-sm font-medium text-gray-800">{text}</p>
     </div>

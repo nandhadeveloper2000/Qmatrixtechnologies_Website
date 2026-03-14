@@ -1,45 +1,49 @@
-export type UserRole = "ADMIN" | "EDITOR" | "USER" |"EMPLOYEE";
+export type UserRole = "ADMIN" | "EDITOR" | "USER";
 
-export type SessionUser = {
+export type AuthUser = {
   uid: string;
-  role: UserRole;
+  id?: string;
   email: string;
   name?: string;
+  role: UserRole;
+  is_active?: boolean;
+  created_by?: string | null;
+  avatar_url?: string | null;
+  avatar_public_id?: string | null;
+  token_version?: number;
+  created_at?: string | null;
+  updated_at?: string | null;
 };
 
-const ACCESS_KEY = "qm_access";
-const REFRESH_KEY = "qm_refresh";
+const ACCESS_TOKEN_KEY = "qm_access_token";
+const REFRESH_TOKEN_KEY = "qm_refresh_token";
 const USER_KEY = "qm_user";
 
-export function setSession(accessToken: string, refreshToken: string, user: SessionUser) {
-  localStorage.setItem(ACCESS_KEY, accessToken);
-  localStorage.setItem(REFRESH_KEY, refreshToken);
+export function setSession(accessToken: string, refreshToken: string, user: AuthUser) {
+  localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   localStorage.setItem(USER_KEY, JSON.stringify(user));
 }
 
-export function getAccessToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(ACCESS_KEY);
+export function getAccessToken(): string {
+  return localStorage.getItem(ACCESS_TOKEN_KEY) || "";
 }
 
-export function getRefreshToken() {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem(REFRESH_KEY);
+export function getRefreshToken(): string {
+  return localStorage.getItem(REFRESH_TOKEN_KEY) || "";
 }
 
-export function getUser(): SessionUser | null {
-  if (typeof window === "undefined") return null;
-  const raw = localStorage.getItem(USER_KEY);
-  if (!raw) return null;
+export function getUser(): AuthUser | null {
   try {
-    return JSON.parse(raw) as SessionUser;
+    const raw = localStorage.getItem(USER_KEY);
+    return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
   }
 }
 
 export function clearSession() {
-  localStorage.removeItem(ACCESS_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
 }

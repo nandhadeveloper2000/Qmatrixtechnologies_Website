@@ -1,16 +1,22 @@
-// app/lib/apiFetch.ts
 import {
   getAccessToken,
   getRefreshToken,
   setSession,
   getUser,
   clearSession,
+  type AuthUser,
 } from "./auth";
 
 import SummaryApi, { baseURL } from "../constants/SummaryApi";
 
 type ApiErrorBody = { message?: string };
-type RefreshResponse = { accessToken?: string; refreshToken?: string };
+
+type RefreshResponse = {
+  success?: boolean;
+  accessToken?: string;
+  refreshToken?: string;
+  user?: AuthUser;
+};
 
 export type ApiFetchOptions = Omit<RequestInit, "headers" | "body"> & {
   headers?: HeadersInit;
@@ -70,7 +76,7 @@ async function refreshAccessToken(): Promise<string | null> {
 
   if (!res.ok || !data.accessToken) return null;
 
-  const user = getUser();
+  const user = data.user ?? getUser();
   if (user) {
     setSession(data.accessToken, data.refreshToken ?? refreshToken, user);
   }

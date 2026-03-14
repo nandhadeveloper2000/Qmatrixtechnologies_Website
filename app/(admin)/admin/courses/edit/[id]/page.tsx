@@ -6,13 +6,19 @@ import Protected from "@/app/components/admin/Protected";
 import CourseForm from "@/app/components/admin/CourseForm";
 import SummaryApi from "@/app/constants/SummaryApi";
 import { apiFetch } from "@/app/lib/apiFetch";
-import type { ICourse } from "@/app/types/course";
+import type { Course } from "@/app/types/course";
+
+type CourseResponse = {
+  success: boolean;
+  data?: Course;
+  course?: Course;
+};
 
 export default function EditCoursePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
-  const [course, setCourse] = useState<ICourse | null>(null);
+  const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -21,25 +27,34 @@ export default function EditCoursePage() {
       setLoading(true);
       setError("");
 
-      const res = await apiFetch<{ success: boolean; data: ICourse }>(
-        SummaryApi.admin_course_by_id(params.id).url,
-        { method: SummaryApi.admin_course_by_id(params.id).method }
-      );
+      const endpoint = SummaryApi.admin_course_by_id(params.id);
 
-      setCourse(res.data);
-    } catch (err: any) {
-      setError(err?.message || "Failed to fetch course");
+      const res = await apiFetch<CourseResponse>(endpoint.url, {
+        method: endpoint.method,
+      });
+
+      const courseData = res.data || res.course || null;
+      setCourse(courseData);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to fetch course");
     } finally {
       setLoading(false);
     }
   }
 
-  async function handleUpdate(payload: any) {
-await apiFetch(SummaryApi.update_course(params.id).url, {
-  method: SummaryApi.update_course(params.id).method,
-  json: payload,
-});
-    router.push("/admin/courses");
+  async function handleUpdate(payload: Partial<Course>) {
+    try {
+      const endpoint = SummaryApi.update_course(params.id);
+
+      await apiFetch(endpoint.url, {
+        method: endpoint.method,
+        json: payload,
+      });
+
+      router.push("/admin/courses");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Failed to update course");
+    }
   }
 
   useEffect(() => {

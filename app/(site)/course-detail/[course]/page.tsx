@@ -1,17 +1,58 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import CourseDetailsBanner from "@/app/components/Courses/CourseDetails/CourseDetailsBanner";
-import { coursesData } from "@/app/(site)/data/courses";
 import CourseDetailsContent from "@/app/components/Courses/CourseDetails/CourseDetailsContent";
 import AlumniWorkSection from "@/app/components/About/AlumniWorkSection";
 import NewsletterCTA from "@/app/components/Blogs/NewsletterCTA";
 import { SITE_URL } from "@/app/lib/seo";
+import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
+import type { Course, CourseSingleResponse, CoursesListResponse } from "@/app/types/course";
 
-export function generateStaticParams() {
-  return coursesData.map((c) => ({ course: c.path }));
+async function getPublishedCourses(): Promise<Course[]> {
+  try {
+    const endpoint = SummaryApi.public_courses;
+    const res = await fetch(`${baseURL}${endpoint.url}`, {
+      method: endpoint.method,
+      cache: "no-store",
+    });
+
+    if (!res.ok) return [];
+
+    const data: CoursesListResponse = await res.json();
+    return data.data || data.courses || [];
+  } catch {
+    return [];
+  }
 }
 
-export const dynamicParams = false;
+async function getCourse(slug: string): Promise<Course | null> {
+  try {
+    const endpoint = SummaryApi.public_course_by_slug(slug);
+    const res = await fetch(`${baseURL}${endpoint.url}`, {
+      method: endpoint.method,
+      cache: "no-store",
+    });
+
+    if (!res.ok) return null;
+
+    const data: CourseSingleResponse = await res.json();
+    return data.course || data.data || null;
+  } catch {
+    return null;
+  }
+}
+
+function stripHtml(html?: string) {
+  if (!html) return "";
+  return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+export async function generateStaticParams() {
+  const courses = await getPublishedCourses();
+  return courses.map((c) => ({ course: c.slug }));
+}
+
+export const dynamicParams = true;
 
 export async function generateMetadata({
   params,
@@ -19,7 +60,7 @@ export async function generateMetadata({
   params: Promise<{ course: string }>;
 }): Promise<Metadata> {
   const { course: courseParam } = await params;
-  const course = coursesData.find((c) => c.path === courseParam);
+  const course = await getCourse(courseParam);
 
   if (!course) {
     return {
@@ -30,9 +71,9 @@ export async function generateMetadata({
 
   const title = `${course.title} Course in Chennai | QMatrix Technologies`;
   const description =
-    course.description ||
+    stripHtml(course.description) ||
     `${course.title} training in Chennai with real-time projects and placement support.`;
-  const canonical = `${SITE_URL}/course-detail/${course.path}`;
+  const canonical = `${SITE_URL}/course-detail/${course.slug}`;
 
   return {
     metadataBase: new URL(SITE_URL),
@@ -46,14 +87,16 @@ export async function generateMetadata({
       description,
       url: canonical,
       siteName: "QMatrix Technologies",
-      images: course.image ? [{ url: course.image, alt: course.title }] : [],
+      images: course.coverImage?.url
+        ? [{ url: course.coverImage.url, alt: course.coverImage.alt || course.title }]
+        : [],
       type: "website",
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: course.image ? [course.image] : [],
+      images: course.coverImage?.url ? [course.coverImage.url] : [],
     },
     robots: "index,follow",
   };
@@ -65,7 +108,7 @@ export default async function CourseDetailPage({
   params: Promise<{ course: string }>;
 }) {
   const { course: courseParam } = await params;
-  const course = coursesData.find((c) => c.path === courseParam);
+  const course = await getCourse(courseParam);
 
   if (!course) return notFound();
 

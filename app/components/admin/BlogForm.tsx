@@ -950,17 +950,10 @@ export default function BlogForm({
             id="blog-sections"
             className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div className="flex items-center justify-between">
+            <div>
               <h3 className="text-lg font-semibold text-slate-900">
                 Content Sections
               </h3>
-              <button
-                type="button"
-                onClick={addSection}
-                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-              >
-                + Add Section
-              </button>
             </div>
 
             <div className="mt-5 space-y-6">
@@ -1007,15 +1000,8 @@ export default function BlogForm({
                   </div>
 
                   <div className="mt-6">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4">
                       <h5 className="font-medium text-slate-900">Subsections</h5>
-                      <button
-                        type="button"
-                        onClick={() => addSubpoint(sectionIndex)}
-                        className="rounded-xl bg-fuchsia-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-700"
-                      >
-                        + Add Subsection
-                      </button>
                     </div>
 
                     <div className="space-y-4">
@@ -1075,6 +1061,16 @@ export default function BlogForm({
                         </div>
                       ))}
                     </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => addSubpoint(sectionIndex)}
+                        className="rounded-xl bg-fuchsia-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-fuchsia-700"
+                      >
+                        + Add Subsection
+                      </button>
+                    </div>
                   </div>
 
                   <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
@@ -1083,7 +1079,9 @@ export default function BlogForm({
                         <Image
                           src={section.image.url}
                           alt={
-                            section.image.alt || section.title || "Section image"
+                            section.image.alt ||
+                            section.title ||
+                            "Section image"
                           }
                           className="h-56 w-full object-cover"
                           width={260}
@@ -1147,15 +1145,8 @@ export default function BlogForm({
                   </div>
 
                   <div className="mt-6">
-                    <div className="mb-4 flex items-center justify-between">
+                    <div className="mb-4">
                       <h5 className="font-medium text-slate-900">Points</h5>
-                      <button
-                        type="button"
-                        onClick={() => addSectionPoint(sectionIndex)}
-                        className="rounded-xl bg-violet-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-violet-700"
-                      >
-                        + Add Point
-                      </button>
                     </div>
 
                     <div className="space-y-4">
@@ -1215,9 +1206,29 @@ export default function BlogForm({
                         </div>
                       ))}
                     </div>
+
+                    <div className="mt-4 flex justify-end">
+                      <button
+                        type="button"
+                        onClick={() => addSectionPoint(sectionIndex)}
+                        className="rounded-xl bg-violet-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-violet-700"
+                      >
+                        + Add Point
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={addSection}
+                  className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                >
+                  + Add Section
+                </button>
+              </div>
             </div>
           </section>
 
@@ -1225,15 +1236,8 @@ export default function BlogForm({
             id="blog-faqs"
             className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div className="flex items-center justify-between">
+            <div>
               <h3 className="text-lg font-semibold text-slate-900">FAQs</h3>
-              <button
-                type="button"
-                onClick={addFaq}
-                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
-              >
-                + Add FAQ
-              </button>
             </div>
 
             <div className="mt-5 space-y-4">
@@ -1278,6 +1282,16 @@ export default function BlogForm({
                   </div>
                 </div>
               ))}
+
+              <div className="mt-6 flex justify-end">
+                <button
+                  type="button"
+                  onClick={addFaq}
+                  className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
+                >
+                  + Add FAQ
+                </button>
+              </div>
             </div>
           </section>
 

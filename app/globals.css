@@ -445,3 +445,225 @@ h6 {
 .rich-text-content p:last-child {
   margin-bottom: 0;
 }
+
+
+
+/* =========================
+   Placement Hiring Section
+   ========================= */
+
+.placement-hiring-section {
+  background:
+    linear-gradient(180deg, #f8fbff 0%, #f4f7ff 46%, #ffffff 100%);
+}
+
+.placement-grid {
+  opacity: 0.035;
+  background-image:
+    linear-gradient(to right, rgba(8, 42, 94, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(8, 42, 94, 0.16) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black 46%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 46%, transparent 100%);
+}
+
+.placement-noise {
+  opacity: 0.028;
+  background-image: radial-gradient(rgba(8, 42, 94, 0.18) 0.7px, transparent 0.7px);
+  background-size: 18px 18px;
+}
+
+.placement-orb {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(78px);
+  animation: placementFloat 18s ease-in-out infinite;
+  will-change: transform;
+}
+
+.placement-orb-1 {
+  left: -120px;
+  top: 60px;
+  height: 320px;
+  width: 320px;
+  background: rgba(8, 42, 94, 0.09);
+  animation-delay: 0s;
+}
+
+.placement-orb-2 {
+  right: -100px;
+  top: 110px;
+  height: 360px;
+  width: 360px;
+  background: rgba(145, 22, 161, 0.11);
+  animation-delay: 2s;
+}
+
+.placement-orb-3 {
+  bottom: -50px;
+  left: 30%;
+  height: 300px;
+  width: 300px;
+  background: rgba(129, 33, 251, 0.1);
+  animation-delay: 4s;
+}
+
+.placement-ambient-line {
+  position: absolute;
+  height: 1px;
+  width: 38%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(145, 22, 161, 0.15) 50%,
+    transparent 100%
+  );
+  filter: blur(0.2px);
+  opacity: 0.7;
+}
+
+.placement-ambient-line-1 {
+  top: 22%;
+  left: 8%;
+}
+
+.placement-ambient-line-2 {
+  bottom: 18%;
+  right: 6%;
+}
+
+.placement-marquee-left {
+  animation: placementMarqueeLeft 46s linear infinite;
+}
+
+.placement-marquee-right {
+  animation: placementMarqueeRight 52s linear infinite;
+}
+
+.placement-logo-card {
+  box-shadow:
+    0 10px 30px rgba(8, 42, 94, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.placement-logo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.8),
+    rgba(255, 255, 255, 0.2),
+    rgba(145, 22, 161, 0.08)
+  );
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.placement-card-shine {
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background:
+    linear-gradient(
+      115deg,
+      transparent 20%,
+      rgba(255, 255, 255, 0.65) 42%,
+      transparent 58%
+    );
+  transform: translateX(-140%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.placement-logo-card:hover .placement-card-shine {
+  animation: placementShine 1.2s ease forwards;
+  opacity: 1;
+}
+
+.placement-card-glow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.85), transparent 38%),
+    radial-gradient(circle at 85% 100%, rgba(129, 33, 251, 0.12), transparent 42%),
+    radial-gradient(circle at 10% 0%, rgba(145, 22, 161, 0.1), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  pointer-events: none;
+}
+
+.placement-logo-card:hover .placement-card-glow {
+  opacity: 1;
+}
+
+@keyframes placementMarqueeLeft {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+@keyframes placementMarqueeRight {
+  0% {
+    transform: translate3d(-50%, 0, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes placementFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  25% {
+    transform: translate3d(18px, -10px, 0) scale(1.03);
+  }
+  50% {
+    transform: translate3d(-12px, 14px, 0) scale(0.985);
+  }
+  75% {
+    transform: translate3d(10px, 8px, 0) scale(1.015);
+  }
+}
+
+@keyframes placementShine {
+  0% {
+    transform: translateX(-140%);
+  }
+  100% {
+    transform: translateX(140%);
+  }
+}
+
+/* smoother rendering */
+.placement-marquee-left,
+.placement-marquee-right,
+.placement-orb {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .placement-marquee-left,
+  .placement-marquee-right,
+  .placement-orb,
+  .placement-card-shine {
+    animation: none !important;
+  }
+}
