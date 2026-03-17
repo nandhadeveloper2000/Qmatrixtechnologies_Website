@@ -11,7 +11,7 @@ type Props = {
 
 export default function HomePopupLauncher({
   defaultCourse = "",
-  delay = 1000,
+  delay = 0,
   onlyOncePerSession = true,
 }: Props) {
   const [open, setOpen] = useState(false);

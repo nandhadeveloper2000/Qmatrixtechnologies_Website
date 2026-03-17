@@ -50,7 +50,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HomePopupLauncher delay={1000} onlyOncePerSession />
+      <HomePopupLauncher delay={0} onlyOncePerSession />
       <Hero />
       <CompanyLogos />
       <CoursesSection />
