@@ -17,6 +17,7 @@ import {
   getPageSEO,
   SITE_URL,
 } from "@/app/lib/seo";
+import HomePopupLauncher from "@/app/components/common/HomePopupLauncher";
 
 const HOME_FALLBACK = {
   title: "Best Software Training Institute in Chennai | QMatrix Technologies",
@@ -49,6 +50,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <HomePopupLauncher delay={1000} onlyOncePerSession />
       <Hero />
       <CompanyLogos />
       <CoursesSection />

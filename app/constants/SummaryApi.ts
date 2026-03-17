@@ -1,6 +1,6 @@
 export const baseURL =
-  // process.env.NEXT_PUBLIC_API_BASE || "https://qmatrixtechnologies.onrender.com/api";
-  process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000/api";
+  process.env.NEXT_PUBLIC_API_BASE || "https://qmatrixtechnologies.onrender.com/api";
+  // process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000/api";
 
 const SummaryApi = {
   requestOtp: {
