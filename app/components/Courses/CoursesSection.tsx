@@ -10,7 +10,6 @@ import {
   LayoutGrid,
   List,
   Search,
-  Sparkles,
   ArrowRight,
   Star,
 } from "lucide-react";
@@ -80,6 +79,35 @@ function formatRating(rating?: number) {
   return rating.toFixed(1);
 }
 
+function getObjectIdTimestamp(id?: string) {
+  if (!id || id.length < 8) return 0;
+
+  const hex = id.slice(0, 8);
+  const timestamp = Number.parseInt(hex, 16);
+
+  if (Number.isNaN(timestamp)) return 0;
+
+  return timestamp * 1000;
+}
+
+function sortCoursesOldestFirst(list: Course[]) {
+  return [...list].sort((a, b) => {
+    const aCreatedAt =
+      "createdAt" in a && a.createdAt ? new Date(a.createdAt as string).getTime() : 0;
+    const bCreatedAt =
+      "createdAt" in b && b.createdAt ? new Date(b.createdAt as string).getTime() : 0;
+
+    if (aCreatedAt && bCreatedAt) {
+      return aCreatedAt - bCreatedAt;
+    }
+
+    const aIdTime = getObjectIdTimestamp(String(a._id ?? ""));
+    const bIdTime = getObjectIdTimestamp(String(b._id ?? ""));
+
+    return aIdTime - bIdTime;
+  });
+}
+
 export default function CoursesSection() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [loading, setLoading] = useState(true);
@@ -115,6 +143,7 @@ export default function CoursesSection() {
         setError("");
 
         const endpoint = SummaryApi.public_courses;
+
         const res = await fetch(`${baseURL}${endpoint.url}`, {
           method: endpoint.method,
           cache: "no-store",
@@ -127,8 +156,10 @@ export default function CoursesSection() {
         const data: CoursesListResponse = await res.json();
         const list = data.data || data.courses || [];
 
+        const normalizedCourses = Array.isArray(list) ? sortCoursesOldestFirst(list) : [];
+
         if (!ignore) {
-          setCourses(Array.isArray(list) ? list : []);
+          setCourses(normalizedCourses);
         }
       } catch (err) {
         if (!ignore) {
@@ -319,7 +350,7 @@ export default function CoursesSection() {
                     <article className="flex h-full flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(15,23,42,0.14)]">
                       <div className="relative h-60 overflow-hidden">
                         <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#08152f]/60 via-[#08152f]/10 to-transparent" />
-                        <div className="absolute inset-0 z-[3] opacity-0 transition duration-500 group-hover:opacity-100 bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.20)_35%,transparent_60%)] translate-x-[-100%] group-hover:translate-x-[100%]" />
+                        <div className="absolute inset-0 z-[3] translate-x-[-100%] bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.20)_35%,transparent_60%)] opacity-0 transition duration-500 group-hover:translate-x-[100%] group-hover:opacity-100" />
 
                         <Image
                           src={getCourseImage(course)}
@@ -370,10 +401,7 @@ export default function CoursesSection() {
 
                         <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
                           <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
-                            🏆{" "}
-                            {course.placementSupport
-                              ? "Placement assistance"
-                              : "Career guidance"}
+                            🏆 {course.placementSupport ? "Placement assistance" : "Career guidance"}
                           </span>
 
                           <span className="inline-flex items-center gap-2 text-sm font-semibold text-secondary">
@@ -410,6 +438,7 @@ export default function CoursesSection() {
                       <div className="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-center">
                         <div className="relative h-56 w-full shrink-0 overflow-hidden rounded-[22px] sm:h-48 lg:h-44 lg:w-[320px]">
                           <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#08152f]/45 via-transparent to-transparent" />
+
                           <Image
                             src={getCourseImage(course)}
                             alt={getCourseAlt(course)}

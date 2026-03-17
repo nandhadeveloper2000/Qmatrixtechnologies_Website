@@ -18,10 +18,16 @@ type Course = {
   duration: string;
   modulesCount: string;
   rating: number;
+  createdAt?: string;
   coverImage?: {
     url: string;
     alt?: string;
   };
+};
+
+type CoursesResponse = {
+  data?: Course[];
+  courses?: Course[];
 };
 
 type Filter = "All Courses" | CourseCategory;
@@ -37,7 +43,11 @@ const container: Variants = {
 
 const fadeUp: Variants = {
   hidden: { opacity: 0, y: 36 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.85, ease: EASE_OUT } },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.85, ease: EASE_OUT },
+  },
 };
 
 const popIn: Variants = {
@@ -50,19 +60,57 @@ const popIn: Variants = {
   },
 };
 
+function getObjectIdTimestamp(id?: string) {
+  if (!id || id.length < 8) return 0;
+
+  const hex = id.slice(0, 8);
+  const timestamp = Number.parseInt(hex, 16);
+
+  return Number.isNaN(timestamp) ? 0 : timestamp * 1000;
+}
+
+function sortCoursesOldestFirst(list: Course[]) {
+  return [...list].sort((a, b) => {
+    const aCreatedAt = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bCreatedAt = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+    if (aCreatedAt && bCreatedAt) {
+      return aCreatedAt - bCreatedAt;
+    }
+
+    return getObjectIdTimestamp(a._id) - getObjectIdTimestamp(b._id);
+  });
+}
+
+function getBadgeClass(category: CourseCategory) {
+  switch (category) {
+    case "Recommended":
+      return "bg-violet-600";
+    case "Most Placed":
+      return "bg-emerald-600";
+    case "New One":
+    default:
+      return "bg-secondary";
+  }
+}
+
 export default function CoursesSection() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [activeFilter, setActiveFilter] = useState<Filter>("All Courses");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
   const inView = useInView(sectionRef, { once: true, amount: 0.25 });
 
-  /* ---------------- FETCH COURSES ---------------- */
-
   useEffect(() => {
-    const fetchCourses = async () => {
+    let ignore = false;
+
+    async function fetchCourses() {
       try {
+        setLoading(true);
+        setError("");
+
         const endpoint = SummaryApi.public_courses;
 
         const res = await fetch(`${baseURL}${endpoint.url}`, {
@@ -70,35 +118,51 @@ export default function CoursesSection() {
           cache: "no-store",
         });
 
-        const data = await res.json();
+        if (!res.ok) {
+          throw new Error("Failed to load courses");
+        }
 
-        const courseList = data?.data || data?.courses || [];
+        const data: CoursesResponse = await res.json();
+        const rawCourses = Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data?.courses)
+          ? data.courses
+          : [];
 
-        setCourses(courseList);
-      } catch (error) {
-        console.error("Failed to load courses", error);
+        const sortedCourses = sortCoursesOldestFirst(rawCourses);
+
+        if (!ignore) {
+          setCourses(sortedCourses);
+        }
+      } catch (err) {
+        if (!ignore) {
+          console.error("Failed to load courses", err);
+          setCourses([]);
+          setError(err instanceof Error ? err.message : "Something went wrong");
+        }
       } finally {
-        setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
-    };
+    }
 
     fetchCourses();
-  }, []);
 
-  /* ---------------- FILTER ---------------- */
+    return () => {
+      ignore = true;
+    };
+  }, []);
 
   const filteredCourses = useMemo(() => {
     if (activeFilter === "All Courses") return courses;
-    return courses.filter((c) => c.category === activeFilter);
+    return courses.filter((course) => course.category === activeFilter);
   }, [activeFilter, courses]);
 
   return (
     <MotionConfig reducedMotion="never">
       <section className="bg-[#f5f6fa] py-16">
         <div ref={sectionRef} className="mx-auto max-w-6xl px-4">
-
-          {/* HEADER */}
-
           <motion.div
             variants={container}
             initial="hidden"
@@ -122,11 +186,12 @@ export default function CoursesSection() {
               {filters.map((filter) => (
                 <button
                   key={filter}
+                  type="button"
                   onClick={() => setActiveFilter(filter)}
-                  className={`transition pb-1 ${
+                  className={`border-b-2 pb-1 transition ${
                     activeFilter === filter
-                      ? "text-secondary border-b-2 border-secondary"
-                      : "text-gray-600 hover:text-secondary"
+                      ? "border-secondary text-secondary"
+                      : "border-transparent text-gray-600 hover:text-secondary"
                   }`}
                 >
                   {filter}
@@ -135,17 +200,23 @@ export default function CoursesSection() {
             </motion.div>
           </motion.div>
 
-          {/* LOADING */}
-
           {loading && (
-            <div className="text-center text-gray-500 py-12">
-              Loading courses...
+            <div className="py-12 text-center text-gray-500">Loading courses...</div>
+          )}
+
+          {!loading && error && (
+            <div className="rounded-xl border border-red-200 bg-red-50 py-12 text-center text-sm text-red-600">
+              {error}
             </div>
           )}
 
-          {/* COURSES GRID */}
+          {!loading && !error && filteredCourses.length === 0 && (
+            <div className="rounded-xl border border-gray-200 bg-white py-12 text-center text-gray-500">
+              No courses found.
+            </div>
+          )}
 
-          {!loading && (
+          {!loading && !error && filteredCourses.length > 0 && (
             <motion.div
               variants={container}
               initial="hidden"
@@ -158,9 +229,6 @@ export default function CoursesSection() {
                   variants={popIn}
                   className="group flex flex-col overflow-hidden rounded-xl bg-white shadow-sm transition-shadow duration-300 hover:shadow-2xl"
                 >
-
-                  {/* IMAGE */}
-
                   <Link href={`/course-detail/${course.slug}`} className="block">
                     <div className="relative h-56 overflow-hidden">
                       <Image
@@ -168,45 +236,40 @@ export default function CoursesSection() {
                         alt={course.coverImage?.alt || course.title}
                         fill
                         className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                        sizes="(max-width:768px) 100vw, 33vw"
+                        sizes="(max-width: 768px) 100vw, 33vw"
                         priority={index < 3}
                       />
 
-                      {/* CATEGORY BADGE */}
-
-                      <span className="absolute bottom-4 left-4 rounded-md bg-secondary px-3 py-1 text-xs text-white shadow">
+                      <span
+                        className={`absolute bottom-4 left-4 rounded-md px-3 py-1 text-xs text-white shadow ${getBadgeClass(
+                          course.category
+                        )}`}
+                      >
                         {course.category}
                       </span>
                     </div>
                   </Link>
 
-                  {/* CONTENT */}
-
                   <div className="flex flex-1 flex-col p-5">
-
                     <div className="mb-3 flex items-center gap-4 text-sm text-gray-500">
                       <div className="flex items-center gap-1">
                         <BookOpen size={14} />
-                        {course.modulesCount}
+                        <span>{course.modulesCount}</span>
                       </div>
 
                       <div className="flex items-center gap-1">
                         <Clock size={14} />
-                        {course.duration}
+                        <span>{course.duration}</span>
                       </div>
                     </div>
 
                     <h3 className="mb-2 text-base font-semibold text-[#082A5E]">
-                      <Link href={`/course-detail/${course.slug}`}>
-                        {course.title}
-                      </Link>
+                      <Link href={`/course-detail/${course.slug}`}>{course.title}</Link>
                     </h3>
 
                     <div className="mb-2 text-sm text-yellow-400">
                       ★★★★★
-                      <span className="ml-2 text-xs text-gray-500">
-                        ({course.rating})
-                      </span>
+                      <span className="ml-2 text-xs text-gray-500">({course.rating})</span>
                     </div>
 
                     <p className="mb-4 text-xs text-gray-500">
@@ -221,7 +284,6 @@ export default function CoursesSection() {
                         See More →
                       </Link>
                     </div>
-
                   </div>
                 </motion.article>
               ))}

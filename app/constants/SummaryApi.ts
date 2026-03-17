@@ -23,11 +23,6 @@ const SummaryApi = {
     method: "POST",
   },
 
-  master_all_shopowners: {
-    url: "/master/all-shopowners",
-    method: "GET",
-  },
-
   admin_dashboard: {
     url: "/admin/dashboard",
     method: "GET",

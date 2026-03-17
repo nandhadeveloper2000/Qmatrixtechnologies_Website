@@ -9,7 +9,7 @@ import { apiFetch } from "@/app/lib/apiFetch";
 export default function CreateCoursePage() {
   const router = useRouter();
 
-  async function handleCreate(payload: any) {
+  async function handleCreate(payload: unknown) {
 await apiFetch(SummaryApi.create_course.url, {
   method: SummaryApi.create_course.method,
   json: payload,

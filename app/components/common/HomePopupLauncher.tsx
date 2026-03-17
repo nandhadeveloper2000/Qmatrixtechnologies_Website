@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import EnquiryPopup from "@/app/components/common/EnquiryPopup";
+import EnquiryPopup from "@/app/components/common/EnquiryPopupHome";
 
 type Props = {
   defaultCourse?: string;
