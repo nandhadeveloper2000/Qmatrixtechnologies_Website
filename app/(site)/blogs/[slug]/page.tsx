@@ -13,7 +13,7 @@ import {
 
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
 import type { Blog, BlogImage, BlogResponse } from "@/app/types/blogs";
-import { imageToUrl, SITE_URL } from "@/app/lib/seo";
+import { imageToUrl, SITE_URL, DEFAULT_OG_IMAGE } from "@/app/lib/seo";
 import RichTextContent from "@/app/components/common/RichTextContent";
 import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
 
@@ -62,7 +62,16 @@ function getSafeAbsoluteUrl(url?: string | null) {
 function getSafeImageUrl(value?: string | BlogImage | null): string | null {
   if (!value) return null;
 
-  const raw = typeof value === "string" ? value : value.url;
+  let raw: string | null = null;
+
+  if (typeof value === "string") {
+    raw = value;
+  } else if (typeof value === "object") {
+    raw =
+      (value as BlogImage & { secure_url?: string | null }).secure_url ||
+      value.url ||
+      null;
+  }
 
   if (!raw || typeof raw !== "string") return null;
 
@@ -80,6 +89,10 @@ async function getBlog(slug: string): Promise<Blog | null> {
     const res = await fetch(url, {
       method: endpoint.method,
       cache: "no-store",
+      next: { revalidate: 0 },
+      headers: {
+        Accept: "application/json",
+      },
     });
 
     if (!res.ok) {
@@ -93,7 +106,15 @@ async function getBlog(slug: string): Promise<Blog | null> {
       return null;
     }
 
-    const data: BlogResponse = await res.json();
+    let data: BlogResponse;
+
+    try {
+      data = await res.json();
+    } catch (error) {
+      console.error("Blog detail JSON parse failed for slug:", slug, error);
+      return null;
+    }
+
     const blog = data.blog || data.data || null;
 
     if (!blog) {
@@ -111,7 +132,9 @@ async function getBlog(slug: string): Promise<Blog | null> {
 function formatDate(date?: string | null) {
   if (!date) return "";
   try {
-    return new Date(date).toLocaleDateString("en-IN", {
+    const parsed = new Date(date);
+    if (Number.isNaN(parsed.getTime())) return "";
+    return parsed.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -121,7 +144,7 @@ function formatDate(date?: string | null) {
   }
 }
 
-function stripHtml(html?: string) {
+function stripHtml(html?: string | null) {
   if (!html) return "";
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, "")
@@ -135,6 +158,12 @@ function stripHtml(html?: string) {
     .replace(/&#39;/gi, "'")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function getAltText(image?: string | BlogImage | null, fallback = "Blog image") {
+  if (!image) return fallback;
+  if (typeof image === "string") return fallback;
+  return image.alt?.trim() || fallback;
 }
 
 export async function generateMetadata({
@@ -169,6 +198,7 @@ export async function generateMetadata({
     const ogImage =
       getSafeImageUrl(blog.seo?.ogImage) ||
       getSafeImageUrl(blog.coverImage) ||
+      getSafeAbsoluteUrl(DEFAULT_OG_IMAGE) ||
       undefined;
 
     return {
@@ -411,7 +441,7 @@ export default async function BlogDetailPage({ params }: PageProps) {
                             <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] bg-slate-100">
                               <Image
                                 src={sectionImageUrl}
-                                alt={section.image?.alt || section.title}
+                                alt={getAltText(section.image, section.title)}
                                 fill
                                 className="object-cover transition-transform duration-700 hover:scale-[1.03]"
                                 unoptimized
