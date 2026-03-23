@@ -75,6 +75,16 @@ export default function BlogDetailsBanner({
   location,
   coverImage,
 }: BlogDetailsBannerProps) {
+  const bannerImage =
+    typeof coverImage?.url === "string" && coverImage.url.trim()
+      ? coverImage.url
+      : "https://placehold.co/1200x1400/png";
+
+  const bannerAlt =
+    typeof coverImage?.alt === "string" && coverImage.alt.trim()
+      ? coverImage.alt
+      : title;
+
   return (
     <section className="relative w-full overflow-hidden">
       <div
@@ -87,17 +97,14 @@ export default function BlogDetailsBanner({
           py-16 md:py-20 lg:py-24
         "
       >
-        {/* Light overlays */}
         <div className="absolute inset-0 bg-[radial-gradient(700px_280px_at_50%_0%,rgba(255,255,255,0.22),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(500px_220px_at_10%_20%,rgba(255,255,255,0.10),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(500px_220px_at_90%_20%,rgba(255,255,255,0.08),transparent_70%)]" />
 
-        {/* Glow blobs */}
         <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
         <div className="pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full bg-fuchsia-300/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl" />
 
-        {/* Premium grid */}
         <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:40px_40px]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -135,10 +142,12 @@ export default function BlogDetailsBanner({
                   icon={<User2 className="h-4 w-4" />}
                   label={authorName || "Admin"}
                 />
-                <GlassStat
-                  icon={<CalendarDays className="h-4 w-4" />}
-                  label={publishedDate || ""}
-                />
+                {!!publishedDate && (
+                  <GlassStat
+                    icon={<CalendarDays className="h-4 w-4" />}
+                    label={publishedDate}
+                  />
+                )}
                 <GlassStat
                   icon={<Clock3 className="h-4 w-4" />}
                   label={`${readTime || 2} min read`}
@@ -176,8 +185,8 @@ export default function BlogDetailsBanner({
               <div className="relative overflow-hidden rounded-[34px] border border-white/20 bg-white/10 p-3 shadow-[0_30px_80px_rgba(0,0,0,0.18)] backdrop-blur-xl">
                 <div className="relative aspect-[4/4.6] overflow-hidden rounded-[28px] bg-white/10">
                   <Image
-                    src={coverImage?.url || "https://placehold.co/1200x1400/png"}
-                    alt={coverImage?.alt || title}
+                    src={bannerImage}
+                    alt={bannerAlt}
                     fill
                     className="object-cover"
                     unoptimized
@@ -202,8 +211,6 @@ export default function BlogDetailsBanner({
               </div>
             </div>
           </div>
-
-
         </div>
       </div>
     </section>

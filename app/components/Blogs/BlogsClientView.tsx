@@ -13,7 +13,6 @@ import {
 import { motion } from "framer-motion";
 import type { Blog } from "@/app/types/blogs";
 import FeaturedBlogSlider from "@/app/components/Blogs/FeaturedBlogSlider";
-import NewsletterCTA from "@/app/components/Blogs/NewsletterCTA";
 
 function formatDate(date?: string) {
   if (!date) return "";

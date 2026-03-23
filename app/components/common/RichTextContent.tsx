@@ -1,14 +1,20 @@
 import DOMPurify from "isomorphic-dompurify";
 
 type Props = {
-  html?: string | null;
+  html?: unknown;
   className?: string;
 };
 
-export default function RichTextContent({ html, className = "" }: Props) {
-  if (!html) return null;
+function toSafeHtml(value: unknown): string {
+  return typeof value === "string" ? value : "";
+}
 
-  const cleanHtml = DOMPurify.sanitize(html, {
+export default function RichTextContent({ html, className = "" }: Props) {
+  const rawHtml = toSafeHtml(html);
+
+  if (!rawHtml.trim()) return null;
+
+  const cleanHtml = DOMPurify.sanitize(rawHtml, {
     USE_PROFILES: { html: true },
   });
 

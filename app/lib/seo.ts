@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://qmatrixtechnologies-website.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+  "https://qmatrixtechnologies-website.vercel.app";
 
 export const DEFAULT_OG_IMAGE =
   "https://res.cloudinary.com/dfbbnzwmc/image/upload/f_auto,q_auto/v1/qmatrix/default-og.jpg";
@@ -16,7 +17,7 @@ export type SEORecord = {
   canonicalUrl: string;
   ogTitle?: string;
   ogDescription?: string;
-  ogImage?: string;
+  ogImage?: string | { url?: string | null } | null;
   robots?: string;
   schemaType?: "WebPage" | "Article" | "Course" | "FAQPage";
   createdAt?: string;
@@ -131,6 +132,27 @@ export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
   },
 };
 
+export function getSafeSiteUrl(): string {
+  try {
+    return new URL(SITE_URL).toString().replace(/\/$/, "");
+  } catch {
+    return "https://qmatrixtechnologies-website.vercel.app";
+  }
+}
+
+export function getSafeMetadataBase(): URL {
+  try {
+    return new URL(getSafeSiteUrl());
+  } catch {
+    return new URL("https://qmatrixtechnologies-website.vercel.app");
+  }
+}
+
+export function normalizeKeywords(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+}
+
 export async function getPageSEO(pageKey: string): Promise<SEORecord | null> {
   try {
     const endpoint = SummaryApi.public_page_seo(pageKey);
@@ -157,7 +179,7 @@ export function normalizeDbSeo(
   const fallback = PAGE_SEO_FALLBACKS[pageKey] || {
     title: "QMatrix Technologies",
     description: "Premium IT training institute in Chennai.",
-    canonical: SITE_URL,
+    canonical: getSafeSiteUrl(),
     keywords: [],
     ogImage: DEFAULT_OG_IMAGE,
     robots: "index,follow",
@@ -170,12 +192,12 @@ export function normalizeDbSeo(
     canonical: dbSeo?.canonicalUrl || fallback.canonical,
     keywords:
       dbSeo?.keywords && dbSeo.keywords.length
-        ? dbSeo.keywords
-        : (fallback.keywords ?? []),
+        ? normalizeKeywords(dbSeo.keywords)
+        : normalizeKeywords(fallback.keywords ?? []),
     ogTitle: dbSeo?.ogTitle || dbSeo?.metaTitle || fallback.title,
     ogDescription:
       dbSeo?.ogDescription || dbSeo?.metaDescription || fallback.description,
-    ogImage: dbSeo?.ogImage || fallback.ogImage || DEFAULT_OG_IMAGE,
+    ogImage: imageToUrl(dbSeo?.ogImage) || fallback.ogImage || DEFAULT_OG_IMAGE,
     robots: dbSeo?.robots || fallback.robots || "index,follow",
     schemaType: dbSeo?.schemaType || fallback.schemaType || "WebPage",
   };
@@ -190,18 +212,22 @@ export function buildStaticMetadata(
   const title = dbSeo?.metaTitle || fallback.title || normalized.title;
   const description =
     dbSeo?.metaDescription || fallback.description || normalized.description;
-  const canonical = dbSeo?.canonicalUrl || fallback.canonical || normalized.canonical;
+  const canonical =
+    dbSeo?.canonicalUrl || fallback.canonical || normalized.canonical;
   const keywords =
     dbSeo?.keywords && dbSeo.keywords.length
-      ? dbSeo.keywords
-      : (fallback.keywords ?? normalized.keywords ?? []);
+      ? normalizeKeywords(dbSeo.keywords)
+      : normalizeKeywords(fallback.keywords ?? normalized.keywords ?? []);
   const ogTitle = dbSeo?.ogTitle || title;
   const ogDescription = dbSeo?.ogDescription || description;
-  const ogImage = dbSeo?.ogImage || fallback.ogImage || DEFAULT_OG_IMAGE;
+  const ogImage =
+    imageToUrl(dbSeo?.ogImage) ||
+    fallback.ogImage ||
+    DEFAULT_OG_IMAGE;
   const robots = dbSeo?.robots || fallback.robots || "index,follow";
 
   return {
-    metadataBase: new URL(SITE_URL),
+    metadataBase: getSafeMetadataBase(),
     title,
     description,
     keywords,
@@ -240,7 +266,7 @@ export function imageToUrl(
 ): string {
   if (!image) return "";
   if (typeof image === "string") return image;
-  return image.url || "";
+  return typeof image.url === "string" ? image.url : "";
 }
 
 export function buildJsonLd(
@@ -248,36 +274,35 @@ export function buildJsonLd(
   dbSeo: SEORecord | null,
   fallback?: StaticSEOInput
 ) {
-  const normalized = fallback
-    ? {
-        title: dbSeo?.metaTitle || fallback.title,
-        description: dbSeo?.metaDescription || fallback.description,
-        canonical: dbSeo?.canonicalUrl || fallback.canonical,
-        schemaType: dbSeo?.schemaType || fallback.schemaType || "WebPage",
-      }
-    : {
-        title: dbSeo?.metaTitle || "QMatrix Technologies",
-        description:
-          dbSeo?.metaDescription || "Premium IT training institute in Chennai.",
-        canonical: dbSeo?.canonicalUrl || SITE_URL,
-        schemaType: dbSeo?.schemaType || "WebPage",
-      };
-
-  if (pageKey === "contact") {
-    return {
-      "@context": "https://schema.org",
-      "@type": "ContactPage",
-      name: normalized.title,
-      description: normalized.description,
-      url: normalized.canonical,
-    };
-  }
+  const title =
+    dbSeo?.metaTitle || fallback?.title || "QMatrix Technologies";
+  const description =
+    dbSeo?.metaDescription ||
+    fallback?.description ||
+    "Premium IT training institute in Chennai.";
+  const canonical =
+    dbSeo?.canonicalUrl ||
+    fallback?.canonical ||
+    `${getSafeSiteUrl()}/${pageKey === "home" ? "" : pageKey}`;
+  const schemaType =
+    dbSeo?.schemaType || fallback?.schemaType || "WebPage";
 
   return {
     "@context": "https://schema.org",
-    "@type": normalized.schemaType,
-    name: normalized.title,
-    description: normalized.description,
-    url: normalized.canonical,
+    "@type": schemaType,
+    name: title,
+    headline: title,
+    description,
+    url: canonical,
+    image: imageToUrl(dbSeo?.ogImage) || fallback?.ogImage || DEFAULT_OG_IMAGE,
+    publisher: {
+      "@type": "Organization",
+      name: "QMatrix Technologies",
+      url: getSafeSiteUrl(),
+      logo: {
+        "@type": "ImageObject",
+        url: DEFAULT_OG_IMAGE,
+      },
+    },
   };
 }

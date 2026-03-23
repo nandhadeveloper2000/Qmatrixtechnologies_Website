@@ -12,129 +12,66 @@ import {
 } from "lucide-react";
 
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
-import type { Blog, BlogImage, BlogResponse } from "@/app/types/blogs";
-import { imageToUrl, SITE_URL, DEFAULT_OG_IMAGE } from "@/app/lib/seo";
+import type {
+  Blog,
+  BlogFaq,
+  BlogResponse,
+  BlogSection,
+  BlogSectionPoint,
+  BlogSectionSubpoint,
+} from "@/app/types/blogs";
+import {
+  getSafeMetadataBase,
+  getSafeSiteUrl,
+  imageToUrl,
+  normalizeKeywords,
+} from "@/app/lib/seo";
 import RichTextContent from "@/app/components/common/RichTextContent";
 import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
-
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
-
-function getSafeSiteUrl() {
-  const fallback = "https://qmatrixtechnologies-website.vercel.app";
-
-  if (!SITE_URL || typeof SITE_URL !== "string") {
-    return fallback;
-  }
-
-  const trimmed = SITE_URL.trim();
-
-  if (!/^https?:\/\//i.test(trimmed)) {
-    return fallback;
-  }
-
-  try {
-    new URL(trimmed);
-    return trimmed.replace(/\/+$/, "");
-  } catch {
-    return fallback;
-  }
-}
-
-function getSafeAbsoluteUrl(url?: string | null) {
-  if (!url || typeof url !== "string") return null;
-
-  const trimmed = url.trim();
-  if (!trimmed) return null;
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    try {
-      return new URL(trimmed).toString();
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
-}
-
-function getSafeImageUrl(value?: string | BlogImage | null): string | null {
-  if (!value) return null;
-
-  let raw: string | null = null;
-
-  if (typeof value === "string") {
-    raw = value;
-  } else if (typeof value === "object") {
-    raw =
-      (value as BlogImage & { secure_url?: string | null }).secure_url ||
-      value.url ||
-      null;
-  }
-
-  if (!raw || typeof raw !== "string") return null;
-
-  const converted = imageToUrl(raw);
-  return getSafeAbsoluteUrl(converted);
-}
 
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
     const endpoint = SummaryApi.public_blog_by_slug(slug);
-    const url = `${baseURL}${endpoint.url}`;
 
-    console.log("Fetching blog detail:", url, "slug:", slug);
-
-    const res = await fetch(url, {
+    const res = await fetch(`${baseURL}${endpoint.url}`, {
       method: endpoint.method,
       cache: "no-store",
-      next: { revalidate: 0 },
-      headers: {
-        Accept: "application/json",
-      },
     });
 
-    if (!res.ok) {
-      console.error(
-        "Blog detail fetch failed:",
-        res.status,
-        res.statusText,
-        "slug:",
-        slug
-      );
-      return null;
-    }
+    if (!res.ok) return null;
 
-    let data: BlogResponse;
-
-    try {
-      data = await res.json();
-    } catch (error) {
-      console.error("Blog detail JSON parse failed for slug:", slug, error);
-      return null;
-    }
-
+    const data: BlogResponse = await res.json();
     const blog = data.blog || data.data || null;
-
-    if (!blog) {
-      console.error("Blog detail response empty for slug:", slug);
-      return null;
-    }
 
     return blog;
   } catch (error) {
-    console.error("Blog detail fetch error for slug:", slug, error);
+    console.error("getBlog error:", error);
     return null;
   }
 }
 
-function formatDate(date?: string | null) {
+function safeText(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function safeNumber(value: unknown, fallback = 0): number {
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function safeArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function safeImageUrl(image?: { url?: unknown } | string | null): string {
+  if (!image) return "";
+  if (typeof image === "string") return image;
+  return typeof image.url === "string" ? image.url : "";
+}
+
+function formatDate(date?: string) {
   if (!date) return "";
   try {
-    const parsed = new Date(date);
-    if (Number.isNaN(parsed.getTime())) return "";
-    return parsed.toLocaleDateString("en-IN", {
+    return new Date(date).toLocaleDateString("en-IN", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -144,8 +81,9 @@ function formatDate(date?: string | null) {
   }
 }
 
-function stripHtml(html?: string | null) {
-  if (!html) return "";
+function stripHtml(html?: unknown) {
+  if (typeof html !== "string" || !html) return "";
+
   return html
     .replace(/<style[\s\S]*?<\/style>/gi, "")
     .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -160,83 +98,65 @@ function stripHtml(html?: string | null) {
     .trim();
 }
 
-function getAltText(image?: string | BlogImage | null, fallback = "Blog image") {
-  if (!image) return fallback;
-  if (typeof image === "string") return fallback;
-  return image.alt?.trim() || fallback;
-}
-
 export async function generateMetadata({
   params,
-}: PageProps): Promise<Metadata> {
-  try {
-    const { slug } = await params;
-    const blog = await getBlog(slug);
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const blog = await getBlog(slug);
 
-    if (!blog || blog.isPublished === false) {
-      return {
-        title: "Blog Not Found | QMatrix Technologies",
-        description: "The requested blog could not be found.",
-      };
-    }
-
-    const safeSiteUrl = getSafeSiteUrl();
-
-    const descriptionSource =
-      stripHtml(blog.seo?.metaDescription) ||
-      stripHtml(blog.excerpt) ||
-      stripHtml(blog.introDescription) ||
-      "Read the latest blog from QMatrix Technologies.";
-
-    const title =
-      blog.seo?.metaTitle || `${blog.title} | QMatrix Technologies Blog`;
-
-    const canonical =
-      getSafeAbsoluteUrl(blog.seo?.canonicalUrl) ||
-      `${safeSiteUrl}/blogs/${blog.slug}`;
-
-    const ogImage =
-      getSafeImageUrl(blog.seo?.ogImage) ||
-      getSafeImageUrl(blog.coverImage) ||
-      getSafeAbsoluteUrl(DEFAULT_OG_IMAGE) ||
-      undefined;
-
+  if (!blog || blog.isPublished === false) {
     return {
-      metadataBase: new URL(safeSiteUrl),
-      title,
-      description: descriptionSource,
-      keywords: Array.isArray(blog.seo?.keywords)
-        ? blog.seo.keywords
-        : Array.isArray(blog.tags)
-        ? blog.tags
-        : [],
-      alternates: {
-        canonical,
-      },
-      openGraph: {
-        title: blog.seo?.ogTitle || title,
-        description: blog.seo?.ogDescription || descriptionSource,
-        url: canonical,
-        siteName: "QMatrix Technologies",
-        images: ogImage ? [{ url: ogImage, alt: title }] : [],
-        type: "article",
-      },
-      twitter: {
-        card: "summary_large_image",
-        title: blog.seo?.ogTitle || title,
-        description: blog.seo?.ogDescription || descriptionSource,
-        images: ogImage ? [ogImage] : [],
-      },
-      robots: blog.seo?.robots || "index,follow",
-    };
-  } catch (error) {
-    console.error("generateMetadata blog error:", error);
-
-    return {
-      title: "Blog | QMatrix Technologies",
-      description: "Read the latest blog from QMatrix Technologies.",
+      title: "Blog Not Found | QMatrix Technologies",
+      description: "The requested blog could not be found.",
+      robots: "noindex,nofollow",
     };
   }
+
+  const title =
+    safeText(blog.seo?.metaTitle) ||
+    `${safeText(blog.title, "Blog")} | QMatrix Technologies Blog`;
+
+  const description =
+    stripHtml(blog.seo?.metaDescription) ||
+    stripHtml(blog.excerpt) ||
+    stripHtml(blog.introDescription) ||
+    "Read the latest blog from QMatrix Technologies.";
+
+  const canonical =
+    safeText(blog.seo?.canonicalUrl) ||
+    `${getSafeSiteUrl()}/blogs/${safeText(blog.slug)}`;
+
+  const ogImage = imageToUrl(blog.seo?.ogImage || blog.coverImage);
+  const ogTitle = safeText(blog.seo?.ogTitle) || title;
+  const ogDescription = safeText(blog.seo?.ogDescription) || description;
+  const keywords = normalizeKeywords(blog.seo?.keywords || blog.tags);
+
+  return {
+    metadataBase: getSafeMetadataBase(),
+    title,
+    description,
+    keywords,
+    alternates: {
+      canonical,
+    },
+    openGraph: {
+      title: ogTitle,
+      description: ogDescription,
+      url: canonical,
+      siteName: "QMatrix Technologies",
+      images: ogImage ? [{ url: ogImage, alt: title }] : [],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description: ogDescription,
+      images: ogImage ? [ogImage] : [],
+    },
+    robots: safeText(blog.seo?.robots) || "index,follow",
+  };
 }
 
 function PremiumBadge({
@@ -294,246 +214,238 @@ function SectionCard({
   );
 }
 
-export default async function BlogDetailPage({ params }: PageProps) {
-  try {
-    const { slug } = await params;
-    console.log("Rendering blog detail page for slug:", slug);
-
-    const blog = await getBlog(slug);
-
-    if (!blog || blog.isPublished === false) {
-      notFound();
-    }
-
-    const heroPreview =
-      stripHtml(blog.excerpt) ||
-      stripHtml(blog.introDescription) ||
-      "Read the latest insights from QMatrix Technologies.";
-
-    const publishedDate = formatDate(blog.publishedAt || blog.createdAt);
-
-    return (
-      <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
-          <div className="absolute left-[-8rem] top-24 h-[26rem] w-[26rem] rounded-full bg-fuchsia-300/12 blur-3xl" />
-          <div className="absolute right-[-8rem] top-40 h-[30rem] w-[30rem] rounded-full bg-violet-300/12 blur-3xl" />
-          <div className="absolute left-1/2 top-[34rem] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-sky-300/10 blur-3xl" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:70px_70px] opacity-[0.18]" />
+function FaqCard({ faq, index }: { faq: BlogFaq; index: number }) {
+  return (
+    <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_16px_50px_rgba(2,8,23,0.06)] ring-1 ring-slate-200/60 backdrop-blur-xl sm:p-7">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
+      <div className="flex items-start gap-4">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#082a5e] via-[#9116a1] to-[#8121fb] text-sm font-extrabold text-white shadow-[0_14px_34px_rgba(129,33,251,0.22)]">
+          {index + 1}
         </div>
 
-        <BlogDetailsBanner
-          category={blog.category}
-          title={blog.title}
-          heroPreview={heroPreview}
-          authorName={blog.authorName || "Admin"}
-          publishedDate={publishedDate}
-          readTime={blog.readTime || 2}
-          views={blog.views || 0}
-          location={blog.location}
-          coverImage={blog.coverImage}
-        />
+        <div className="min-w-0">
+          <div className="mb-2 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-violet-700">
+            <HelpCircle className="h-3.5 w-3.5" />
+            FAQ
+          </div>
+          <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
+            {safeText(faq.question, `Question ${index + 1}`)}
+          </h3>
+          <div className="mt-3 prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-8">
+            <RichTextContent html={faq.answer} />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-        <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
-          <article className="relative overflow-hidden rounded-[38px] border border-white/70 bg-white/72 shadow-[0_35px_120px_rgba(2,8,23,0.10)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(167,36,228,0.06),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.06),transparent_32%)]" />
-            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-300 to-transparent" />
+export default async function BlogDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const blog = await getBlog(slug);
 
-            <div className="relative px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-14 xl:px-16 xl:py-16">
-              {(blog.introTitle || blog.introDescription) && (
-                <div className="relative overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(252,245,255,0.98)_48%,rgba(244,250,255,0.98)_100%)] p-6 shadow-[0_20px_70px_rgba(2,8,23,0.06)] ring-1 ring-slate-100/70 sm:p-8 lg:p-10 xl:p-12">
-                  <div className="absolute -right-10 top-0 h-32 w-32 rounded-full bg-fuchsia-300/20 blur-3xl" />
-                  <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-sky-300/20 blur-3xl" />
+  if (!blog || blog.isPublished === false) {
+    notFound();
+  }
 
-                  <div className="relative">
-                    <PremiumBadge className="border-fuchsia-200/80 bg-white/80 text-fuchsia-700 shadow-sm">
-                      <ChevronRight className="h-3.5 w-3.5" />
-                      Introduction
-                    </PremiumBadge>
+  const heroPreview =
+    stripHtml(blog.excerpt) ||
+    stripHtml(blog.introDescription) ||
+    "Read the latest insights from QMatrix Technologies.";
 
-                    {blog.introTitle ? (
-                      <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                        {blog.introTitle}
-                      </h2>
-                    ) : null}
+  const publishedDate = formatDate(
+    safeText(blog.publishedAt) || safeText(blog.createdAt)
+  );
 
-                    <div className="prose prose-slate mt-6 max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
-                      <RichTextContent html={blog.introDescription} />
-                    </div>
+  const sections = safeArray<BlogSection>(blog.sections);
+  const faqs = safeArray<BlogFaq>(blog.faqs);
+  const tags = normalizeKeywords(blog.tags);
+
+  return (
+    <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="absolute left-[-8rem] top-24 h-[26rem] w-[26rem] rounded-full bg-fuchsia-300/12 blur-3xl" />
+        <div className="absolute right-[-8rem] top-40 h-[30rem] w-[30rem] rounded-full bg-violet-300/12 blur-3xl" />
+        <div className="absolute left-1/2 top-[34rem] h-[28rem] w-[28rem] -translate-x-1/2 rounded-full bg-sky-300/10 blur-3xl" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.08)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.08)_1px,transparent_1px)] bg-[size:70px_70px] opacity-[0.18]" />
+      </div>
+
+      <BlogDetailsBanner
+        category={safeText(blog.category)}
+        title={safeText(blog.title, "Blog Details")}
+        heroPreview={heroPreview}
+        authorName={safeText(blog.authorName, "Admin")}
+        publishedDate={publishedDate}
+        readTime={safeNumber(blog.readTime, 2)}
+        views={safeNumber(blog.views, 0)}
+        location={safeText(blog.location)}
+        coverImage={blog.coverImage}
+      />
+
+      <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
+        <article className="relative overflow-hidden rounded-[38px] border border-white/70 bg-white/72 shadow-[0_35px_120px_rgba(2,8,23,0.10)] ring-1 ring-slate-200/70 backdrop-blur-2xl">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(167,36,228,0.06),transparent_34%),radial-gradient(circle_at_bottom_left,rgba(14,165,233,0.06),transparent_32%)]" />
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-300 to-transparent" />
+
+          <div className="relative px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-14 xl:px-16 xl:py-16">
+            {(safeText(blog.introTitle) || safeText(blog.introDescription)) && (
+              <div className="relative overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(252,245,255,0.98)_48%,rgba(244,250,255,0.98)_100%)] p-6 shadow-[0_20px_70px_rgba(2,8,23,0.06)] ring-1 ring-slate-100/70 sm:p-8 lg:p-10 xl:p-12">
+                <div className="absolute -right-10 top-0 h-32 w-32 rounded-full bg-fuchsia-300/20 blur-3xl" />
+                <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-sky-300/20 blur-3xl" />
+
+                <div className="relative">
+                  <PremiumBadge className="border-fuchsia-200/80 bg-white/80 text-fuchsia-700 shadow-sm">
+                    <ChevronRight className="h-3.5 w-3.5" />
+                    Introduction
+                  </PremiumBadge>
+
+                  {safeText(blog.introTitle) ? (
+                    <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
+                      {safeText(blog.introTitle)}
+                    </h2>
+                  ) : null}
+
+                  <div className="prose prose-slate mt-6 max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
+                    <RichTextContent html={blog.introDescription} />
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {!!blog.sections?.length && (
-                <div className="mt-12 space-y-8 lg:mt-14 lg:space-y-10">
-                  {blog.sections.map((section, index) => {
-                    const sectionImageUrl = getSafeImageUrl(section.image);
+            {sections.length > 0 && (
+              <div className="mt-12 space-y-8 lg:mt-14 lg:space-y-10">
+                {sections.map((section, index) => {
+                  const sectionImage = safeImageUrl(section?.image);
+                  const points = safeArray<BlogSectionPoint>(section?.points);
+                  const subpoints = safeArray<BlogSectionSubpoint>(
+                    section?.subpoints
+                  );
 
-                    return (
-                      <SectionCard
-                        key={`${section.title}-${index}`}
-                        index={index}
-                        title={section.title}
-                      >
-                        <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
-                          <RichTextContent html={section.description} />
-                        </div>
+                  return (
+                    <SectionCard
+                      key={`${safeText(section?.title, "section")}-${index}`}
+                      index={index}
+                      title={safeText(section?.title, `Section ${index + 1}`)}
+                    >
+                      <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
+                        <RichTextContent html={section?.description} />
+                      </div>
 
-                        {!!section.points?.length && (
-                          <div className="mt-8 grid gap-5 lg:grid-cols-2">
-                            {section.points.map((point, idx) => (
-                              <div
-                                key={`${point.title || "point"}-${idx}`}
-                                className="group relative overflow-hidden rounded-[26px] border border-slate-200/70 bg-[linear-gradient(180deg,#ffffff_0%,#fcfcff_100%)] p-5 shadow-[0_12px_34px_rgba(2,8,23,0.05)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_38px_rgba(2,8,23,0.08)] sm:p-6"
-                              >
-                                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#082a5e] via-[#9116a1] to-[#8121fb]" />
-
-                                <div className="mb-3 flex items-center gap-2 text-fuchsia-700">
-                                  <Star className="h-4 w-4 fill-current" />
-                                  <span className="text-[11px] font-bold uppercase tracking-[0.22em]">
-                                    Highlight Point
-                                  </span>
-                                </div>
-
-                                {point.title ? (
-                                  <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-                                    {point.title}
-                                  </h3>
-                                ) : null}
-
-                                <div className="prose prose-slate mt-3 max-w-none prose-p:text-slate-700 prose-p:leading-7">
-                                  <RichTextContent html={point.description} />
-                                </div>
+                      {points.length > 0 && (
+                        <div className="mt-8 grid gap-5 lg:grid-cols-2">
+                          {points.map((point, idx) => (
+                            <div
+                              key={`${safeText(point?.title, "point")}-${idx}`}
+                              className="rounded-[24px] border border-slate-200/70 bg-slate-50/80 p-5 ring-1 ring-white/80"
+                            >
+                              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
+                                <Star className="h-4 w-4 text-fuchsia-600" />
+                                {safeText(point?.title, `Point ${idx + 1}`)}
                               </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {!!section.subpoints?.length && (
-                          <div className="mt-8 grid gap-4">
-                            {section.subpoints.map((item, idx) => (
-                              <div
-                                key={`${item.subtitle || "subpoint"}-${idx}`}
-                                className="rounded-[24px] border border-slate-200/70 bg-white/95 p-5 shadow-[0_10px_24px_rgba(2,8,23,0.04)] ring-1 ring-slate-100/60 sm:p-6"
-                              >
-                                <div className="mb-3 flex items-center gap-2 text-sky-700">
-                                  <CircleDot className="h-4 w-4" />
-                                  <span className="text-[11px] font-bold uppercase tracking-[0.22em]">
-                                    Sub Topic
-                                  </span>
-                                </div>
-
-                                {item.subtitle ? (
-                                  <h4 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-                                    {item.subtitle}
-                                  </h4>
-                                ) : null}
-
-                                <div className="prose prose-slate mt-3 max-w-none prose-p:text-slate-700 prose-p:leading-7">
-                                  <RichTextContent html={item.subdescription} />
-                                </div>
+                              <div className="prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-7">
+                                <RichTextContent html={point?.description} />
                               </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {sectionImageUrl ? (
-                          <div className="relative mt-8 overflow-hidden rounded-[30px] border border-slate-200/70 bg-white p-2 shadow-[0_20px_60px_rgba(2,8,23,0.08)]">
-                            <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] bg-slate-100">
-                              <Image
-                                src={sectionImageUrl}
-                                alt={getAltText(section.image, section.title)}
-                                fill
-                                className="object-cover transition-transform duration-700 hover:scale-[1.03]"
-                                unoptimized
-                              />
-                              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/10 via-transparent to-transparent" />
                             </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {subpoints.length > 0 && (
+                        <div className="mt-8 grid gap-4">
+                          {subpoints.map((item, idx) => (
+                            <div
+                              key={`${safeText(item?.subtitle, "subpoint")}-${idx}`}
+                              className="rounded-[22px] border border-slate-200/70 bg-white/80 p-5 shadow-sm"
+                            >
+                              <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
+                                <CircleDot className="h-4 w-4 text-sky-600" />
+                                {safeText(item?.subtitle, `Subpoint ${idx + 1}`)}
+                              </div>
+                              <div className="prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-7">
+                                <RichTextContent html={item?.subdescription} />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {sectionImage ? (
+                        <div className="relative mt-8 overflow-hidden rounded-[30px] border border-slate-200/70 bg-white p-2 shadow-[0_20px_60px_rgba(2,8,23,0.08)]">
+                          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] bg-slate-100">
+                            <Image
+                              src={sectionImage}
+                              alt={
+                                safeText(section?.image?.alt) ||
+                                safeText(section?.title, "Blog section image")
+                              }
+                              fill
+                              className="object-cover transition-transform duration-700 hover:scale-[1.03]"
+                              unoptimized
+                            />
                           </div>
-                        ) : null}
-                      </SectionCard>
-                    );
-                  })}
+                        </div>
+                      ) : null}
+                    </SectionCard>
+                  );
+                })}
+              </div>
+            )}
+
+            {faqs.length > 0 && (
+              <div className="mt-12 lg:mt-14">
+                <div className="mb-6 sm:mb-8">
+                  <PremiumBadge className="border-violet-200/80 bg-white/80 text-violet-700 shadow-sm">
+                    <HelpCircle className="h-3.5 w-3.5" />
+                    Frequently Asked Questions
+                  </PremiumBadge>
+                  <h2 className="mt-4 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
+                    Common questions about this topic
+                  </h2>
                 </div>
-              )}
 
-              {!!blog.faqs?.length && (
-                <div className="relative mt-14 overflow-hidden rounded-[32px] border border-white/70 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(252,246,255,0.98)_46%,rgba(244,250,255,0.98)_100%)] p-6 shadow-[0_20px_70px_rgba(2,8,23,0.06)] ring-1 ring-slate-100/70 sm:p-8 lg:p-10 xl:p-12">
-                  <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-fuchsia-300/15 blur-3xl" />
-                  <div className="absolute bottom-0 left-0 h-32 w-32 rounded-full bg-sky-300/15 blur-3xl" />
+                <div className="grid gap-5">
+                  {faqs.map((faq, index) => (
+                    <FaqCard
+                      key={`${safeText(faq.question, "faq")}-${index}`}
+                      faq={faq}
+                      index={index}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
+            {tags.length > 0 && (
+              <div className="mt-12 lg:mt-14">
+                <div className="relative overflow-hidden rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-[0_18px_50px_rgba(2,8,23,0.06)] ring-1 ring-slate-200/60 sm:p-8">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_right_top,rgba(167,36,228,0.08),transparent_30%)]" />
                   <div className="relative">
-                    <PremiumBadge className="border-fuchsia-200/80 bg-white/80 text-fuchsia-700 shadow-sm">
-                      <HelpCircle className="h-3.5 w-3.5" />
-                      Helpful Answers
-                    </PremiumBadge>
+                    <div className="mb-4 flex items-center gap-2 text-[11px] font-bold uppercase tracking-[0.22em] text-fuchsia-700">
+                      <Tags className="h-3.5 w-3.5" />
+                      Related Tags
+                    </div>
 
-                    <h3 className="mt-5 text-3xl font-black tracking-tight text-slate-950 sm:text-4xl">
-                      Frequently Asked Questions
-                    </h3>
-
-                    <div className="mt-8 grid gap-4">
-                      {blog.faqs.map((faq, index) => (
-                        <div
-                          key={`${faq.question}-${index}`}
-                          className="group rounded-[24px] border border-slate-200/70 bg-white/92 p-5 shadow-[0_10px_30px_rgba(2,8,23,0.04)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_38px_rgba(2,8,23,0.08)] sm:p-6"
+                    <div className="flex flex-wrap gap-3">
+                      {tags.map((tag, index) => (
+                        <span
+                          key={`${tag}-${index}`}
+                          className="inline-flex items-center rounded-full border border-fuchsia-200/80 bg-fuchsia-50/80 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm"
                         >
-                          <div className="flex items-start gap-4">
-                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] bg-gradient-to-br from-[#082a5e] via-[#9116a1] to-[#8121fb] text-sm font-extrabold text-white shadow-[0_12px_28px_rgba(129,33,251,0.25)]">
-                              {String(index + 1).padStart(2, "0")}
-                            </div>
-
-                            <div className="min-w-0 flex-1">
-                              <h4 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-                                {faq.question}
-                              </h4>
-
-                              <div className="prose prose-slate mt-3 max-w-none prose-p:text-slate-700 prose-p:leading-7 prose-strong:text-slate-950">
-                                <RichTextContent html={faq.answer} />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
+                          #{tag}
+                        </span>
                       ))}
                     </div>
                   </div>
                 </div>
-              )}
-
-              {!!blog.tags?.length && (
-                <div className="mt-12 rounded-[30px] border border-slate-200/70 bg-white/75 p-6 shadow-[0_16px_40px_rgba(2,8,23,0.04)] backdrop-blur-xl sm:p-8">
-                  <div className="mb-5 flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-[18px] bg-gradient-to-br from-fuchsia-600 to-violet-600 text-white shadow-md">
-                      <Tags className="h-5 w-5" />
-                    </div>
-                    <div>
-                      <h4 className="text-xl font-black text-slate-950">
-                        Related Topics
-                      </h4>
-                      <p className="text-sm text-slate-600">
-                        Explore the main themes connected to this article.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-3">
-                    {blog.tags.map((tag) => (
-                      <span
-                        key={tag}
-                        className="rounded-full border border-fuchsia-200/80 bg-[linear-gradient(135deg,#fff8ff_0%,#ffffff_48%,#f3fbff_100%)] px-4 py-2.5 text-sm font-bold text-fuchsia-700 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
-                      >
-                        #{tag}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </article>
-        </section>
-      </main>
-    );
-  } catch (error) {
-    console.error("BlogDetailPage render error:", error);
-    throw error;
-  }
+              </div>
+            )}
+          </div>
+        </article>
+      </section>
+    </main>
+  );
 }
