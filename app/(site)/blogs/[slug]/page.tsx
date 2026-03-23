@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
@@ -20,12 +19,6 @@ import type {
   BlogSectionPoint,
   BlogSectionSubpoint,
 } from "@/app/types/blogs";
-import {
-  getSafeMetadataBase,
-  getSafeSiteUrl,
-  imageToUrl,
-  normalizeKeywords,
-} from "@/app/lib/seo";
 import RichTextContent from "@/app/components/common/RichTextContent";
 import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
 
@@ -98,65 +91,11 @@ function stripHtml(html?: unknown) {
     .trim();
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const blog = await getBlog(slug);
-
-  if (!blog || blog.isPublished === false) {
-    return {
-      title: "Blog Not Found | QMatrix Technologies",
-      description: "The requested blog could not be found.",
-      robots: "noindex,nofollow",
-    };
-  }
-
-  const title =
-    safeText(blog.seo?.metaTitle) ||
-    `${safeText(blog.title, "Blog")} | QMatrix Technologies Blog`;
-
-  const description =
-    stripHtml(blog.seo?.metaDescription) ||
-    stripHtml(blog.excerpt) ||
-    stripHtml(blog.introDescription) ||
-    "Read the latest blog from QMatrix Technologies.";
-
-  const canonical =
-    safeText(blog.seo?.canonicalUrl) ||
-    `${getSafeSiteUrl()}/blogs/${safeText(blog.slug)}`;
-
-  const ogImage = imageToUrl(blog.seo?.ogImage || blog.coverImage);
-  const ogTitle = safeText(blog.seo?.ogTitle) || title;
-  const ogDescription = safeText(blog.seo?.ogDescription) || description;
-  const keywords = normalizeKeywords(blog.seo?.keywords || blog.tags);
-
-  return {
-    metadataBase: getSafeMetadataBase(),
-    title,
-    description,
-    keywords,
-    alternates: {
-      canonical,
-    },
-    openGraph: {
-      title: ogTitle,
-      description: ogDescription,
-      url: canonical,
-      siteName: "QMatrix Technologies",
-      images: ogImage ? [{ url: ogImage, alt: title }] : [],
-      type: "article",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: ogTitle,
-      description: ogDescription,
-      images: ogImage ? [ogImage] : [],
-    },
-    robots: safeText(blog.seo?.robots) || "index,follow",
-  };
+function normalizeTags(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter(
+    (item): item is string => typeof item === "string" && item.trim().length > 0
+  );
 }
 
 function PremiumBadge({
@@ -263,7 +202,7 @@ export default async function BlogDetailPage({
 
   const sections = safeArray<BlogSection>(blog.sections);
   const faqs = safeArray<BlogFaq>(blog.faqs);
-  const tags = normalizeKeywords(blog.tags);
+  const tags = normalizeTags(blog.tags);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
