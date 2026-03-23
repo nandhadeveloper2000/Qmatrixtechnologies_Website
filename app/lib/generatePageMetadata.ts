@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getPageSEO } from "./getPageSEO";
 
 const SITE_URL =
-  process.env.NEXT_PUBLIC_API_BASE ||
+  process.env.NEXT_PUBLIC_SITE_URL ||
   "https://qmatrixtechnologies.com";
 
 export async function generatePageMetadata(

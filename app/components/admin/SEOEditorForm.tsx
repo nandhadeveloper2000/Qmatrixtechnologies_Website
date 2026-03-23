@@ -25,7 +25,7 @@ type FormState = {
 
 function getFallbackCanonical(pageKey: string) {
   const SITE_URL =
-    process.env.NEXT_PUBLIC_API_BASE || "https://qmatrixtechnologies.com";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://qmatrixtechnologies.com";
 
   if (pageKey === "home") return SITE_URL;
   return `${SITE_URL}/${pageKey}`;
