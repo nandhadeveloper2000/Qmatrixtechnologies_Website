@@ -36,10 +36,10 @@ type Course = {
 
 type CoursesResponse =
     | {
-        success?: boolean;
-        data?: Course[];
-        courses?: Course[];
-    }
+          success?: boolean;
+          data?: Course[];
+          courses?: Course[];
+      }
     | Course[];
 
 const initialState: FormState = {
@@ -80,14 +80,14 @@ function FloatingInput({
                 required={required}
                 maxLength={maxLength}
                 placeholder=" "
-                className="peer h-12 w-full rounded-2xl border border-slate-200 bg-white px-4 pt-4 pb-1.5 text-[14px] text-slate-900 outline-none transition duration-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
+                className="peer h-10 w-full rounded-xl border border-slate-200 bg-white px-4 pt-4 pb-1.5 text-[14px] text-slate-900 outline-none transition duration-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-100"
             />
             <label
                 htmlFor={name}
                 className="pointer-events-none absolute left-4 top-1.5 z-10 origin-left text-[10px] font-medium text-slate-500 transition-all duration-200
-        peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-placeholder-shown:font-normal
-        peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-medium peer-focus:text-violet-600
-        peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:font-medium"
+                peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:text-[14px] peer-placeholder-shown:font-normal
+                peer-focus:top-1.5 peer-focus:translate-y-0 peer-focus:text-[10px] peer-focus:font-medium peer-focus:text-violet-600
+                peer-[:not(:placeholder-shown)]:top-1.5 peer-[:not(:placeholder-shown)]:translate-y-0 peer-[:not(:placeholder-shown)]:text-[10px] peer-[:not(:placeholder-shown)]:font-medium"
             >
                 {label}
             </label>
@@ -121,7 +121,7 @@ function SimpleSelect({
                 onChange={onChange}
                 required={required}
                 disabled={disabled}
-                className="h-12 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-[14px] text-slate-700 outline-none transition duration-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                className="h-10 w-full appearance-none rounded-2xl border border-slate-200 bg-white px-4 pr-10 text-[14px] text-slate-700 outline-none transition duration-200 focus:border-violet-500 focus:ring-4 focus:ring-violet-100 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
             >
                 <option value="" disabled>
                     {placeholder}
@@ -199,10 +199,10 @@ export default function EnquiryPopup({
                 const rawCourses = Array.isArray(res)
                     ? res
                     : Array.isArray(res?.data)
-                        ? res.data
-                        : Array.isArray(res?.courses)
-                            ? res.courses
-                            : [];
+                      ? res.data
+                      : Array.isArray(res?.courses)
+                        ? res.courses
+                        : [];
 
                 const publishedCourses = rawCourses
                     .filter((course) => Boolean(course?.title))
@@ -361,16 +361,16 @@ export default function EnquiryPopup({
                     ✕
                 </button>
 
-                <div className="bg-[linear-gradient(135deg,#f3f0ff_0%,#ffffff_42%,#f6efff_100%)] px-4 pb-4 pt-5 sm:px-5">
+                <div className="bg-[linear-gradient(135deg,#f3f0ff_0%,#ffffff_42%,#f6efff_100%)] px-2 pb-2 pt-3 sm:px-3">
                     <span className="mb-2 inline-flex rounded-full border border-violet-200 bg-violet-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-700">
                         Career Enquiry
                     </span>
 
-                    <h2 className="pr-10 text-xl font-bold leading-snug tracking-tight text-slate-900 sm:text-[26px]">
+                    <h4 className="pr-10 text-[16px] font-bold leading-snug tracking-tight text-slate-900 sm:text-[16px]">
                         Enroll in Top IT Courses & Boost Your Career
-                    </h2>
+                    </h4>
 
-                    <p className="mt-1.5 text-[13px] leading-5 text-slate-600 sm:text-[14px]">
+                    <p className="mt-1.5 text-[12px] leading-5 text-slate-600 sm:text-[12px]">
                         Get expert guidance for{" "}
                         <span className="font-semibold text-violet-700">
                             Data Engineering, AWS, Azure, Databricks
@@ -381,7 +381,7 @@ export default function EnquiryPopup({
 
                 <form
                     onSubmit={handleSubmit}
-                    className="max-h-[calc(88vh-110px)] space-y-3.5 overflow-y-auto px-4 pb-5 pt-4 sm:px-5"
+                    className="max-h-[calc(88vh-100px)] space-y-3.5 overflow-y-auto px-3 pb-3 pt-3 sm:px-4"
                 >
                     <FloatingInput
                         label="Full Name"
@@ -391,32 +391,34 @@ export default function EnquiryPopup({
                         required
                     />
 
-                    <FloatingInput
-                        label="Email Address"
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={handleInputChange}
-                        required
-                    />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <FloatingInput
+                            label="Email Address"
+                            name="email"
+                            type="email"
+                            value={form.email}
+                            onChange={handleInputChange}
+                            required
+                        />
 
-                    <div className="relative">
-                        <div className="flex h-12 overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 focus-within:border-violet-500 focus-within:ring-4 focus-within:ring-violet-100">
-                            <div className="flex min-w-[62px] items-center justify-center border-r border-slate-200 px-3 text-[13px] font-semibold text-slate-700">
-                                +91
+                        <div className="relative">
+                            <div className="flex h-10 overflow-hidden rounded-2xl border border-slate-200 bg-white transition duration-200 focus-within:border-violet-500 focus-within:ring-4 focus-within:ring-violet-100">
+                                <div className="flex min-w-[62px] items-center justify-center border-r border-slate-200 px-3 text-[13px] font-semibold text-slate-700">
+                                    +91
+                                </div>
+                                <input
+                                    id="mobile"
+                                    name="mobile"
+                                    type="tel"
+                                    inputMode="numeric"
+                                    value={form.mobile}
+                                    onChange={handleInputChange}
+                                    required
+                                    maxLength={10}
+                                    placeholder="Mobile Number"
+                                    className="h-full w-full bg-transparent px-4 text-[14px] text-slate-900 outline-none placeholder:text-slate-400"
+                                />
                             </div>
-                            <input
-                                id="mobile"
-                                name="mobile"
-                                type="tel"
-                                inputMode="numeric"
-                                value={form.mobile}
-                                onChange={handleInputChange}
-                                required
-                                maxLength={10}
-                                placeholder="Mobile Number"
-                                className="h-full w-full bg-transparent px-4 text-[14px] text-slate-900 outline-none placeholder:text-slate-400"
-                            />
                         </div>
                     </div>
 
@@ -431,30 +433,33 @@ export default function EnquiryPopup({
                             coursesLoading
                                 ? "Loading courses..."
                                 : courseTitles.length === 0
-                                    ? "No courses available"
-                                    : "Select Course"
+                                  ? "No courses available"
+                                  : "Select Course"
                         }
                     />
 
-                    <FloatingInput
-                        label="Qualification"
-                        name="qualification"
-                        value={form.qualification}
-                        onChange={handleInputChange}
-                    />
-                    <FloatingInput
-                        label="Background"
-                        name="background"
-                        value={form.background}
-                        onChange={handleInputChange}
-                    />
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <FloatingInput
+                            label="Qualification"
+                            name="qualification"
+                            value={form.qualification}
+                            onChange={handleInputChange}
+                        />
 
-                    <FloatingInput
+                        <FloatingInput
+                            label="Background"
+                            name="background"
+                            value={form.background}
+                            onChange={handleInputChange}
+                        />
+                    </div>
+
+                    {/* <FloatingInput
                         label="Current Location"
                         name="current_location"
                         value={form.current_location}
                         onChange={handleInputChange}
-                    />
+                    /> */}
 
                     {coursesError ? (
                         <div className="rounded-2xl border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[13px] font-medium text-amber-700">
