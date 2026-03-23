@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://www.qmatrixtech.com";
+  process.env.NEXT_PUBLIC_API_BASE || "https://qmatrixtechnologies-website.vercel.app";
 
 export const DEFAULT_OG_IMAGE =
   "https://res.cloudinary.com/dfbbnzwmc/image/upload/f_auto,q_auto/v1/qmatrix/default-og.jpg";
