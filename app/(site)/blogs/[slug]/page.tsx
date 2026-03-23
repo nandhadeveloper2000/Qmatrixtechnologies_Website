@@ -22,6 +22,10 @@ import type {
 import RichTextContent from "@/app/components/common/RichTextContent";
 import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
 
+type MongoDateLike = {
+  $date?: string;
+};
+
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
     const endpoint = SummaryApi.public_blog_by_slug(slug);
@@ -31,10 +35,15 @@ async function getBlog(slug: string): Promise<Blog | null> {
       cache: "no-store",
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("getBlog failed:", res.status, res.statusText);
+      return null;
+    }
 
     const data: BlogResponse = await res.json();
     const blog = data.blog || data.data || null;
+
+    if (!blog || typeof blog !== "object") return null;
 
     return blog;
   } catch (error) {
@@ -61,10 +70,33 @@ function safeImageUrl(image?: { url?: unknown } | string | null): string {
   return typeof image.url === "string" ? image.url : "";
 }
 
-function formatDate(date?: string) {
-  if (!date) return "";
+function normalizeDate(value: unknown): string {
+  if (!value) return "";
+
+  if (typeof value === "string") return value;
+
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "$date" in value &&
+    typeof (value as MongoDateLike).$date === "string"
+  ) {
+    return (value as MongoDateLike).$date || "";
+  }
+
+  return "";
+}
+
+function formatDate(value: unknown) {
+  const dateString = normalizeDate(value);
+  if (!dateString) return "";
+
   try {
-    return new Date(date).toLocaleDateString("en-IN", {
+    const date = new Date(dateString);
+
+    if (Number.isNaN(date.getTime())) return "";
+
+    return date.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -93,6 +125,7 @@ function stripHtml(html?: unknown) {
 
 function normalizeTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
+
   return value.filter(
     (item): item is string => typeof item === "string" && item.trim().length > 0
   );
@@ -196,10 +229,7 @@ export default async function BlogDetailPage({
     stripHtml(blog.introDescription) ||
     "Read the latest insights from QMatrix Technologies.";
 
-  const publishedDate = formatDate(
-    safeText(blog.publishedAt) || safeText(blog.createdAt)
-  );
-
+  const publishedDate = formatDate(blog.publishedAt || blog.createdAt);
   const sections = safeArray<BlogSection>(blog.sections);
   const faqs = safeArray<BlogFaq>(blog.faqs);
   const tags = normalizeTags(blog.tags);
@@ -318,7 +348,9 @@ export default async function BlogDetailPage({
                             <Image
                               src={sectionImage}
                               alt={
-                                safeText(section?.image?.alt) ||
+                                safeText(
+                                  (section?.image as { alt?: unknown } | null | undefined)?.alt
+                                ) ||
                                 safeText(section?.title, "Blog section image")
                               }
                               fill
