@@ -1,8 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
-import DOMPurify from "isomorphic-dompurify";
-
 type Props = {
   html?: unknown;
   className?: string;
@@ -12,17 +9,13 @@ function toSafeHtml(value: unknown): string {
   return typeof value === "string" ? value : "";
 }
 
-export default function RichTextContent({ html, className = "" }: Props) {
-  const rawHtml = toSafeHtml(html);
+export default function RichTextContent({
+  html,
+  className = "",
+}: Props) {
+  const rawHtml = toSafeHtml(html).trim();
 
-  const cleanHtml = useMemo(() => {
-    if (!rawHtml.trim()) return "";
-    return DOMPurify.sanitize(rawHtml, {
-      USE_PROFILES: { html: true },
-    });
-  }, [rawHtml]);
-
-  if (!cleanHtml) return null;
+  if (!rawHtml) return null;
 
   return (
     <div
@@ -38,7 +31,7 @@ export default function RichTextContent({ html, className = "" }: Props) {
         "prose-li:my-1",
         className,
       ].join(" ")}
-      dangerouslySetInnerHTML={{ __html: cleanHtml }}
+      dangerouslySetInnerHTML={{ __html: rawHtml }}
     />
   );
 }

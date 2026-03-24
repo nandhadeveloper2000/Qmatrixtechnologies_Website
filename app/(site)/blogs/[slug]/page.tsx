@@ -19,6 +19,8 @@ import type {
   BlogSection,
   BlogSectionPoint,
   BlogSectionSubpoint,
+  BlogImage,
+  MongoDateLike,
 } from "@/app/types/blogs";
 import RichTextContent from "@/app/components/common/RichTextContent";
 import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
@@ -30,102 +32,14 @@ type Params = {
   slug: string;
 };
 
-type MongoDateLike = {
-  $date?: string;
-};
-
 type SafeImage = {
-  url?: string;
-  alt?: string;
+  url: string;
+  alt: string;
   public_id?: string;
 };
 
-async function getBlog(slug: string): Promise<Blog | null> {
-  try {
-    const safeSlug = encodeURIComponent(slug);
-    const endpoint = SummaryApi.public_blog_by_slug(safeSlug);
-    const fullUrl = `${baseURL}${endpoint.url}`;
-
-    const res = await fetch(fullUrl, {
-      method: endpoint.method,
-      cache: "no-store",
-      next: { revalidate: 0 },
-      headers: {
-        Accept: "application/json",
-      },
-    });
-
-    if (!res.ok) {
-      console.error("Blog fetch failed:", {
-        slug,
-        url: fullUrl,
-        status: res.status,
-        statusText: res.statusText,
-      });
-      return null;
-    }
-
-    const data: BlogResponse = await res.json();
-    const blog = data?.blog ?? data?.data ?? null;
-
-    if (!blog || typeof blog !== "object") {
-      console.error("Invalid blog response:", data);
-      return null;
-    }
-
-    return blog;
-  } catch (error) {
-    console.error("Blog fetch error:", error);
-    return null;
-  }
-}
-
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
-  const { slug } = await params;
-  const blog = await getBlog(slug);
-
-  if (!blog) {
-    return {
-      title: "Blog Not Found | QMatrix Technologies",
-      description: "The requested blog could not be found.",
-    };
-  }
-
-  const title =
-    safeText(blog?.seo?.metaTitle) ||
-    safeText(blog?.title) ||
-    "Blog Details | QMatrix Technologies";
-
-  const description =
-    safeText(blog?.seo?.metaDescription) ||
-    stripHtml(blog?.excerpt) ||
-    stripHtml(blog?.introDescription) ||
-    "Read the latest insights from QMatrix Technologies.";
-
-  const ogImage =
-    safeImageUrl(blog?.seo?.ogImage) ||
-    safeImageUrl(blog?.coverImage) ||
-    "";
-
-  return {
-    title,
-    description,
-    keywords: safeArray<string>(blog?.seo?.keywords),
-    alternates: safeText(blog?.seo?.canonicalUrl)
-      ? { canonical: safeText(blog?.seo?.canonicalUrl) }
-      : undefined,
-    robots: safeText(blog?.seo?.robots) || undefined,
-    openGraph: {
-      title: safeText(blog?.seo?.ogTitle) || title,
-      description: safeText(blog?.seo?.ogDescription) || description,
-      type: "article",
-      images: ogImage ? [{ url: ogImage }] : [],
-    },
-  };
+function isObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
 }
 
 function safeText(value: unknown, fallback = ""): string {
@@ -140,61 +54,22 @@ function safeArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? value : [];
 }
 
-function safeImageObject(image?: unknown): SafeImage | null {
-  if (!image || typeof image !== "object") return null;
-
-  const imageObj = image as Record<string, unknown>;
-
-  return {
-    url: typeof imageObj.url === "string" ? imageObj.url : "",
-    alt: typeof imageObj.alt === "string" ? imageObj.alt : "",
-    public_id:
-      typeof imageObj.public_id === "string" ? imageObj.public_id : "",
-  };
-}
-
-function safeImageUrl(image?: unknown): string {
-  if (!image || typeof image !== "object") return "";
-  const imageObj = image as Record<string, unknown>;
-  return typeof imageObj.url === "string" ? imageObj.url : "";
-}
-
-function safeImageAlt(image?: unknown, fallback = "Image"): string {
-  if (!image || typeof image !== "object") return fallback;
-
-  const imageObj = image as Record<string, unknown>;
-  return typeof imageObj.alt === "string" && imageObj.alt.trim()
-    ? imageObj.alt
-    : fallback;
-}
-
-function normalizeDate(value: unknown): string {
+function normalizeDate(value?: MongoDateLike | null): string {
   if (!value) return "";
-
   if (typeof value === "string") return value;
-
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "$date" in value &&
-    typeof (value as MongoDateLike).$date === "string"
-  ) {
-    return (value as MongoDateLike).$date || "";
-  }
-
+  if (isObject(value) && typeof value.$date === "string") return value.$date;
   return "";
 }
 
-function formatDate(value: unknown): string {
-  const dateString = normalizeDate(value);
-  if (!dateString) return "";
+function formatDate(value?: MongoDateLike | null): string {
+  const normalized = normalizeDate(value);
+  if (!normalized) return "";
 
   try {
-    const date = new Date(dateString);
+    const parsed = new Date(normalized);
+    if (Number.isNaN(parsed.getTime())) return "";
 
-    if (Number.isNaN(date.getTime())) return "";
-
-    return date.toLocaleDateString("en-IN", {
+    return parsed.toLocaleDateString("en-IN", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -225,9 +100,167 @@ function normalizeTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
 
   return value.filter(
-    (item): item is string =>
-      typeof item === "string" && item.trim().length > 0
+    (item): item is string => typeof item === "string" && item.trim().length > 0
   );
+}
+
+function safeImageObject(
+  image?: BlogImage | null | unknown,
+  fallbackAlt = "Image"
+): SafeImage | null {
+  if (!isObject(image)) return null;
+
+  const url =
+    typeof image.url === "string" && image.url.trim() ? image.url : "";
+  const alt =
+    typeof image.alt === "string" && image.alt.trim() ? image.alt : fallbackAlt;
+  const public_id =
+    typeof image.public_id === "string" ? image.public_id : undefined;
+
+  if (!url) return null;
+
+  return { url, alt, public_id };
+}
+
+function safeImageUrl(image?: BlogImage | null | unknown): string {
+  return safeImageObject(image)?.url || "";
+}
+
+function safeKeywords(value: unknown): string[] | undefined {
+  const keywords = normalizeTags(value);
+  return keywords.length ? keywords : undefined;
+}
+
+function normalizeBlog(raw: unknown): Blog | null {
+  if (!isObject(raw)) return null;
+
+  const title = safeText(raw.title);
+  const slug = safeText(raw.slug);
+
+  if (!title || !slug || typeof slug !== "string") return null;
+
+  return {
+    _id: raw._id as Blog["_id"],
+    title,
+    slug,
+    excerpt: safeText(raw.excerpt),
+    introTitle: safeText(raw.introTitle),
+    introDescription: safeText(raw.introDescription),
+    category: safeText(raw.category),
+    tags: normalizeTags(raw.tags),
+    coverImage: isObject(raw.coverImage) ? (raw.coverImage as BlogImage) : null,
+    authorName: safeText(raw.authorName),
+    location: safeText(raw.location),
+    readTime: safeNumber(raw.readTime, 0),
+    views: safeNumber(raw.views, 0),
+    sections: safeArray<BlogSection>(raw.sections),
+    faqs: safeArray<BlogFaq>(raw.faqs),
+    seo: isObject(raw.seo) ? raw.seo : undefined,
+    isPublished:
+      typeof raw.isPublished === "boolean" ? raw.isPublished : undefined,
+    publishedAt: (raw.publishedAt as MongoDateLike | null | undefined) ?? null,
+    createdAt: raw.createdAt as MongoDateLike | undefined,
+    updatedAt: raw.updatedAt as MongoDateLike | undefined,
+  };
+}
+
+async function getBlog(slug: string): Promise<Blog | null> {
+  try {
+    const safeSlug = encodeURIComponent(slug);
+    const endpoint = SummaryApi.public_blog_by_slug(safeSlug);
+    const url = `${baseURL}${endpoint.url}`;
+
+    const res = await fetch(url, {
+      method: endpoint.method,
+      cache: "no-store",
+      next: { revalidate: 0 },
+      headers: {
+        Accept: "application/json",
+      },
+    });
+
+    if (!res.ok) {
+      console.error("Blog fetch failed:", {
+        slug,
+        url,
+        status: res.status,
+        statusText: res.statusText,
+      });
+      return null;
+    }
+
+    const data: BlogResponse | unknown = await res.json();
+    const blog = normalizeBlog(
+      (data as BlogResponse)?.blog ?? (data as BlogResponse)?.data
+    );
+
+    if (!blog) {
+      console.error("Invalid blog response shape:", data);
+      return null;
+    }
+
+    return blog;
+  } catch (error) {
+    console.error("Blog fetch error:", error);
+    return null;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Params;
+}): Promise<Metadata> {
+  try {
+    const { slug } = params;
+    const blog = await getBlog(slug);
+
+    if (!blog) {
+      return {
+        title: "Blog Not Found | QMatrix Technologies",
+        description: "The requested blog could not be found.",
+      };
+    }
+
+    const seo = isObject(blog.seo) ? blog.seo : undefined;
+
+    const title =
+      safeText(seo?.metaTitle) ||
+      safeText(blog.title) ||
+      "Blog Details | QMatrix Technologies";
+
+    const description =
+      safeText(seo?.metaDescription) ||
+      stripHtml(blog.excerpt) ||
+      stripHtml(blog.introDescription) ||
+      "Read the latest insights from QMatrix Technologies.";
+
+    const ogImage =
+      safeImageUrl(seo?.ogImage) || safeImageUrl(blog.coverImage) || "";
+
+    return {
+      title,
+      description,
+      keywords: safeKeywords(seo?.keywords),
+      alternates: safeText(seo?.canonicalUrl)
+        ? { canonical: safeText(seo?.canonicalUrl) }
+        : undefined,
+      robots: safeText(seo?.robots) || undefined,
+      openGraph: {
+        title: safeText(seo?.ogTitle) || title,
+        description: safeText(seo?.ogDescription) || description,
+        type: "article",
+        images: ogImage ? [{ url: ogImage }] : [],
+      },
+    };
+  } catch (error) {
+    console.error("Metadata generation error:", error);
+
+    return {
+      title: "Blog Details | QMatrix Technologies",
+      description: "Read the latest insights from QMatrix Technologies.",
+    };
+  }
 }
 
 function PremiumBadge({
@@ -286,6 +319,8 @@ function SectionCard({
 }
 
 function FaqCard({ faq, index }: { faq: BlogFaq; index: number }) {
+  const question = safeText(faq?.question, `Question ${index + 1}`);
+
   return (
     <div className="relative overflow-hidden rounded-[28px] border border-white/70 bg-white/90 p-6 shadow-[0_16px_50px_rgba(2,8,23,0.06)] ring-1 ring-slate-200/60 backdrop-blur-xl sm:p-7">
       <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-300 to-transparent" />
@@ -302,7 +337,7 @@ function FaqCard({ faq, index }: { faq: BlogFaq; index: number }) {
           </div>
 
           <h3 className="text-lg font-black tracking-tight text-slate-950 sm:text-xl">
-            {safeText(faq?.question, `Question ${index + 1}`)}
+            {question}
           </h3>
 
           <div className="mt-3 prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-8">
@@ -317,25 +352,25 @@ function FaqCard({ faq, index }: { faq: BlogFaq; index: number }) {
 export default async function BlogDetailPage({
   params,
 }: {
-  params: Promise<Params>;
+  params: Params;
 }) {
-  const { slug } = await params;
+  const { slug } = params;
   const blog = await getBlog(slug);
 
-  if (!blog || blog?.isPublished === false) {
+  if (!blog || blog.isPublished === false) {
     notFound();
   }
 
   const heroPreview =
-    stripHtml(blog?.excerpt) ||
-    stripHtml(blog?.introDescription) ||
+    stripHtml(blog.excerpt) ||
+    stripHtml(blog.introDescription) ||
     "Read the latest insights from QMatrix Technologies.";
 
-  const publishedDate = formatDate(blog?.publishedAt || blog?.createdAt);
-  const sections = safeArray<BlogSection>(blog?.sections);
-  const faqs = safeArray<BlogFaq>(blog?.faqs);
-  const tags = normalizeTags(blog?.tags);
-  const coverImage = safeImageObject(blog?.coverImage);
+  const publishedDate = formatDate(blog.publishedAt || blog.createdAt);
+  const sections = safeArray<BlogSection>(blog.sections);
+  const faqs = safeArray<BlogFaq>(blog.faqs);
+  const tags = normalizeTags(blog.tags);
+  const coverImage = safeImageObject(blog.coverImage, blog.title);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
@@ -347,14 +382,14 @@ export default async function BlogDetailPage({
       </div>
 
       <BlogDetailsBanner
-        category={safeText(blog?.category)}
-        title={safeText(blog?.title, "Blog Details")}
+        category={safeText(blog.category)}
+        title={safeText(blog.title, "Blog Details")}
         heroPreview={heroPreview}
-        authorName={safeText(blog?.authorName, "Admin")}
+        authorName={safeText(blog.authorName, "Admin")}
         publishedDate={publishedDate}
-        readTime={safeNumber(blog?.readTime, 2)}
-        views={safeNumber(blog?.views, 0)}
-        location={safeText(blog?.location)}
+        readTime={safeNumber(blog.readTime, 2)}
+        views={safeNumber(blog.views, 0)}
+        location={safeText(blog.location)}
         coverImage={coverImage}
       />
 
@@ -364,7 +399,7 @@ export default async function BlogDetailPage({
           <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-fuchsia-300 to-transparent" />
 
           <div className="relative px-5 py-8 sm:px-8 sm:py-10 lg:px-12 lg:py-14 xl:px-16 xl:py-16">
-            {(safeText(blog?.introTitle) || safeText(blog?.introDescription)) && (
+            {(safeText(blog.introTitle) || safeText(blog.introDescription)) && (
               <div className="relative overflow-hidden rounded-[32px] border border-white/80 bg-[linear-gradient(135deg,rgba(255,255,255,0.98)_0%,rgba(252,245,255,0.98)_48%,rgba(244,250,255,0.98)_100%)] p-6 shadow-[0_20px_70px_rgba(2,8,23,0.06)] ring-1 ring-slate-100/70 sm:p-8 lg:p-10 xl:p-12">
                 <div className="absolute -right-10 top-0 h-32 w-32 rounded-full bg-fuchsia-300/20 blur-3xl" />
                 <div className="absolute -left-10 bottom-0 h-32 w-32 rounded-full bg-sky-300/20 blur-3xl" />
@@ -375,79 +410,104 @@ export default async function BlogDetailPage({
                     Introduction
                   </PremiumBadge>
 
-                  {safeText(blog?.introTitle) ? (
+                  {safeText(blog.introTitle) ? (
                     <h2 className="mt-5 max-w-4xl text-3xl font-black tracking-tight text-slate-950 sm:text-4xl lg:text-5xl">
-                      {safeText(blog?.introTitle)}
+                      {safeText(blog.introTitle)}
                     </h2>
                   ) : null}
 
                   <div className="prose prose-slate mt-6 max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
-                    <RichTextContent html={blog?.introDescription} />
+                    <RichTextContent html={blog.introDescription} />
                   </div>
                 </div>
               </div>
             )}
 
-            {sections.length > 0 && (
+            {sections.length > 0 ? (
               <div className="mt-12 space-y-8 lg:mt-14 lg:space-y-10">
                 {sections.map((section, index) => {
-                  const sectionImageUrl = safeImageUrl(section?.image);
-                  const sectionImageAlt = safeImageAlt(
-                    section?.image,
-                    safeText(section?.title, "Blog section image")
+                  const title = safeText(
+                    isObject(section) ? section.title : "",
+                    `Section ${index + 1}`
                   );
-                  const points = safeArray<BlogSectionPoint>(section?.points);
+                  const description = isObject(section)
+                    ? section.description
+                    : "";
+                  const sectionImageUrl = safeImageUrl(
+                    isObject(section) ? section.image : null
+                  );
+                  const sectionImageAlt =
+                    safeImageObject(
+                      isObject(section) ? section.image : null,
+                      title
+                    )?.alt || title;
+
+                  const points = safeArray<BlogSectionPoint>(
+                    isObject(section) ? section.points : []
+                  );
                   const subpoints = safeArray<BlogSectionSubpoint>(
-                    section?.subpoints
+                    isObject(section) ? section.subpoints : []
                   );
 
                   return (
                     <SectionCard
-                      key={`${safeText(section?.title, "section")}-${index}`}
+                      key={`${blog.slug}-section-${index}`}
                       index={index}
-                      title={safeText(section?.title, `Section ${index + 1}`)}
+                      title={title}
                     >
                       <div className="prose prose-slate max-w-none prose-headings:font-bold prose-headings:text-slate-950 prose-p:text-[16px] prose-p:leading-8 prose-p:text-slate-700 prose-li:text-slate-700 prose-strong:text-slate-950">
-                        <RichTextContent html={section?.description} />
+                        <RichTextContent html={description} />
                       </div>
 
-                      {points.length > 0 && (
+                      {points.length > 0 ? (
                         <div className="mt-8 grid gap-5 lg:grid-cols-2">
                           {points.map((point, idx) => (
                             <div
-                              key={`${safeText(point?.title, "point")}-${idx}`}
+                              key={`${blog.slug}-point-${index}-${idx}`}
                               className="rounded-[24px] border border-slate-200/70 bg-slate-50/80 p-5 ring-1 ring-white/80"
                             >
                               <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
                                 <Star className="h-4 w-4 text-fuchsia-600" />
-                                {safeText(point?.title, `Point ${idx + 1}`)}
+                                {safeText(
+                                  isObject(point) ? point.title : "",
+                                  `Point ${idx + 1}`
+                                )}
                               </div>
                               <div className="prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-7">
-                                <RichTextContent html={point?.description} />
+                                <RichTextContent
+                                  html={isObject(point) ? point.description : ""}
+                                />
                               </div>
                             </div>
                           ))}
                         </div>
-                      )}
+                      ) : null}
 
-                      {subpoints.length > 0 && (
+                      {subpoints.length > 0 ? (
                         <div className="mt-8 grid gap-4">
                           {subpoints.map((item, idx) => (
                             <div
-                              key={`${safeText(item?.subtitle, "subpoint")}-${idx}`}
+                              key={`${blog.slug}-subpoint-${index}-${idx}`}
                               className="rounded-[22px] border border-slate-200/70 bg-white/80 p-5 shadow-sm"
                             >
                               <div className="mb-3 flex items-center gap-2 text-sm font-bold text-slate-900">
                                 <CircleDot className="h-4 w-4 text-sky-600" />
-                                {safeText(item?.subtitle, `Subpoint ${idx + 1}`)}
+                                {safeText(
+                                  isObject(item) ? item.subtitle : "",
+                                  `Subpoint ${idx + 1}`
+                                )}
                               </div>
                               <div className="prose prose-slate max-w-none prose-p:text-slate-700 prose-p:leading-7">
-                                <RichTextContent html={item?.subdescription} />
+                                <RichTextContent
+                                  html={
+                                    isObject(item) ? item.subdescription : ""
+                                  }
+                                />
                               </div>
                             </div>
                           ))}
                         </div>
-                      )}
+                      ) : null}
 
                       {sectionImageUrl ? (
                         <div className="relative mt-8 overflow-hidden rounded-[30px] border border-slate-200/70 bg-white p-2 shadow-[0_20px_60px_rgba(2,8,23,0.08)]">
@@ -466,9 +526,9 @@ export default async function BlogDetailPage({
                   );
                 })}
               </div>
-            )}
+            ) : null}
 
-            {faqs.length > 0 && (
+            {faqs.length > 0 ? (
               <div className="mt-12 lg:mt-14">
                 <div className="mb-6 sm:mb-8">
                   <PremiumBadge className="border-violet-200/80 bg-white/80 text-violet-700 shadow-sm">
@@ -484,16 +544,16 @@ export default async function BlogDetailPage({
                 <div className="grid gap-5">
                   {faqs.map((faq, index) => (
                     <FaqCard
-                      key={`${safeText(faq?.question, "faq")}-${index}`}
+                      key={`${blog.slug}-faq-${index}`}
                       faq={faq}
                       index={index}
                     />
                   ))}
                 </div>
               </div>
-            )}
+            ) : null}
 
-            {tags.length > 0 && (
+            {tags.length > 0 ? (
               <div className="mt-12 lg:mt-14">
                 <div className="relative overflow-hidden rounded-[28px] border border-white/80 bg-white/90 p-6 shadow-[0_18px_50px_rgba(2,8,23,0.06)] ring-1 ring-slate-200/60 sm:p-8">
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_right_top,rgba(167,36,228,0.08),transparent_30%)]" />
@@ -507,7 +567,7 @@ export default async function BlogDetailPage({
                     <div className="flex flex-wrap gap-3">
                       {tags.map((tag, index) => (
                         <span
-                          key={`${tag}-${index}`}
+                          key={`${blog.slug}-tag-${index}`}
                           className="inline-flex items-center rounded-full border border-fuchsia-200/80 bg-fuchsia-50/80 px-4 py-2 text-sm font-semibold text-fuchsia-700 shadow-sm"
                         >
                           #{tag}
@@ -517,7 +577,7 @@ export default async function BlogDetailPage({
                   </div>
                 </div>
               </div>
-            )}
+            ) : null}
           </div>
         </article>
       </section>

@@ -3,11 +3,18 @@ import type { Blog, BlogsResponse } from "@/app/types/blogs";
 import BlogsClientView from "@/app/components/Blogs/BlogsClientView";
 import BlogsBanner from "@/app/components/Blogs/BlogsBanner";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 async function getBlogs(): Promise<Blog[]> {
   try {
     const res = await fetch(`${baseURL}${SummaryApi.blogs.url}`, {
       method: SummaryApi.blogs.method,
       cache: "no-store",
+      next: { revalidate: 0 },
+      headers: {
+        Accept: "application/json",
+      },
     });
 
     if (!res.ok) {
@@ -16,9 +23,17 @@ async function getBlogs(): Promise<Blog[]> {
     }
 
     const data: BlogsResponse = await res.json();
-    const blogs = data.blogs || data.data || [];
+    const rawBlogs = data?.blogs ?? data?.data ?? [];
 
-    return blogs.filter((blog) => blog.isPublished !== false);
+    if (!Array.isArray(rawBlogs)) {
+      console.error("Invalid blogs response:", data);
+      return [];
+    }
+
+    return rawBlogs.filter(
+      (blog): blog is Blog =>
+        Boolean(blog && typeof blog === "object" && blog.isPublished !== false)
+    );
   } catch (error) {
     console.error("Blog fetch error:", error);
     return [];

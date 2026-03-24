@@ -1,3 +1,7 @@
+export type MongoIdLike = string | { $oid?: string };
+
+export type MongoDateLike = string | { $date?: string };
+
 export type BlogImage = {
   url: string;
   public_id?: string | null;
@@ -39,7 +43,7 @@ export type BlogFaq = {
 };
 
 export type Blog = {
-  _id?: string;
+  _id?: MongoIdLike;
   title: string;
   slug: string;
   excerpt?: string;
@@ -56,9 +60,9 @@ export type Blog = {
   faqs?: BlogFaq[];
   seo?: BlogSeo;
   isPublished?: boolean;
-  publishedAt?: string | null;
-  createdAt?: string;
-  updatedAt?: string;
+  publishedAt?: MongoDateLike | null;
+  createdAt?: MongoDateLike;
+  updatedAt?: MongoDateLike;
 };
 
 export type BlogResponse = {

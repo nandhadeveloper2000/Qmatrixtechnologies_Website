@@ -11,19 +11,29 @@ import {
   ChevronRight,
   ArrowUpRight,
 } from "lucide-react";
-import type { Blog } from "@/app/types/blogs";
+import type { Blog, MongoDateLike } from "@/app/types/blogs";
 
-function formatDate(date?: string) {
-  if (!date) return "";
-  try {
-    return new Date(date).toLocaleDateString("en-IN", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return "";
+function normalizeDate(value?: MongoDateLike): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object" && typeof value.$date === "string") {
+    return value.$date;
   }
+  return "";
+}
+
+function formatDate(date?: MongoDateLike) {
+  const normalized = normalizeDate(date);
+  if (!normalized) return "";
+
+  const parsed = new Date(normalized);
+  if (Number.isNaN(parsed.getTime())) return "";
+
+  return parsed.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
 }
 
 function htmlToText(html?: string) {
@@ -51,10 +61,16 @@ export default function FeaturedBlogSlider({
   blogs,
   autoPlayMs = 5000,
 }: Props) {
-  const safeBlogs = useMemo(() => blogs.filter(Boolean), [blogs]);
-  const [index, setIndex] = useState(0);
+  const safeBlogs = useMemo(
+    () =>
+      (blogs ?? []).filter(
+        (blog): blog is Blog => Boolean(blog && blog.title && blog.slug)
+      ),
+    [blogs]
+  );
 
   const total = safeBlogs.length;
+  const [index, setIndex] = useState(0);
 
   useEffect(() => {
     if (total <= 1) return;
@@ -66,9 +82,9 @@ export default function FeaturedBlogSlider({
     return () => clearInterval(timer);
   }, [total, autoPlayMs]);
 
-  if (!safeBlogs.length) return null;
+  if (total === 0) return null;
 
-  const safeIndex = index >= total ? 0 : index;
+  const safeIndex = index % total;
   const current = safeBlogs[safeIndex];
 
   const goPrev = () => {
@@ -78,6 +94,19 @@ export default function FeaturedBlogSlider({
   const goNext = () => {
     setIndex((prev) => (prev + 1) % total);
   };
+
+  const imageSrc =
+    current.coverImage?.url?.trim() || "https://placehold.co/1400x900/png";
+
+  const imageAlt =
+    current.coverImage?.alt?.trim() || current.title || "Featured blog image";
+
+  const authorName = current.authorName?.trim() || "Admin";
+  const publishedDate = formatDate(current.publishedAt || current.createdAt);
+  const readTime =
+    typeof current.readTime === "number" && current.readTime > 0
+      ? current.readTime
+      : 2;
 
   const previewText =
     htmlToText(current.excerpt) ||
@@ -106,6 +135,7 @@ export default function FeaturedBlogSlider({
             >
               <ChevronLeft className="h-5 w-5" />
             </button>
+
             <button
               type="button"
               onClick={goNext}
@@ -122,12 +152,13 @@ export default function FeaturedBlogSlider({
         <div className="grid lg:grid-cols-[1.08fr_0.92fr]">
           <div className="relative min-h-[280px] bg-slate-100 sm:min-h-[360px] lg:min-h-[460px]">
             <Image
-              src={current.coverImage?.url || "https://placehold.co/1400x900/png"}
-              alt={current.coverImage?.alt || current.title}
+              src={imageSrc}
+              alt={imageAlt}
               fill
-              className="object-cover"
-              unoptimized
               priority
+              unoptimized
+              className="object-cover"
+              sizes="(max-width: 1024px) 100vw, 55vw"
             />
 
             <div className="absolute inset-0 bg-gradient-to-r from-black/35 via-black/10 to-transparent" />
@@ -167,15 +198,19 @@ export default function FeaturedBlogSlider({
             <div className="mb-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
               <span className="inline-flex items-center gap-2">
                 <User2 className="h-4 w-4 text-fuchsia-700" />
-                {current.authorName || "Admin"}
+                {authorName}
               </span>
-              <span className="inline-flex items-center gap-2">
-                <CalendarDays className="h-4 w-4 text-fuchsia-700" />
-                {formatDate(current.publishedAt || current.createdAt)}
-              </span>
+
+              {publishedDate ? (
+                <span className="inline-flex items-center gap-2">
+                  <CalendarDays className="h-4 w-4 text-fuchsia-700" />
+                  {publishedDate}
+                </span>
+              ) : null}
+
               <span className="inline-flex items-center gap-2">
                 <Clock3 className="h-4 w-4 text-fuchsia-700" />
-                {current.readTime || 2} min read
+                {readTime} min read
               </span>
             </div>
 
@@ -206,12 +241,13 @@ export default function FeaturedBlogSlider({
 
             {total > 1 ? (
               <div className="mt-8 flex items-center gap-2">
-                {safeBlogs.map((_, i) => (
+                {safeBlogs.map((blog, i) => (
                   <button
-                    key={i}
+                    key={blog.slug}
                     type="button"
                     onClick={() => setIndex(i)}
                     aria-label={`Go to slide ${i + 1}`}
+                    aria-pressed={i === safeIndex}
                     className={`h-2.5 rounded-full transition-all ${
                       i === safeIndex
                         ? "w-8 bg-fuchsia-700"

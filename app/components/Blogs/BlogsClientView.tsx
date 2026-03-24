@@ -11,13 +11,24 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import type { Blog } from "@/app/types/blogs";
+import type { Blog, MongoDateLike } from "@/app/types/blogs";
 import FeaturedBlogSlider from "@/app/components/Blogs/FeaturedBlogSlider";
 
-function formatDate(date?: string) {
-  if (!date) return "";
+function normalizeDate(value?: MongoDateLike): string {
+  if (!value) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "object" && typeof value.$date === "string") {
+    return value.$date;
+  }
+  return "";
+}
+
+function formatDate(date?: MongoDateLike) {
+  const normalized = normalizeDate(date);
+  if (!normalized) return "";
+
   try {
-    return new Date(date).toLocaleDateString("en-IN", {
+    return new Date(normalized).toLocaleDateString("en-IN", {
       day: "numeric",
       month: "short",
       year: "numeric",
@@ -59,10 +70,10 @@ export default function BlogsClientView({ blogs }: Props) {
 
     return blogs.filter((blog) => {
       const haystack = [
-        blog.title,
+        blog.title || "",
         htmlToText(blog.excerpt),
         htmlToText(blog.introDescription),
-        blog.authorName,
+        blog.authorName || "",
         ...(Array.isArray(blog.tags) ? blog.tags : []),
       ]
         .filter(Boolean)
@@ -138,7 +149,7 @@ export default function BlogsClientView({ blogs }: Props) {
 
                 return (
                   <motion.article
-                    key={blog._id}
+                    key={blog.slug}
                     initial={{ opacity: 0, y: 24 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.35, delay: i * 0.04 }}
