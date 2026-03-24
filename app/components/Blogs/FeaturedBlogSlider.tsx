@@ -57,7 +57,7 @@ export default function FeaturedBlogSlider({
   const total = safeBlogs.length;
 
   useEffect(() => {
-    if (!total || total <= 1) return;
+    if (total <= 1) return;
 
     const timer = setInterval(() => {
       setIndex((prev) => (prev + 1) % total);
@@ -66,13 +66,10 @@ export default function FeaturedBlogSlider({
     return () => clearInterval(timer);
   }, [total, autoPlayMs]);
 
-  useEffect(() => {
-    if (index >= total) setIndex(0);
-  }, [index, total]);
-
   if (!safeBlogs.length) return null;
 
-  const current = safeBlogs[index];
+  const safeIndex = index >= total ? 0 : index;
+  const current = safeBlogs[safeIndex];
 
   const goPrev = () => {
     setIndex((prev) => (prev - 1 + total) % total);
@@ -216,7 +213,7 @@ export default function FeaturedBlogSlider({
                     onClick={() => setIndex(i)}
                     aria-label={`Go to slide ${i + 1}`}
                     className={`h-2.5 rounded-full transition-all ${
-                      i === index
+                      i === safeIndex
                         ? "w-8 bg-fuchsia-700"
                         : "w-2.5 bg-slate-300 hover:bg-slate-400"
                     }`}
