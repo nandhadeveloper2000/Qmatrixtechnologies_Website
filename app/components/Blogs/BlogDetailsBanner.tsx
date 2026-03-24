@@ -12,6 +12,12 @@ import {
   Bookmark,
 } from "lucide-react";
 
+type BlogImage = {
+  url?: string;
+  alt?: string;
+  public_id?: string;
+};
+
 type BlogDetailsBannerProps = {
   category?: string;
   title: string;
@@ -21,8 +27,7 @@ type BlogDetailsBannerProps = {
   readTime?: number;
   views?: number;
   location?: string;
-  coverImage?: string;
-  coverImageAlt?: string;
+  coverImage?: BlogImage | null;
 };
 
 function GlassStat({
@@ -70,16 +75,15 @@ export default function BlogDetailsBanner({
   views,
   location,
   coverImage,
-  coverImageAlt,
 }: BlogDetailsBannerProps) {
   const bannerImage =
-    typeof coverImage === "string" && coverImage.trim()
-      ? coverImage
+    typeof coverImage?.url === "string" && coverImage.url.trim()
+      ? coverImage.url
       : "https://placehold.co/1200x1400/png";
 
   const bannerAlt =
-    typeof coverImageAlt === "string" && coverImageAlt.trim()
-      ? coverImageAlt
+    typeof coverImage?.alt === "string" && coverImage.alt.trim()
+      ? coverImage.alt
       : title;
 
   return (

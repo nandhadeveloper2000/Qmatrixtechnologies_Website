@@ -26,6 +26,12 @@ type MongoDateLike = {
   $date?: string;
 };
 
+type BlogImage = {
+  url?: string;
+  alt?: string;
+  public_id?: string;
+};
+
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
     const safeSlug = encodeURIComponent(slug);
@@ -68,20 +74,31 @@ function safeArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? value : [];
 }
 
-function safeImageUrl(image?: { url?: unknown } | string | null): string {
-  if (!image) return "";
-  if (typeof image === "string") return image;
-  return typeof image.url === "string" ? image.url : "";
+function safeImageObject(image?: unknown): BlogImage | null {
+  if (!image || typeof image !== "object") return null;
+
+  const imageObj = image as Record<string, unknown>;
+
+  return {
+    url: typeof imageObj.url === "string" ? imageObj.url : "",
+    alt: typeof imageObj.alt === "string" ? imageObj.alt : "",
+    public_id:
+      typeof imageObj.public_id === "string" ? imageObj.public_id : "",
+  };
 }
 
-function safeImageAlt(
-  image?: { alt?: unknown } | string | null,
-  fallback = "Image"
-): string {
-  if (image && typeof image === "object" && typeof image.alt === "string") {
-    return image.alt;
-  }
-  return fallback;
+function safeImageUrl(image?: unknown): string {
+  if (!image || typeof image !== "object") return "";
+  const imageObj = image as Record<string, unknown>;
+  return typeof imageObj.url === "string" ? imageObj.url : "";
+}
+
+function safeImageAlt(image?: unknown, fallback = "Image"): string {
+  if (!image || typeof image !== "object") return fallback;
+  const imageObj = image as Record<string, unknown>;
+  return typeof imageObj.alt === "string" && imageObj.alt.trim()
+    ? imageObj.alt
+    : fallback;
 }
 
 function normalizeDate(value: unknown): string {
@@ -248,12 +265,7 @@ export default async function BlogDetailPage({
   const sections = safeArray<BlogSection>(blog.sections);
   const faqs = safeArray<BlogFaq>(blog.faqs);
   const tags = normalizeTags(blog.tags);
-
-  const coverImageUrl = safeImageUrl(blog.coverImage);
-  const coverImageAlt = safeImageAlt(
-    blog.coverImage,
-    safeText(blog.title, "Blog cover image")
-  );
+  const coverImage = safeImageObject(blog.coverImage);
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
@@ -273,8 +285,7 @@ export default async function BlogDetailPage({
         readTime={safeNumber(blog.readTime, 2)}
         views={safeNumber(blog.views, 0)}
         location={safeText(blog.location)}
-        coverImage={coverImageUrl}
-        coverImageAlt={coverImageAlt}
+        coverImage={coverImage}
       />
 
       <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
@@ -310,7 +321,11 @@ export default async function BlogDetailPage({
             {sections.length > 0 && (
               <div className="mt-12 space-y-8 lg:mt-14 lg:space-y-10">
                 {sections.map((section, index) => {
-                  const sectionImage = safeImageUrl(section?.image);
+                  const sectionImageUrl = safeImageUrl(section?.image);
+                  const sectionImageAlt = safeImageAlt(
+                    section?.image,
+                    safeText(section?.title, "Blog section image")
+                  );
                   const points = safeArray<BlogSectionPoint>(section?.points);
                   const subpoints = safeArray<BlogSectionSubpoint>(section?.subpoints);
 
@@ -362,16 +377,12 @@ export default async function BlogDetailPage({
                         </div>
                       )}
 
-                      {sectionImage ? (
+                      {sectionImageUrl ? (
                         <div className="relative mt-8 overflow-hidden rounded-[30px] border border-slate-200/70 bg-white p-2 shadow-[0_20px_60px_rgba(2,8,23,0.08)]">
                           <div className="relative aspect-[16/9] w-full overflow-hidden rounded-[24px] bg-slate-100">
                             <Image
-                              src={sectionImage}
-                              alt={
-                                safeText(
-                                  (section?.image as { alt?: unknown } | null | undefined)?.alt
-                                ) || safeText(section?.title, "Blog section image")
-                              }
+                              src={sectionImageUrl}
+                              alt={sectionImageAlt}
                               fill
                               className="object-cover transition-transform duration-700 hover:scale-[1.03]"
                               unoptimized
