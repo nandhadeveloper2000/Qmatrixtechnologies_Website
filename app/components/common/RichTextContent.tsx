@@ -1,3 +1,6 @@
+"use client";
+
+import { useMemo } from "react";
 import DOMPurify from "isomorphic-dompurify";
 
 type Props = {
@@ -12,11 +15,14 @@ function toSafeHtml(value: unknown): string {
 export default function RichTextContent({ html, className = "" }: Props) {
   const rawHtml = toSafeHtml(html);
 
-  if (!rawHtml.trim()) return null;
+  const cleanHtml = useMemo(() => {
+    if (!rawHtml.trim()) return "";
+    return DOMPurify.sanitize(rawHtml, {
+      USE_PROFILES: { html: true },
+    });
+  }, [rawHtml]);
 
-  const cleanHtml = DOMPurify.sanitize(rawHtml, {
-    USE_PROFILES: { html: true },
-  });
+  if (!cleanHtml) return null;
 
   return (
     <div
