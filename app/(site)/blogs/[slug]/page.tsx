@@ -28,26 +28,34 @@ type MongoDateLike = {
 
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
-    const endpoint = SummaryApi.public_blog_by_slug(slug);
+    const safeSlug = encodeURIComponent(slug);
+    const endpoint = SummaryApi.public_blog_by_slug(safeSlug);
+    const fullUrl = `${baseURL}${endpoint.url}`;
 
-    const res = await fetch(`${baseURL}${endpoint.url}`, {
+    console.log("Fetching blog URL:", fullUrl);
+
+    const res = await fetch(fullUrl, {
       method: endpoint.method,
       cache: "no-store",
     });
 
+    console.log("Fetch status:", res.status);
+
     if (!res.ok) {
-      console.error("getBlog failed:", res.status, res.statusText);
+      console.error("Failed to fetch blog:", res.status, res.statusText);
       return null;
     }
 
     const data: BlogResponse = await res.json();
     const blog = data.blog || data.data || null;
 
-    if (!blog || typeof blog !== "object") return null;
+    if (!blog || typeof blog !== "object") {
+      return null;
+    }
 
     return blog;
   } catch (error) {
-    console.error("getBlog error:", error);
+    console.error("Blog fetch error:", error);
     return null;
   }
 }
@@ -70,6 +78,16 @@ function safeImageUrl(image?: { url?: unknown } | string | null): string {
   return typeof image.url === "string" ? image.url : "";
 }
 
+function safeImageAlt(
+  image?: { alt?: unknown } | string | null,
+  fallback = "Image"
+): string {
+  if (image && typeof image === "object" && typeof image.alt === "string") {
+    return image.alt;
+  }
+  return fallback;
+}
+
 function normalizeDate(value: unknown): string {
   if (!value) return "";
 
@@ -87,7 +105,7 @@ function normalizeDate(value: unknown): string {
   return "";
 }
 
-function formatDate(value: unknown) {
+function formatDate(value: unknown): string {
   const dateString = normalizeDate(value);
   if (!dateString) return "";
 
@@ -106,7 +124,7 @@ function formatDate(value: unknown) {
   }
 }
 
-function stripHtml(html?: unknown) {
+function stripHtml(html?: unknown): string {
   if (typeof html !== "string" || !html) return "";
 
   return html
@@ -127,7 +145,8 @@ function normalizeTags(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
 
   return value.filter(
-    (item): item is string => typeof item === "string" && item.trim().length > 0
+    (item): item is string =>
+      typeof item === "string" && item.trim().length > 0
   );
 }
 
@@ -234,6 +253,12 @@ export default async function BlogDetailPage({
   const faqs = safeArray<BlogFaq>(blog.faqs);
   const tags = normalizeTags(blog.tags);
 
+  const coverImageUrl = safeImageUrl(blog.coverImage);
+  const coverImageAlt = safeImageAlt(
+    blog.coverImage,
+    safeText(blog.title, "Blog cover image")
+  );
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-[linear-gradient(180deg,#fcfbff_0%,#f7f8fc_24%,#f4f7fb_55%,#f7fbff_100%)] text-slate-900">
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
@@ -252,7 +277,8 @@ export default async function BlogDetailPage({
         readTime={safeNumber(blog.readTime, 2)}
         views={safeNumber(blog.views, 0)}
         location={safeText(blog.location)}
-        coverImage={blog.coverImage}
+        coverImage={coverImageUrl}
+        coverImageAlt={coverImageAlt}
       />
 
       <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
@@ -290,9 +316,7 @@ export default async function BlogDetailPage({
                 {sections.map((section, index) => {
                   const sectionImage = safeImageUrl(section?.image);
                   const points = safeArray<BlogSectionPoint>(section?.points);
-                  const subpoints = safeArray<BlogSectionSubpoint>(
-                    section?.subpoints
-                  );
+                  const subpoints = safeArray<BlogSectionSubpoint>(section?.subpoints);
 
                   return (
                     <SectionCard
@@ -350,8 +374,7 @@ export default async function BlogDetailPage({
                               alt={
                                 safeText(
                                   (section?.image as { alt?: unknown } | null | undefined)?.alt
-                                ) ||
-                                safeText(section?.title, "Blog section image")
+                                ) || safeText(section?.title, "Blog section image")
                               }
                               fill
                               className="object-cover transition-transform duration-700 hover:scale-[1.03]"

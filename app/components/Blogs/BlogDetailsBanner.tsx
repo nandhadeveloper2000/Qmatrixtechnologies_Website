@@ -12,11 +12,6 @@ import {
   Bookmark,
 } from "lucide-react";
 
-type BlogImage = {
-  url?: string;
-  alt?: string;
-};
-
 type BlogDetailsBannerProps = {
   category?: string;
   title: string;
@@ -26,7 +21,8 @@ type BlogDetailsBannerProps = {
   readTime?: number;
   views?: number;
   location?: string;
-  coverImage?: BlogImage | null;
+  coverImage?: string;
+  coverImageAlt?: string;
 };
 
 function GlassStat({
@@ -74,15 +70,16 @@ export default function BlogDetailsBanner({
   views,
   location,
   coverImage,
+  coverImageAlt,
 }: BlogDetailsBannerProps) {
   const bannerImage =
-    typeof coverImage?.url === "string" && coverImage.url.trim()
-      ? coverImage.url
+    typeof coverImage === "string" && coverImage.trim()
+      ? coverImage
       : "https://placehold.co/1200x1400/png";
 
   const bannerAlt =
-    typeof coverImage?.alt === "string" && coverImage.alt.trim()
-      ? coverImage.alt
+    typeof coverImageAlt === "string" && coverImageAlt.trim()
+      ? coverImageAlt
       : title;
 
   return (
@@ -142,20 +139,24 @@ export default function BlogDetailsBanner({
                   icon={<User2 className="h-4 w-4" />}
                   label={authorName || "Admin"}
                 />
+
                 {!!publishedDate && (
                   <GlassStat
                     icon={<CalendarDays className="h-4 w-4" />}
                     label={publishedDate}
                   />
                 )}
+
                 <GlassStat
                   icon={<Clock3 className="h-4 w-4" />}
                   label={`${readTime || 2} min read`}
                 />
+
                 <GlassStat
                   icon={<Eye className="h-4 w-4" />}
                   label={`${views || 0} views`}
                 />
+
                 {location ? (
                   <GlassStat
                     icon={<MapPin className="h-4 w-4" />}
