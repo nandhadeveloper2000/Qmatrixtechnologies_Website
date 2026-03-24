@@ -84,16 +84,7 @@ export default function BlogDetailsBanner({
 
   return (
     <section className="relative w-full overflow-hidden">
-      <div
-        className="
-          relative overflow-hidden
-          bg-gradient-to-br
-          from-[#082a5e]
-          via-[#9116a1]
-          to-[#8121fb]
-          py-16 md:py-20 lg:py-24
-        "
-      >
+      <div className="relative overflow-hidden bg-linear-to-br from-[#082a5e] via-[#9116a1] to-[#8121fb] py-16 md:py-20 lg:py-24">
         <div className="absolute inset-0 bg-[radial-gradient(700px_280px_at_50%_0%,rgba(255,255,255,0.22),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(500px_220px_at_10%_20%,rgba(255,255,255,0.10),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(500px_220px_at_90%_20%,rgba(255,255,255,0.08),transparent_70%)]" />
@@ -102,7 +93,7 @@ export default function BlogDetailsBanner({
         <div className="pointer-events-none absolute -right-24 top-0 h-80 w-80 rounded-full bg-fuchsia-300/20 blur-3xl" />
         <div className="pointer-events-none absolute bottom-0 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-violet-300/20 blur-3xl" />
 
-        <div className="absolute inset-0 opacity-[0.08] [background-image:linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] [background-size:40px_40px]" />
+        <div className="absolute inset-0 opacity-[0.08] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-size-[40px_40px]" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_0.9fr]">
@@ -196,7 +187,7 @@ export default function BlogDetailsBanner({
                   <div className="absolute inset-0 bg-[linear-gradient(to_top,rgba(2,6,23,0.68),rgba(2,6,23,0.16),transparent)]" />
 
                   <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
-                    <div className="rounded-[24px] border border-white/20 bg-white/12 p-4 text-white backdrop-blur-xl">
+                    <div className="rounded-3xl border border-white/20 bg-white/12 p-4 text-white backdrop-blur-xl">
                       <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/75">
                         Featured Article
                       </div>

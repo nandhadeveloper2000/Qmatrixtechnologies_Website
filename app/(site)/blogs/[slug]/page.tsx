@@ -32,14 +32,10 @@ async function getBlog(slug: string): Promise<Blog | null> {
     const endpoint = SummaryApi.public_blog_by_slug(safeSlug);
     const fullUrl = `${baseURL}${endpoint.url}`;
 
-    console.log("Fetching blog URL:", fullUrl);
-
     const res = await fetch(fullUrl, {
       method: endpoint.method,
       cache: "no-store",
     });
-
-    console.log("Fetch status:", res.status);
 
     if (!res.ok) {
       console.error("Failed to fetch blog:", res.status, res.statusText);
