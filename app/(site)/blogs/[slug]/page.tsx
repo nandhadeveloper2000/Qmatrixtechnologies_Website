@@ -28,9 +28,9 @@ import BlogDetailsBanner from "@/app/components/Blogs/BlogDetailsBanner";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-type Params = {
+type Params = Promise<{
   slug: string;
-};
+}>;
 
 type SafeImage = {
   url: string;
@@ -137,7 +137,7 @@ function normalizeBlog(raw: unknown): Blog | null {
   const title = safeText(raw.title);
   const slug = safeText(raw.slug);
 
-  if (!title || !slug || typeof slug !== "string") return null;
+  if (!title || !slug) return null;
 
   return {
     _id: raw._id as Blog["_id"],
@@ -166,6 +166,8 @@ function normalizeBlog(raw: unknown): Blog | null {
 
 async function getBlog(slug: string): Promise<Blog | null> {
   try {
+    if (!slug?.trim()) return null;
+
     const safeSlug = encodeURIComponent(slug);
     const endpoint = SummaryApi.public_blog_by_slug(safeSlug);
     const url = `${baseURL}${endpoint.url}`;
@@ -212,7 +214,7 @@ export async function generateMetadata({
   params: Params;
 }): Promise<Metadata> {
   try {
-    const { slug } = params;
+    const { slug } = await params;
     const blog = await getBlog(slug);
 
     if (!blog) {
@@ -354,7 +356,7 @@ export default async function BlogDetailPage({
 }: {
   params: Params;
 }) {
-  const { slug } = params;
+  const { slug } = await params;
   const blog = await getBlog(slug);
 
   if (!blog || blog.isPublished === false) {
