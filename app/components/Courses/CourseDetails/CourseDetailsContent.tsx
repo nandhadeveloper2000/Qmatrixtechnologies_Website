@@ -106,7 +106,7 @@ export default function CourseDetailsContent({ course }: { course: Course }) {
           <div className="rounded-2xl bg-[#F1EDFF] p-4 text-center ring-1 ring-black/5">
             <p className="text-xs text-gray-600">For details about the course</p>
             <p className="mt-1 text-sm font-semibold text-[#4C1D95]">
-              Call Us: +91 80 86 651 651
+              Call Us: +91 99 43 53 25 32
             </p>
           </div>
 

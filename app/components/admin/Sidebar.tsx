@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -15,18 +16,48 @@ import {
 import Image from "next/image";
 import { cldPublic } from "@/app/lib/cloudinary";
 
-const nav = [
-  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
-  { label: "Users", href: "/admin/users", icon: Users },
-  { label: "Contact", href: "/admin/contact-messages",icon:Contact},
-  { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare  },
-  { label: "Courses", href: "/admin/courses", icon: BookOpen },
-  { label: "Blogs", href:"/admin/blogs", icon:Blocks},
-  { label: "SEO Manager", href: "/admin/seo", icon: ShieldCheck },
-];
+const navByRole = {
+  admin: [
+    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Users", href: "/admin/users", icon: Users },
+    { label: "Contact", href: "/admin/contact-messages", icon: Contact },
+    { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
+    { label: "Courses", href: "/admin/courses", icon: BookOpen },
+    { label: "Blogs", href: "/admin/blogs", icon: Blocks },
+    { label: "SEO Manager", href: "/admin/seo", icon: ShieldCheck },
+  ],
+  user: [
+    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Contact", href: "/admin/contact-messages", icon: Contact },
+    { label: "Enquiries", href: "/admin/enquiries", icon: MessageSquare },
+    { label: "Courses", href: "/admin/courses", icon: BookOpen },
+    { label: "Blogs", href: "/admin/blogs", icon: Blocks },
+  ],
+  editor: [
+    { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
+    { label: "Courses", href: "/admin/courses", icon: BookOpen },
+    { label: "Blogs", href: "/admin/blogs", icon: Blocks },
+  ],
+};
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [role, setRole] = useState("admin");
+
+  useEffect(() => {
+    const userData = localStorage.getItem("user");
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setRole(parsedUser?.role?.toLowerCase() || "admin");
+      } catch (error) {
+        console.error("Invalid user data in localStorage", error);
+        setRole("admin");
+      }
+    }
+  }, []);
+
+  const nav = navByRole[role] || navByRole.admin;
 
   return (
     <aside className="sticky top-0 flex min-h-screen w-72 flex-col border-r border-white/10 bg-[linear-gradient(180deg,#04152f_0%,#082a5e_55%,#061a36_100%)] text-white shadow-[8px_0_30px_rgba(2,6,23,0.18)]">
@@ -45,7 +76,7 @@ export default function Sidebar() {
 
           <div>
             <h2 className="text-base font-bold tracking-wide">QMTechnologies</h2>
-            <p className="text-xs text-white/60">Admin Panel</p>
+            <p className="text-xs text-white/60 capitalize">{role} Panel</p>
           </div>
         </div>
 
@@ -66,7 +97,8 @@ export default function Sidebar() {
 
       <nav className="flex-1 space-y-2 px-4 py-5">
         {nav.map((item) => {
-          const active = pathname === item.href;
+          const active =
+            pathname === item.href || pathname.startsWith(item.href + "/");
           const Icon = item.icon;
 
           return (

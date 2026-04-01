@@ -35,7 +35,7 @@ export default function Hero() {
           <div className="text-center lg:text-left lg:pr-6 xl:pr-10">
             {/* Badge */}
             <div className="relative mb-5 inline-flex items-center gap-3 rounded-full bg-secondary/10 px-5 py-2 pr-11 text-sm font-medium text-secondary">
-              🏆 Leaders in Education Since 8 Years
+              🏆 Leaders in Education Since 6 Years
 
               {/* ✅ Robot (fixed: width/height required) */}
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -159,7 +159,7 @@ export default function Hero() {
                     Placements
                   </p>
                   <p className="text-[26px] font-extrabold text-[#082A5E]">
-                    9000+
+                    1500+
                   </p>
                 </div>
               </div>
@@ -194,7 +194,7 @@ export default function Hero() {
                     Total Technologies
                   </p>
                   <p className="text-[26px] font-extrabold text-[#082A5E]">
-                    30+
+                    5+
                   </p>
                 </div>
               </div>

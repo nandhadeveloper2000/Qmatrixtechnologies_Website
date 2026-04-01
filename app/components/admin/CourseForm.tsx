@@ -331,8 +331,8 @@ export default function CourseForm({
         label: "Basic Info",
         done: Boolean(
           form.title.trim() &&
-            form.slug.trim() &&
-            htmlToLines(form.description).length
+          form.slug.trim() &&
+          htmlToLines(form.description).length
         ),
       },
       {
@@ -661,9 +661,9 @@ export default function CourseForm({
 
         coverImage: form.coverImage
           ? {
-              ...form.coverImage,
-              alt: form.coverImageAlt.trim(),
-            }
+            ...form.coverImage,
+            alt: form.coverImageAlt.trim(),
+          }
           : null,
         galleryImages: form.galleryImages,
 
@@ -865,20 +865,15 @@ export default function CourseForm({
               </Field>
 
               <Field label="Duration">
-                <select
+                <input
+                  type="text"
                   value={form.duration}
                   onChange={(e) =>
                     setForm((prev) => ({ ...prev, duration: e.target.value }))
                   }
                   className="input"
-                >
-                  <option value="">Select duration</option>
-                  {DURATION_OPTIONS.map((item) => (
-                    <option key={item} value={item}>
-                      {item}
-                    </option>
-                  ))}
-                </select>
+                  placeholder="e.g. 3 Months / 45 Days / 120 Hours"
+                />
               </Field>
 
               <Field label="Modules Count">

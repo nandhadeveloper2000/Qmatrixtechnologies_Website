@@ -23,7 +23,6 @@ const logos: string[] = [
   cldPublic("qmatrix/working/mphasis_logo.png", "f_auto,q_auto,w_1000"),
   cldPublic("qmatrix/working/Niq_logo.png", "f_auto,q_auto,w_1000"),
   cldPublic("qmatrix/working/oracel_logo.jpeg", "f_auto,q_auto,w_1000"),
-  cldPublic("qmatrix/working/paypal_logo.webp", "f_auto,q_auto,w_1000"),
   cldPublic("qmatrix/working/persistent_logo.png", "f_auto,q_auto,w_1000"),
   cldPublic("qmatrix/working/saama_logo.webp", "f_auto,q_auto,w_1000"),
   cldPublic("qmatrix/working/Tata_Consultancy_Services_old_logo.png", "f_auto,q_auto,w_1000"),

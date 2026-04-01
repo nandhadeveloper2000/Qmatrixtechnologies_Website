@@ -22,7 +22,6 @@ export const LOGOS: LogoItem[] = [
   { name: "Infosys", src: img("qmatrix/working/Infosys_logo.png") },
   { name: "IBM", src: img("qmatrix/working/ibm_logo.png") },
   { name: "Tech Mahindra", src: img("qmatrix/working/Tech_Mahindra.png") },
-  { name: "PayPal", src: img("qmatrix/working/paypal_logo.webp") },
   { name: "Accenture", src: img("qmatrix/working/accenture_logo.png") },
   { name: "Deloitte", src: img("qmatrix/working/deloitte_logo.png") },
   { name: "Capgemini", src: img("qmatrix/working/Capgemini_Logo..png") },
