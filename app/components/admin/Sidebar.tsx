@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ComponentType } from "react";
 import {
   LayoutDashboard,
   Users,
@@ -12,11 +13,19 @@ import {
   Blocks,
   MessageSquare,
   Contact,
+  type LucideProps,
 } from "lucide-react";
-import Image from "next/image";
 import { cldPublic } from "@/app/lib/cloudinary";
 
-const navByRole = {
+type Role = "admin" | "editor" | "user";
+
+type NavItem = {
+  label: string;
+  href: string;
+  icon: ComponentType<LucideProps>;
+};
+
+const navByRole: Record<Role, NavItem[]> = {
   admin: [
     { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { label: "Users", href: "/admin/users", icon: Users },
@@ -40,24 +49,34 @@ const navByRole = {
   ],
 };
 
+function isValidRole(value: unknown): value is Role {
+  return value === "admin" || value === "editor" || value === "user";
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
-  const [role, setRole] = useState("admin");
+  const [role, setRole] = useState<Role>("admin");
 
   useEffect(() => {
     const userData = localStorage.getItem("user");
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setRole(parsedUser?.role?.toLowerCase() || "admin");
-      } catch (error) {
-        console.error("Invalid user data in localStorage", error);
+    if (!userData) return;
+
+    try {
+      const parsedUser = JSON.parse(userData);
+      const storedRole = parsedUser?.role?.toLowerCase();
+
+      if (isValidRole(storedRole)) {
+        setRole(storedRole);
+      } else {
         setRole("admin");
       }
+    } catch (error) {
+      console.error("Invalid user data in localStorage", error);
+      setRole("admin");
     }
   }, []);
 
-  const nav = navByRole[role] || navByRole.admin;
+  const nav = navByRole[role];
 
   return (
     <aside className="sticky top-0 flex min-h-screen w-72 flex-col border-r border-white/10 bg-[linear-gradient(180deg,#04152f_0%,#082a5e_55%,#061a36_100%)] text-white shadow-[8px_0_30px_rgba(2,6,23,0.18)]">
@@ -76,7 +95,7 @@ export default function Sidebar() {
 
           <div>
             <h2 className="text-base font-bold tracking-wide">QMTechnologies</h2>
-            <p className="text-xs text-white/60 capitalize">{role} Panel</p>
+            <p className="text-xs capitalize text-white/60">{role} Panel</p>
           </div>
         </div>
 
@@ -98,7 +117,7 @@ export default function Sidebar() {
       <nav className="flex-1 space-y-2 px-4 py-5">
         {nav.map((item) => {
           const active =
-            pathname === item.href || pathname.startsWith(item.href + "/");
+            pathname === item.href || pathname.startsWith(`${item.href}/`);
           const Icon = item.icon;
 
           return (
