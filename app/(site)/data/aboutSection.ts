@@ -18,19 +18,13 @@ import { cldPublic } from "@/app/lib/cloudinary";
 export type WhyItem = { icon: LucideIcon; text: string; href?: string };
 
 export const WHY_ITEMS: WhyItem[] = [
-  {
-    icon: Megaphone,
-    text: "Affiliated to NACTET",
-    href: "http://www.nactetindia.org/affiliation.php",
-  },
   { icon: UserCheck, text: "Training by highly experienced and certified professionals" },
   { icon: ClipboardList, text: "Real-time project scenarios & certification help" },
   { icon: Briefcase, text: "Placement support for all courses" },
-  { icon: FileText, text: "List of established & satisfied clients & students" },
+  { icon: FileText, text: "List of established & satisfied & students" },
   { icon: BadgeDollarSign, text: "Most competitive & affordable course fees" },
-  { icon: Award, text: "ISO 9001:2015 Certified Institution" },
-  { icon: MapPin, text: "4 Branches across Kerala" },
-  { icon: GraduationCap, text: "10000+ Placements in 7 Years" },
+  { icon: MapPin, text: "Pallikaranai, Chennai" },
+  { icon: GraduationCap, text: "1500+ Placements in 6 Years" },
   { icon: MonitorSmartphone, text: "Online & offline classes" },
 ];
 

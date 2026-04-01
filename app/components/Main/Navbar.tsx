@@ -25,7 +25,7 @@ type NavItem = {
   children?: { name: string; path: string }[];
 };
 
-type HeaderVariant = "qmatrix" | "luminar";
+type HeaderVariant = "Qmatrix" | "luminar";
 
 const NAV_VARIANT =
   (process.env.NEXT_PUBLIC_HEADER_VARIANT as HeaderVariant) ?? "luminar";
@@ -62,7 +62,7 @@ export default function Navbar() {
       { name: "LinkedIn", href: "https://linkedin.com/", Icon: Linkedin },
       { name: "Facebook", href: "https://facebook.com/", Icon: Facebook },
       { name: "Call", href: "tel:+919999999999", Icon: Phone },
-      { name: "Email", href: "mailto:info@qmatrix.com", Icon: Mail },
+      { name: "Email", href: "mailto:info@Qmatrix.com", Icon: Mail },
     ],
     []
   );
@@ -235,7 +235,7 @@ export default function Navbar() {
               </div>
 
               <div className="hidden shrink-0 items-center lg:flex lg:-mr-10">
-                {variant === "qmatrix" ? (
+                {variant === "Qmatrix" ? (
                   <div className="flex items-center gap-5">
                     <Link
                       href="#"
@@ -306,7 +306,7 @@ export default function Navbar() {
       >
         <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
           <Image
-            src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
+            src={cldPublic("Qmatrix/logo.png", "f_auto,q_auto,w_1000")}
             alt="Logo"
             width={200}
             height={60}

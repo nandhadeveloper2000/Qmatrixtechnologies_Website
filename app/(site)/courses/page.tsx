@@ -9,7 +9,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const seo = await getPageSEO("courses");
 
   return buildStaticMetadata(seo, {
-    title: "Software Courses in Chennai | QMatrix Technologies",
+    title: "Software Courses in Chennai | Qmatrix Technologies",
     description:
       "Explore software training courses in Chennai with real-time projects, expert mentors, and placement support.",
     canonical: "https://www.qmatrixtech.com/courses",

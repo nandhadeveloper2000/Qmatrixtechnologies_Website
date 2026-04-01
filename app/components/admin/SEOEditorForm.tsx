@@ -25,7 +25,7 @@ type FormState = {
 
 function getFallbackCanonical(pageKey: string) {
   const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://qmatrixtechnologies.com";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://Qmatrixtechnologies.com";
 
   if (pageKey === "home") return SITE_URL;
   return `${SITE_URL}/${pageKey}`;
@@ -268,7 +268,7 @@ export default function SEOEditorForm({
                   setForm((prev) => ({ ...prev, canonicalUrl: e.target.value }))
                 }
                 className="input"
-                placeholder="https://qmatrixtechnologies.com/page"
+                placeholder="https://Qmatrixtechnologies.com/page"
               />
             </div>
 

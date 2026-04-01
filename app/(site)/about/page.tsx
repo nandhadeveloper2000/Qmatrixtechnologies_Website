@@ -15,12 +15,12 @@ import {
 } from "@/app/lib/seo";
 
 const ABOUT_FALLBACK = {
-  title: "About QMatrix Technologies",
+  title: "About Qmatrix Technologies",
   description:
-    "Learn about QMatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
+    "Learn about Qmatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
   canonical: `${SITE_URL}/about`,
   keywords: [
-    "about qmatrix technologies",
+    "about Qmatrix technologies",
     "software institute in chennai",
     "IT training center in chennai",
     "placement support institute",

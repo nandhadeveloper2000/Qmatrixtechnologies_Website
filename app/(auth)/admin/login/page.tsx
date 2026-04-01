@@ -397,8 +397,8 @@ export default function AdminLogin() {
                   <div className="absolute inset-0 rounded-[28px] bg-[linear-gradient(135deg,rgba(145,22,161,0.40),rgba(129,33,251,0.22),rgba(59,130,246,0.28))] blur-xl" />
                   <div className="float-y relative flex h-24 w-full items-center justify-center rounded-[28px] border border-white/15 bg-white/10 p-4 ">
                     <Image
-                      src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
-                      alt="QMTechnologies logo"
+                      src={cldPublic("Qmatrix/logo.png", "f_auto,q_auto,w_1000")}
+                      alt="Qmatrix Technologies logo"
                       width={72}
                       height={72}
                       className="h-auto w-auto object-contain"
@@ -444,7 +444,7 @@ Admin
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="admin@qmatrixtechnologies.in"
+                      placeholder="admin@Qmatrixtechnologies.in"
                       disabled={loading || step === "OTP"}
                       className="h-14 w-full rounded-2xl border border-white/15 bg-white/8 pl-12 pr-4 text-sm text-white outline-none transition placeholder:text-white/35 focus:border-fuchsia-400/70 focus:bg-white/11 focus:ring-4 focus:ring-fuchsia-400/15 disabled:cursor-not-allowed disabled:opacity-70"
                     />

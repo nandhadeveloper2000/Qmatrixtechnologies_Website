@@ -39,7 +39,7 @@ export default function NewsletterCTA() {
               <div className="relative w-full max-w-70 lg:max-w-[320px]">
                 <Image
                   src={studentImage}
-                  alt="QMatrix student"
+                  alt="Qmatrix student"
                   width={420}
                   height={520}
                   className="h-auto w-full object-contain"

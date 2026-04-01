@@ -138,7 +138,7 @@ export default function HeroSection() {
               className="w-full max-w-[520px]"
             >
 <Image
-  src={cldPublic("/qmatrix/Call_to_Actions1.png", "f_auto,q_auto,w_1200")}
+  src={cldPublic("/Qmatrix/Call_to_Actions1.png", "f_auto,q_auto,w_1200")}
   alt="Cloud Data Engineering"
   width={1200}
   height={900}

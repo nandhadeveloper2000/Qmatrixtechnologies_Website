@@ -152,7 +152,7 @@ export default function BlogDetailsBanner({
 
                 <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-3 text-sm font-medium text-white/85 shadow-sm backdrop-blur-md">
                   <Bookmark className="h-4 w-4 text-fuchsia-200" />
-                  Premium insights by QMatrix Technologies
+                  Premium insights by Qmatrix Technologies
                 </div>
               </div>
             </div>

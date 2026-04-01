@@ -219,7 +219,7 @@ export async function generateMetadata({
 
     if (!blog) {
       return {
-        title: "Blog Not Found | QMatrix Technologies",
+        title: "Blog Not Found | Qmatrix Technologies",
         description: "The requested blog could not be found.",
       };
     }
@@ -229,13 +229,13 @@ export async function generateMetadata({
     const title =
       safeText(seo?.metaTitle) ||
       safeText(blog.title) ||
-      "Blog Details | QMatrix Technologies";
+      "Blog Details | Qmatrix Technologies";
 
     const description =
       safeText(seo?.metaDescription) ||
       stripHtml(blog.excerpt) ||
       stripHtml(blog.introDescription) ||
-      "Read the latest insights from QMatrix Technologies.";
+      "Read the latest insights from Qmatrix Technologies.";
 
     const ogImage =
       safeImageUrl(seo?.ogImage) || safeImageUrl(blog.coverImage) || "";
@@ -259,8 +259,8 @@ export async function generateMetadata({
     console.error("Metadata generation error:", error);
 
     return {
-      title: "Blog Details | QMatrix Technologies",
-      description: "Read the latest insights from QMatrix Technologies.",
+      title: "Blog Details | Qmatrix Technologies",
+      description: "Read the latest insights from Qmatrix Technologies.",
     };
   }
 }
@@ -366,7 +366,7 @@ export default async function BlogDetailPage({
   const heroPreview =
     stripHtml(blog.excerpt) ||
     stripHtml(blog.introDescription) ||
-    "Read the latest insights from QMatrix Technologies.";
+    "Read the latest insights from Qmatrix Technologies.";
 
   const publishedDate = formatDate(blog.publishedAt || blog.createdAt);
   const sections = safeArray<BlogSection>(blog.sections);

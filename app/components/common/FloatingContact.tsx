@@ -59,7 +59,7 @@ export default function FloatingContact() {
     const phone = "919943532532";
 
     const message =
-      "Hi QMatrix Team,\n\n" +
+      "Hi Qmatrix Team,\n\n" +
       "I would like to know more about your courses and placement support. Please find my details below:\n\n" +
       "Full Name:\nQualification:\nBackground: IT / Non-IT / Career Gap\nLocation:\nInterested Course:\n\n" +
       "Please share syllabus, fees, batch timings and placement details.\n\nThank you.";

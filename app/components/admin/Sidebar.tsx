@@ -34,7 +34,7 @@ export default function Sidebar() {
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-white/10 bg-white/10 p-2 backdrop-blur">
             <Image
-              src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
+              src={cldPublic("Qmatrix/logo.png", "f_auto,q_auto,w_1000")}
               alt="QMTechnologies"
               width={36}
               height={36}

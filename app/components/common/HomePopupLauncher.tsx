@@ -17,7 +17,7 @@ export default function HomePopupLauncher({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    const storageKey = "qmatrix-home-popup-shown";
+    const storageKey = "Qmatrix-home-popup-shown";
 
     if (
       onlyOncePerSession &&

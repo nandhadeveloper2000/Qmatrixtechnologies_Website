@@ -15,8 +15,8 @@ export const faqCategories: FAQCategory[] = [
     label: "General Questions",
     items: [
       {
-        q: "What is QMatrix Technologies?",
-        a: "QMatrix Technologies provides industry-focused training in Snowflake Data Engineering with strong placement support.",
+        q: "What is qmatrix Technologies?",
+        a: "qmatrix Technologies provides industry-focused training in Snowflake Data Engineering with strong placement support.",
       },
       {
         q: "What course do you offer?",
@@ -50,7 +50,7 @@ export const faqCategories: FAQCategory[] = [
     label: "Support Team",
     items: [
       {
-        q: "How can I contact QMatrix support?",
+        q: "How can I contact qmatrix support?",
         a: "You can reach us via phone, email, or through our website contact form.",
       },
       {
@@ -155,7 +155,7 @@ export const faqCategories: FAQCategory[] = [
     label: "Why Choose Us",
     items: [
       {
-        q: "Why choose QMatrix Technologies?",
+        q: "Why choose qmatrix Technologies?",
         a: "We provide industry-focused training, real-time projects, and strong placement support.",
       },
       {

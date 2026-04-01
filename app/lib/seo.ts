@@ -54,28 +54,28 @@ type StaticSEOInput = {
 
 export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
   home: {
-    title: "Best Software Training Institute in Chennai | QMatrix Technologies",
+    title: "Best Software Training Institute in Chennai | Qmatrix Technologies",
     description:
-      "QMatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
+      "Qmatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
     canonical: `${SITE_URL}/`,
     keywords: [
       "software training institute in chennai",
       "best IT training institute in chennai",
       "cloud computing course in chennai",
       "data engineering training in chennai",
-      "qmatrix technologies",
+      "Qmatrix technologies",
     ],
     ogImage: DEFAULT_OG_IMAGE,
     robots: "index,follow",
     schemaType: "WebPage",
   },
   about: {
-    title: "About QMatrix Technologies",
+    title: "About Qmatrix Technologies",
     description:
-      "Learn about QMatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
+      "Learn about Qmatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
     canonical: `${SITE_URL}/about`,
     keywords: [
-      "about qmatrix technologies",
+      "about Qmatrix technologies",
       "software institute in chennai",
       "IT training center in chennai",
       "placement support institute",
@@ -85,12 +85,12 @@ export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
     schemaType: "WebPage",
   },
   contact: {
-    title: "Contact QMatrix Technologies | Chennai",
+    title: "Contact Qmatrix Technologies | Chennai",
     description:
-      "Contact QMatrix Technologies for course details, counseling, batch timings, fees, and placement support in Chennai.",
+      "Contact Qmatrix Technologies for course details, counseling, batch timings, fees, and placement support in Chennai.",
     canonical: `${SITE_URL}/contact`,
     keywords: [
-      "contact qmatrix technologies",
+      "contact Qmatrix technologies",
       "course enquiry chennai",
       "IT training contact",
       "software institute contact chennai",
@@ -100,7 +100,7 @@ export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
     schemaType: "WebPage",
   },
   blogs: {
-    title: "Blogs & Insights | QMatrix Technologies",
+    title: "Blogs & Insights | Qmatrix Technologies",
     description:
       "Explore premium blogs on career guidance, AI, cloud, development, and future-ready technologies.",
     canonical: `${SITE_URL}/blogs`,
@@ -110,14 +110,14 @@ export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
       "cloud computing blog",
       "data engineering blog",
       "software training blog",
-      "qmatrix blog",
+      "Qmatrix blog",
     ],
     ogImage: DEFAULT_OG_IMAGE,
     robots: "index,follow",
     schemaType: "Article",
   },
   courses: {
-    title: "Software Courses in Chennai | QMatrix Technologies",
+    title: "Software Courses in Chennai | Qmatrix Technologies",
     description:
       "Explore software training courses in Chennai with real-time projects, expert mentors, and placement support.",
     canonical: `${SITE_URL}/courses`,
@@ -136,7 +136,7 @@ export function getSafeSiteUrl(): string {
   try {
     return new URL(SITE_URL).toString().replace(/\/$/, "");
   } catch {
-    return "https://qmatrixtechnologies-website.vercel.app";
+    return "https://Qmatrixtechnologies-website.vercel.app";
   }
 }
 
@@ -144,7 +144,7 @@ export function getSafeMetadataBase(): URL {
   try {
     return new URL(getSafeSiteUrl());
   } catch {
-    return new URL("https://qmatrixtechnologies-website.vercel.app");
+    return new URL("https://Qmatrixtechnologies-website.vercel.app");
   }
 }
 
@@ -177,7 +177,7 @@ export function normalizeDbSeo(
   pageKey: string
 ): BuiltSEO {
   const fallback = PAGE_SEO_FALLBACKS[pageKey] || {
-    title: "QMatrix Technologies",
+    title: "Qmatrix Technologies",
     description: "Premium IT training institute in Chennai.",
     canonical: getSafeSiteUrl(),
     keywords: [],
@@ -239,7 +239,7 @@ export function buildStaticMetadata(
       title: ogTitle,
       description: ogDescription,
       url: canonical,
-      siteName: "QMatrix Technologies",
+      siteName: "Qmatrix Technologies",
       type: "website",
       images: ogImage
         ? [
@@ -275,7 +275,7 @@ export function buildJsonLd(
   fallback?: StaticSEOInput
 ) {
   const title =
-    dbSeo?.metaTitle || fallback?.title || "QMatrix Technologies";
+    dbSeo?.metaTitle || fallback?.title || "Qmatrix Technologies";
   const description =
     dbSeo?.metaDescription ||
     fallback?.description ||
@@ -297,7 +297,7 @@ export function buildJsonLd(
     image: imageToUrl(dbSeo?.ogImage) || fallback?.ogImage || DEFAULT_OG_IMAGE,
     publisher: {
       "@type": "Organization",
-      name: "QMatrix Technologies",
+      name: "Qmatrix Technologies",
       url: getSafeSiteUrl(),
       logo: {
         "@type": "ImageObject",

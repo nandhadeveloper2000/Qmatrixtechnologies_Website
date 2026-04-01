@@ -70,7 +70,7 @@ export default function InstagramFeed() {
         {/* CTA */}
         <div className="mt-10 flex justify-center">
           <a
-            href="https://www.instagram.com/qmatrixtech/"
+            href="https://www.instagram.com/Qmatrixtech/"
             target="_blank"
             rel="noreferrer"
             className="group inline-flex items-center gap-3 rounded-full bg-linear-to-r from-[#8b1ccf] to-[#6d28d9] px-8 py-4 text-sm font-semibold text-white shadow-[0_15px_40px_rgba(139,28,207,0.35)] transition-all duration-300 hover:scale-105"

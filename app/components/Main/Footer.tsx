@@ -52,8 +52,8 @@ export default function Footer() {
           <div>
             <Link href="/" className="inline-flex">
               <Image
-                src={cldPublic("/qmatrix/Qmatrix-logo", "f_auto,q_auto,w_400")}
-                alt="QMatrix Technologies"
+                src={cldPublic("/qmatrix/QMatrix-logo", "f_auto,q_auto,w_400")}
+                alt="Qmatrix Technologies"
                 width={176}
                 height={60}
                 priority
@@ -140,11 +140,11 @@ export default function Footer() {
               </a>
 
               <a
-                href="mailto:info@qmatrixtechnologies.in"
+                href="mailto:info@Qmatrixtechnologies.in"
                 className="flex items-start gap-3 transition hover:text-primary"
               >
                 <FaEnvelope className="mt-1 text-white shrink-0" />
-                <span>info@qmatrixtechnologies.in</span>
+                <span>info@Qmatrixtechnologies.in</span>
               </a>
 
               <div className="flex items-start gap-3">
@@ -168,8 +168,8 @@ export default function Footer() {
 
             <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
               <iframe
-                title="QMatrix Location"
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4845.267757057534!2d80.19946998538059!3d12.948457882822341!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525d9723750c13%3A0x10e6f878e4c1e0ce!2sQmatrix%20Technologies!5e1!3m2!1sen!2sus!4v1771743736245!5m2!1sen!2sus"
+                title="Qmatrix Location"
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4845.267757057534!2d80.19946998538059!3d12.948457882822341!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525d9723750c13%3A0x10e6f878e4c1e0ce!2sQMatrix%20Technologies!5e1!3m2!1sen!2sus!4v1771743736245!5m2!1sen!2sus"
                 width="100%"
                 height="230"
                 loading="lazy"
@@ -185,11 +185,11 @@ export default function Footer() {
       <div className="relative border-t border-white/10">
         <div className="mx-auto max-w-7xl px-6 py-6 text-sm text-white/55 md:flex md:items-center md:justify-between">
           <p className="text-center md:text-left">
-            © 2026 QMatrix Technologies. All Rights Reserved.
+            © 2026 Qmatrix Technologies. All Rights Reserved.
           </p>
 
           <p className="mt-2 text-center md:mt-0 md:text-right">
-            Designed & Developed by QMatrix R&amp;D Team
+            Designed & Developed by Qmatrix R&amp;D Team
           </p>
         </div>
       </div>

@@ -20,16 +20,16 @@ import {
 import HomePopupLauncher from "@/app/components/common/HomePopupLauncher";
 
 const HOME_FALLBACK = {
-  title: "Best Software Training Institute in Chennai | QMatrix Technologies",
+  title: "Best Software Training Institute in Chennai | Qmatrix Technologies",
   description:
-    "QMatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
+    "Qmatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
   canonical: `${SITE_URL}/`,
   keywords: [
     "software training institute in chennai",
     "best IT training institute in chennai",
     "cloud computing course in chennai",
     "data engineering training in chennai",
-    "qmatrix technologies",
+    "Qmatrix technologies",
   ],
   robots: "index,follow" as const,
   schemaType: "WebPage" as const,

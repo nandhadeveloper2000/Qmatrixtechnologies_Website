@@ -33,7 +33,7 @@ export default function FloatingCertificateCard({
   publicId = "Qmatrix_Course_Completion.jpg_cldss4.jpg",
   imageUrl,
   title = "Course Completion Certificate",
-  orgTag = "QMatrix Verified",
+  orgTag = "Qmatrix Verified",
   metaLeft = "Shareable & Resume-ready",
   metaRight = "Project-backed learning",
   buttonText = "ENQUIRE NOW",
@@ -80,7 +80,7 @@ export default function FloatingCertificateCard({
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 md:px-6 lg:grid-cols-2 lg:gap-14">
           <div className="text-white">
             <h2 className="text-2xl font-extrabold leading-snug md:text-3xl">
-              Why Learn Snowflake Training in Chennai at QMatrix Technologies?
+              Why Learn Snowflake Training in Chennai at Qmatrix Technologies?
             </h2>
 
             <div className="mt-7 space-y-5">
@@ -135,7 +135,7 @@ export default function FloatingCertificateCard({
 
                   <Image
                     src={src}
-                    alt="QMatrix Certificate"
+                    alt="Qmatrix Certificate"
                     width={900}
                     height={1200}
                     className="h-auto w-full transition-transform duration-700 hover:scale-[1.03]"

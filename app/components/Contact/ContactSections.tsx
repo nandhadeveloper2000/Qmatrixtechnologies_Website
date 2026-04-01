@@ -201,7 +201,7 @@ export default function ContactLayout() {
               <HelpRow
                 icon={<Mail className="h-5 w-5" />}
                 title="Email:"
-                value="info@qmatrixtechnologies.in"
+                value="info@Qmatrixtechnologies.in"
               />
             </div>
 

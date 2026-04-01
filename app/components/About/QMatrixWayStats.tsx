@@ -102,18 +102,18 @@ export default function QMatrixWayStats() {
             >
               <p className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-white/70 px-3 py-1 text-xs font-semibold tracking-wide text-[rgba(8,42,94,0.85)]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[rgba(145,22,161,0.9)]" />
-                The QMatrix Way
+                The Qmatrix Way
               </p>
 
               <h2 className="mt-4 text-2xl font-extrabold tracking-tight text-[rgba(8,42,94,1)] sm:text-3xl lg:text-4xl">
                 Learn. Practice. Get Placed{" "}
                 <span className="bg-[linear-gradient(90deg,#9116a1,#082a5e)] bg-clip-text text-transparent">
-                  The QMatrix Way to Success
+                  The Qmatrix Way to Success
                 </span>
               </h2>
 
               <p className="mt-4 text-sm leading-relaxed text-[rgba(8,42,94,0.75)] sm:text-base lg:text-lg">
-                At QMatrix Technologies, we combine expert training, real-time projects, and career
+                At Qmatrix Technologies, we combine expert training, real-time projects, and career
                 support to ensure every student learns with confidence, practices with purpose, and
                 gets placed in top companies.
               </p>

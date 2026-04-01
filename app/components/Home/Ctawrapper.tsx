@@ -98,7 +98,7 @@ export default function Ctawrapper() {
               >
                 At{" "}
                 <span className="font-semibold text-primary">
-                  QMatrix Technologies
+                  qmatrix Technologies
                 </span>
                 , we empower you with industry-ready skills in Cloud, Data
                 Engineering, and AI. Learn from expert trainers, work on

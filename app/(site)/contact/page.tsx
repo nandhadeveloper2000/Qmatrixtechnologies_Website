@@ -11,12 +11,12 @@ import {
 } from "@/app/lib/seo";
 
 const CONTACT_FALLBACK = {
-  title: "Contact QMatrix Technologies | Chennai",
+  title: "Contact Qmatrix Technologies | Chennai",
   description:
-    "Contact QMatrix Technologies for course details, counseling, batch timings, fees, and placement support in Chennai.",
+    "Contact Qmatrix Technologies for course details, counseling, batch timings, fees, and placement support in Chennai.",
   canonical: `${SITE_URL}/contact`,
   keywords: [
-    "contact qmatrix technologies",
+    "contact Qmatrix technologies",
     "course enquiry chennai",
     "IT training contact",
     "software institute contact chennai",

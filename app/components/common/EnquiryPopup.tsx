@@ -26,8 +26,6 @@ type FormState = {
   background: string;
   current_location: string;
   interested_course: string;
-  subject: string;
-  message: string;
 };
 
 type Course = {
@@ -52,8 +50,6 @@ const initialState: FormState = {
   background: "",
   current_location: "",
   interested_course: "",
-  subject: "",
-  message: "",
 };
 
 function InputField({
@@ -234,16 +230,15 @@ export default function EnquiryPopup({
       background: user?.background || "",
       current_location: user?.current_location || "",
       interested_course: defaultCourse || "",
-      subject: "",
-      message: "",
     }),
     [user, defaultCourse]
   );
 
-  const courseTitles = useMemo(
-    () => courses.map((course) => course.title),
-    [courses]
-  );
+const courseTitles = useMemo(() => {
+  return courses
+    .map((course) => course.title)
+    .sort((a, b) => a.localeCompare(b)); // 🔥 A-Z sorting
+}, [courses]);
 
   useEffect(() => {
     if (open) {
@@ -400,8 +395,6 @@ export default function EnquiryPopup({
           json: {
             ...form,
             mobile: `+91 ${form.mobile}`,
-            subject: form.subject.trim() || null,
-            message: form.message.trim() || null,
             source: "website-popup-dynamic-courses",
           },
         }
@@ -543,27 +536,7 @@ export default function EnquiryPopup({
                   : "Select course"
               }
             />
-
-            <InputField
-              label="Subject"
-              name="subject"
-              value={form.subject}
-              onChange={handleInputChange}
-              placeholder="Enter subject"
-            />
           </div>
-
-          <div className="mt-3">
-            <TextareaField
-              label="Message"
-              name="message"
-              value={form.message}
-              onChange={handleTextareaChange}
-              rows={4}
-              placeholder="Type your message"
-            />
-          </div>
-
           {coursesError ? (
             <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[13px] font-medium text-amber-700">
               {coursesError}

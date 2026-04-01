@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const metadata: Metadata = {
-  title: "QMatrix Technologies",
+  title: "Qmatrix Technologies",
   description: "Best Software Training Institute in Chennai",
 };
 

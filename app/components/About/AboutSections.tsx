@@ -48,14 +48,14 @@ export default function AboutSections() {
           </h2>
 
           <p className="mt-4 text-base leading-relaxed text-black/70 md:text-lg">
-            QMatrix Technologies shapes future tech talent with cutting-edge courses, structured
+            Qmatrix Technologies shapes future tech talent with cutting-edge courses, structured
             mentorship, and placement-focused training—so students step confidently into the IT
             world.
           </p>
 
           <p className="mt-4 text-black/70">
             <span className="font-semibold text-[rgba(8,42,94,0.9)]">Learn. Practice. Get Placed —</span>{" "}
-            the QMatrix way: expert trainers, real-time projects, and career support.
+            the Qmatrix way: expert trainers, real-time projects, and career support.
           </p>
 
           <div className="mt-4">
@@ -71,10 +71,10 @@ export default function AboutSections() {
               onClick={() => setOpen((s) => !s)}
               className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
               aria-expanded={open}
-              aria-controls="qmatrix-why-panel"
+              aria-controls="Qmatrix-why-panel"
             >
               <span className="text-lg font-bold text-[rgba(145,22,161,1)]">
-                Why QMatrix Technologies
+                Why Qmatrix Technologies
               </span>
 
               <span className="grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-white">
@@ -87,7 +87,7 @@ export default function AboutSections() {
             <AnimatePresence initial={false}>
               {open && (
                 <motion.div
-                  id="qmatrix-why-panel"
+                  id="Qmatrix-why-panel"
                   key="content"
                   initial={{ height: 0, opacity: 0 }}
                   animate={{ height: "auto", opacity: 1 }}

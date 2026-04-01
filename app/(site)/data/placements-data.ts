@@ -87,7 +87,7 @@ export const placementProcessSteps: ProcessStepItem[] = [
 ];
 
 export const placementStats: StatItem[] = [
-  { label: "Students Mentored", value: "500+" },
+  { label: "Students Mentored", value: "1500+" },
   { label: "Career Guidance Support", value: "100%" },
   { label: "Mock Interview Sessions", value: "50+" },
   { label: "Hands-on Projects", value: "Real-Time" },

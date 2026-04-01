@@ -53,7 +53,7 @@ export default function PlacementBanner() {
                 </h1>
 
                 <p className="mx-auto mt-5 max-w-2xl text-base leading-7 text-white/80 md:text-lg lg:mx-0">
-                  At QMatrix Technologies, we prepare students with
+                  At Qmatrix Technologies, we prepare students with
                   industry-ready skills, real-time project experience,
                   interview preparation, and strong placement assistance to help
                   them confidently step into top IT careers.
@@ -92,7 +92,7 @@ export default function PlacementBanner() {
                       <Users className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-white">500+</p>
+                      <p className="text-2xl font-bold text-white">1500+</p>
                       <p className="text-sm text-white/75">Students Trained</p>
                     </div>
                   </div>

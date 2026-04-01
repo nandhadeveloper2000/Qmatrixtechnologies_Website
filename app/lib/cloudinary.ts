@@ -1,5 +1,5 @@
 export const CLOUDINARY_CLOUD_NAME = "dfbbnzwmc";
-export const CLOUDINARY_BASE_FOLDER = "qmatrix";
+export const CLOUDINARY_BASE_FOLDER = "Qmatrix";
 
 export function   cldPublic(publicPath: string, transform = "f_auto,q_auto") {
   // "/Instagram/ROW_NUMBER.png" -> "Instagram/ROW_NUMBER"

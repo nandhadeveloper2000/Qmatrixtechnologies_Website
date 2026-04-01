@@ -11,10 +11,10 @@ export async function generatePageMetadata(
   const seo = await getPageSEO(pageKey);
 
   return {
-    title: seo?.metaTitle || "QMatrix Technologies",
+    title: seo?.metaTitle || "Qmatrix Technologies",
     description:
       seo?.metaDescription ||
-      "QMatrix Technologies - Best software training institute",
+      "Qmatrix Technologies - Best software training institute",
     keywords: seo?.keywords || [],
 
     alternates: {
@@ -25,7 +25,7 @@ export async function generatePageMetadata(
       title: seo?.ogTitle || seo?.metaTitle || "",
       description: seo?.ogDescription || seo?.metaDescription || "",
       url: seo?.canonicalUrl || `${SITE_URL}/${pageKey}`,
-      siteName: "QMatrix Technologies",
+      siteName: "Qmatrix Technologies",
       images: seo?.ogImage ? [{ url: seo.ogImage }] : [],
       type: "website",
     },

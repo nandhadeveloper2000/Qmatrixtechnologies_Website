@@ -64,12 +64,12 @@ export async function generateMetadata({
 
   if (!course) {
     return {
-      title: "Course Not Found | QMatrix Technologies",
+      title: "Course Not Found | Qmatrix Technologies",
       description: "The requested course could not be found.",
     };
   }
 
-  const title = `${course.title} Course in Chennai | QMatrix Technologies`;
+  const title = `${course.title} Course in Chennai | Qmatrix Technologies`;
   const description =
     stripHtml(course.description) ||
     `${course.title} training in Chennai with real-time projects and placement support.`;
@@ -86,7 +86,7 @@ export async function generateMetadata({
       title,
       description,
       url: canonical,
-      siteName: "QMatrix Technologies",
+      siteName: "Qmatrix Technologies",
       images: course.coverImage?.url
         ? [{ url: course.coverImage.url, alt: course.coverImage.alt || course.title }]
         : [],

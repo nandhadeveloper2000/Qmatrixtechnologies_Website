@@ -12,9 +12,9 @@ export default function OfficeLocations() {
       "2nd Floor, VMP complex, 200 Feet Radial Rd, Ganesh Avenue, Rose Avenue, Pallikaranai, Chennai, Tamil Nadu 600100",
     phone: "+91 9943532532",
     mapSrc:
-      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4845.267757057534!2d80.19946998538059!3d12.948457882822341!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525d9723750c13%3A0x10e6f878e4c1e0ce!2sQmatrix%20Technologies!5e1!3m2!1sen!2sus!4v1771743736245!5m2!1sen!2sus",
+      "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d4845.267757057534!2d80.19946998538059!3d12.948457882822341!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a525d9723750c13%3A0x10e6f878e4c1e0ce!2sQMatrix%20Technologies!5e1!3m2!1sen!2sus!4v1771743736245!5m2!1sen!2sus",
     // ✅ FIX: string URL (not object)
-    imageSrc: cldPublic("/qmatrix/officelocationimage.webp", "f_auto,q_auto,w_1000"),
+    imageSrc: cldPublic("/QMatrix/officelocationimage.webp", "f_auto,q_auto,w_1000"),
   };
 
   return (

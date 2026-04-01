@@ -83,7 +83,7 @@ export default function Futureoftech() {
         {/* heading */}
         <div className="text-center">
           <h2 className="text-4xl font-extrabold tracking-tight text-gray-900">
-            Master the Future of Tech with QMatrix Technologies
+            Master the Future of Tech with Qmatrix Technologies
           </h2>
           <p className="mx-auto mt-4 max-w-3xl text-gray-600">
             Upskill in Cloud, Data Engineering, and Full-Stack Development with an

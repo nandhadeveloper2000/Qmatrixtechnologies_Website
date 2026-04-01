@@ -78,7 +78,7 @@ export default function WhySection() {
           <h2 className="text-3xl font-extrabold tracking-tight text-slate-900 md:text-4xl">
             Why Choose{" "}
             <span className="bg-linear-to-r from-secondary to-primary bg-clip-text text-transparent">
-              QMatrix Technologies
+              Qmatrix Technologies
             </span>
           </h2>
 

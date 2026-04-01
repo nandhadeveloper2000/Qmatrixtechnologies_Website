@@ -33,7 +33,7 @@ export default function ContactBanner() {
         <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/90 backdrop-blur-md">
             <PhoneCall className="h-4 w-4" />
-            Let’s Connect With QMatrix
+            Let’s Connect With Qmatrix
           </div>
 
           <h1 className="mt-6 text-4xl font-bold tracking-tight text-white md:text-5xl lg:text-6xl">
