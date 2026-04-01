@@ -16,12 +16,16 @@ export default function GoogleReviews() {
 
       <div className="mx-auto max-w-7xl px-4">
         <div className="mt-6 rounded-3xl border border-white/60 bg-white/70 p-6 shadow-[0_20px_60px_rgba(8,42,94,0.16)] backdrop-blur">
-          {/* Jotform Widget Container */}
-          <div id="JFWebsiteWidget-019ca2deca8e7e8789c643dd8b3c64ec50a8"></div>
+          
+          {/* Elfsight Google Reviews Widget */}
+          <div
+            className="elfsight-app-3deb910f-6ad0-4524-abc1-0a008422e6b7"
+            data-elfsight-app-lazy
+          ></div>
 
-          {/* Load Jotform Script */}
+          {/* Load Script */}
           <Script
-            src="https://www.jotform.com/website-widgets/embed/019ca2deca8e7e8789c643dd8b3c64ec50a8"
+            src="https://elfsightcdn.com/platform.js"
             strategy="afterInteractive"
           />
         </div>
