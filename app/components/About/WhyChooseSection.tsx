@@ -68,9 +68,9 @@ export default function WhyChooseSection() {
   return (
     <section className="relative overflow-hidden bg-white py-10 sm:py-20">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-24 h-[520px] w-[520px] rounded-full bg-[rgba(145,22,161,0.16)] blur-3xl" />
-        <div className="absolute -right-44 -bottom-28 h-[560px] w-[560px] rounded-full bg-[rgba(8,42,94,0.14)] blur-3xl" />
-        <div className="absolute left-1/2 top-10 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(145,22,161,0.12),rgba(8,42,94,0.08),transparent_65%)] blur-2xl" />
+        <div className="absolute -left-40 -top-24 h-130 w-130 rounded-full bg-[rgba(145,22,161,0.16)] blur-3xl" />
+        <div className="absolute -right-44 -bottom-28 h-140 w-140 rounded-full bg-[rgba(8,42,94,0.14)] blur-3xl" />
+        <div className="absolute left-1/2 top-10 h-155 w-155 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(145,22,161,0.12),rgba(8,42,94,0.08),transparent_65%)] blur-2xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-2 sm:px-6">
@@ -97,8 +97,8 @@ export default function WhyChooseSection() {
             ))}
           </div>
 
-          <div className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px]">
-            <div className="relative ml-16 aspect-[3/4] w-60 sm:w-[340px] lg:w-[350px]">
+          <div className="relative mx-auto w-full max-w-95 sm:max-w-110">
+            <div className="relative ml-16 aspect-3/4 w-60 sm:w-85 lg:w-87.5">
               <Image
                 src={studentImage}
                 alt="Student"

@@ -40,8 +40,8 @@ export default function NewsletterCTA() {
                 <Image
                   src={studentImage}
                   alt="Qmatrix student"
-                  width={420}
-                  height={520}
+                  width={500}
+                  height={400}
                   className="h-auto w-full object-contain"
                   priority
                 />
@@ -55,17 +55,17 @@ export default function NewsletterCTA() {
                   Career Guidance • Enquiry Form
                 </p>
 
-                <h3 className="mt-5 text-2xl font-extrabold tracking-tight text-[#9116a1] sm:text-3xl lg:text-[2.35rem] lg:leading-[1.2]">
+                <h3 className="mt-5 text-2xl font-extrabold tracking-tight text-[#9116a1] sm:text-3xl lg:text-[2rem] lg:leading-[1.2]">
                   Take the first step toward your IT & digital career!
                 </h3>
 
-                <p className="mx-auto mt-4 max-w-3xl text-sm leading-7 text-slate-700 sm:text-base lg:mx-0">
+                <p className="mx-auto mt-4 max-w-5xl text-sm text-slate-700 sm:text-base lg:mx-0">
                   Your journey to expertise starts here. Fill out the enquiry
                   form and our team will connect you with the right training
                   program to shape your future in the IT industry.
                 </p>
 
-                <div className="mt-8 grid gap-6 rounded-[28px] border border-white/70 bg-white/60 p-5 shadow-[0_10px_35px_rgba(15,23,42,0.06)] backdrop-blur md:grid-cols-[1fr_auto] md:items-center">
+                <div className="mt-4 grid gap-6 rounded-[28px] border border-white/70 bg-white/60 p-5 shadow-[0_10px_35px_rgba(15,23,42,0.06)] backdrop-blur md:grid-cols-[1fr_auto] md:items-center">
                   <div>
                     <div className="flex items-start gap-3">
                       <div className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#9116a1]/10 text-[#9116a1]">

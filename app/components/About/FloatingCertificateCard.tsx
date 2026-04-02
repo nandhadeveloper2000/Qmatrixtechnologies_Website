@@ -75,7 +75,7 @@ export default function FloatingCertificateCard({
             "linear-gradient(135deg, var(--tg-common-color-blue) 0%, var(--tg-common-color-indigo) 45%, var(--tg-common-color-purple) 100%)",
         }}
       >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.45)_1px,transparent_0)] opacity-[0.18] [background-size:18px_18px]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.45)_1px,transparent_0)] opacity-[0.18] bg-size-[18px_18px]" />
 
         <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-5 md:px-6 lg:grid-cols-2 lg:gap-14">
           <div className="text-white">
@@ -112,19 +112,19 @@ export default function FloatingCertificateCard({
             <div className="pointer-events-none absolute -inset-10 rounded-[40px] bg-[radial-gradient(closest-side,rgba(255,255,255,0.18),transparent)] blur-2xl" />
             <div className="pointer-events-none absolute -inset-8 rounded-[40px] bg-[radial-gradient(closest-side,rgba(0,0,0,0.10),transparent)] blur-2xl" />
 
-            <div className="relative w-[460px] max-w-full animate-float">
+            <div className="relative w-115 max-w-full animate-float">
               <div className="absolute inset-0 rounded-[28px] border border-white/50 bg-linear-to-br from-white/70 to-white/30 shadow-[0_30px_90px_rgba(0,0,0,0.20)] backdrop-blur-xl" />
 
               <div className="relative rounded-[28px] p-4">
                 <div className="flex items-center justify-between px-2 pb-3">
                   <div className="flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-[var(--primary)]" />
-                    <p className="text-sm font-semibold text-[var(--primary)]">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    <p className="text-sm font-semibold text-primary">
                       {title}
                     </p>
                   </div>
 
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-[11px] font-semibold text-[var(--primary)]">
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-3 py-1 text-[11px] font-semibold text-primary">
                     <BadgeCheck className="h-3.5 w-3.5" />
                     {orgTag}
                   </span>

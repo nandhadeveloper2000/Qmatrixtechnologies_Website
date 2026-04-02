@@ -36,9 +36,9 @@ export default function HeroSection() {
       <div className="absolute inset-0 bg-linear-to-b from-white via-[#F7F8FC] to-white" />
 
       {/* soft blobs */}
-      <div className="pointer-events-none absolute -left-28 top-24 h-[360px] w-[360px] rounded-full bg-primary/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-[-120px] top-10 h-[420px] w-[420px] rounded-full bg-secondary/10 blur-3xl" />
-      <div className="pointer-events-none absolute left-1/2 bottom-[-240px] h-[520px] w-[520px] -translate-x-1/2 rounded-full bg-[#7C3AED]/10 blur-3xl" />
+      <div className="pointer-events-none absolute -left-28 top-24 h-90 w-90 rounded-full bg-primary/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-30 top-10 h-105 w-105 rounded-full bg-secondary/10 blur-3xl" />
+      <div className="pointer-events-none absolute left-1/2 -bottom-60 h-130 w-130 -translate-x-1/2 rounded-full bg-[#7C3AED]/10 blur-3xl" />
 
       {/* subtle dotted grid */}
       <div
@@ -51,8 +51,8 @@ export default function HeroSection() {
       />
 
       {/* ===== Content ===== */}
-      <div className="relative mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="grid min-h-[560px] items-center gap-10 py-14 lg:grid-cols-2 lg:gap-12 lg:py-16">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="grid min-h-140 items-center gap-10 py-14 lg:grid-cols-2 lg:gap-12 lg:py-16">
           {/* LEFT */}
           <motion.div
             initial={{ opacity: 0, y: 14 }}
@@ -129,13 +129,13 @@ export default function HeroSection() {
             </motion.div>
 
             {/* glow behind image */}
-            <div className="pointer-events-none absolute -z-10 right-4 top-1/2 h-[420px] w-[420px] -translate-y-1/2 rounded-full bg-linear-to-tr from-primary/15 via-secondary/10 to-[#7C3AED]/10 blur-3xl lg:right-0" />
+            <div className="pointer-events-none absolute -z-10 right-4 top-1/2 h-105 w-105 -translate-y-1/2 rounded-full bg-linear-to-tr from-primary/15 via-secondary/10 to-[#7C3AED]/10 blur-3xl lg:right-0" />
 
             {/* image */}
             <motion.div
               animate={{ y: [0, -6, 0] }}
               transition={{ duration: 5.5, repeat: Infinity, ease: "easeInOut" }}
-              className="w-full max-w-[520px]"
+              className="w-full max-w-130"
             >
 <Image
   src={cldPublic("/Qmatrix/Call_to_Actions1.png", "f_auto,q_auto,w_1200")}
