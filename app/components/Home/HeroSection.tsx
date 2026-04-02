@@ -115,7 +115,7 @@ export default function HeroSection() {
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.15 }}
               className="pointer-events-none absolute left-0 top-6 hidden lg:block"
             >
-              <StatCard label="Placements" value="9000+" />
+              <StatCard label="Placements" value="1500+" />
             </motion.div>
 
             <motion.div
@@ -125,7 +125,7 @@ export default function HeroSection() {
               transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
               className="pointer-events-none absolute right-0 bottom-6 hidden lg:block"
             >
-              <StatCard label="Total Technologies" value="30+" />
+              <StatCard label="Total Technologies" value="5+" />
             </motion.div>
 
             {/* glow behind image */}

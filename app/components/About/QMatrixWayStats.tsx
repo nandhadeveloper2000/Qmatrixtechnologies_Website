@@ -2,34 +2,42 @@
 
 import React, { useEffect, useMemo, useRef } from "react";
 import { motion, useInView, useMotionValue, useTransform, animate } from "framer-motion";
-import { GraduationCap, Building2, Users, BadgeCheck } from "lucide-react";
+import {
+  GraduationCap,
+  Building2,
+  Users,
+  BadgeCheck,
+  type LucideIcon,
+} from "lucide-react";
 
 type Stat = {
-  icon: any;
+  icon: LucideIcon;
   label: string;
-  value: number; // ✅ number for animation
+  value: number;
   suffix?: string;
   badge?: string;
 };
 
 const stats: Stat[] = [
-  { icon: GraduationCap, label: "Students Trained", value: 10, suffix: "k+", badge: "Verified" },
-  { icon: Building2, label: "Recruiting Companies", value: 100, suffix: "+", badge: "Trusted" },
-  { icon: Users, label: "Expert Trainers", value: 50, suffix: "+", badge: "Certified" },
+  { icon: GraduationCap, label: "Students Trained", value: 1500, suffix: "+", badge: "Verified" },
+  { icon: Building2, label: "Recruiting Companies", value: 30, suffix: "+", badge: "Trusted" },
+  { icon: Users, label: "Expert Trainers", value: 5, suffix: "+", badge: "Certified" },
   { icon: BadgeCheck, label: "Placement Success", value: 100, suffix: "%", badge: "Proven" },
 ];
+
+type AnimatedNumberProps = {
+  value: number;
+  format?: (n: number) => string;
+  duration?: number;
+  delay?: number;
+};
 
 function AnimatedNumber({
   value,
   format = (n) => n.toString(),
   duration = 1.2,
   delay = 0,
-}: {
-  value: number;
-  format?: (n: number) => string;
-  duration?: number;
-  delay?: number;
-}) {
+}: AnimatedNumberProps) {
   const ref = useRef<HTMLSpanElement | null>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
@@ -42,7 +50,7 @@ function AnimatedNumber({
     const controls = animate(mv, value, {
       duration,
       delay,
-      ease: [0.16, 1, 0.3, 1], // premium spring-like ease
+      ease: [0.16, 1, 0.3, 1],
     });
 
     return () => controls.stop();
@@ -53,6 +61,7 @@ function AnimatedNumber({
       if (!ref.current) return;
       ref.current.textContent = format(v);
     });
+
     return () => unsub();
   }, [rounded, format]);
 
@@ -63,21 +72,20 @@ export default function QMatrixWayStats() {
   const maxValue = useMemo(() => Math.max(...stats.map((s) => s.value)), []);
 
   return (
-    <section className="relative overflow-hidden bg-white py-14 sm:py-16 lg:py-20">
+    <section className="relative overflow-hidden bg-white py-10 sm:py-16 lg:py-20">
       {/* premium glow */}
-      <div className="pointer-events-none absolute -left-24 -top-24 h-[360px] w-[360px] rounded-full bg-[rgba(145,22,161,0.10)] blur-3xl" />
-      <div className="pointer-events-none absolute -right-24 -bottom-24 h-[420px] w-[420px] rounded-full bg-[rgba(8,42,94,0.10)] blur-3xl" />
+      <div className="pointer-events-none absolute -left-24 -top-24 h-90 w-90 rounded-full bg-[rgba(145,22,161,0.10)] blur-3xl" />
+      <div className="pointer-events-none absolute -right-24 -bottom-24 h-105 w-105 rounded-full bg-[rgba(8,42,94,0.10)] blur-3xl" />
 
-      <div className="relative mx-auto max-w-6xl px-4 sm:px-6">
+      <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         {/* glass container */}
         <div className="relative overflow-hidden rounded-[26px] border border-black/10 bg-white/70 shadow-[0_40px_120px_rgba(0,0,0,0.10)] backdrop-blur">
           {/* background gradient layer */}
           <div aria-hidden="true" className="absolute inset-0">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,#ffffff,#f5f7fb)]" />
-            <div className="absolute -left-10 top-0 h-[240px] w-[320px] rounded-[60px] bg-[rgba(145,22,161,0.08)] blur-2xl" />
-            <div className="absolute -right-16 bottom-[-40px] h-[260px] w-[360px] rounded-[70px] bg-[rgba(8,42,94,0.07)] blur-2xl" />
+            <div className="absolute -left-10 top-0 h-60 w-80 rounded-[60px] bg-[rgba(145,22,161,0.08)] blur-2xl" />
+            <div className="absolute -right-16 -bottom-10 h-65 w-90 rounded-[70px] bg-[rgba(8,42,94,0.07)] blur-2xl" />
 
-            {/* subtle diagonal shine */}
             <div
               className="absolute inset-0 opacity-70"
               style={{
@@ -87,12 +95,10 @@ export default function QMatrixWayStats() {
               }}
             />
 
-            {/* top glossy line */}
             <div className="absolute left-0 top-0 h-px w-full bg-[linear-gradient(90deg,rgba(145,22,161,0.35),rgba(8,42,94,0.25),rgba(145,22,161,0.35))] opacity-70" />
           </div>
 
           <div className="relative p-7 sm:p-10 lg:p-12">
-            {/* Heading */}
             <motion.div
               initial={{ opacity: 0, y: 14 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -119,21 +125,13 @@ export default function QMatrixWayStats() {
               </p>
             </motion.div>
 
-            {/* Stats Grid */}
             <div className="mt-8 grid grid-cols-2 gap-4 sm:mt-10 sm:gap-5 lg:grid-cols-4">
               {stats.map((s, idx) => {
                 const Icon = s.icon;
 
-                // ✅ formatting rules (k+ support etc.)
-                const format = (n: number) => {
-                  // if it's "k+" stat (10k+), show 0..10 only and suffix handles k+
-                  // if you want 0..10000 instead, set value: 10000 and suffix: "+"
-                  return n.toString();
-                };
+                const format = (n: number) => n.toString();
 
-                // ✅ stagger duration slightly by size + index for premium feel
-                const duration =
-                  1.1 + (s.value / Math.max(1, maxValue)) * 0.45; // ~1.1s..1.55s
+                const duration = 1.1 + (s.value / Math.max(1, maxValue)) * 0.45;
 
                 return (
                   <motion.div
@@ -150,11 +148,9 @@ export default function QMatrixWayStats() {
                       p-5 sm:p-6
                     "
                   >
-                    {/* hover glow */}
                     <div className="pointer-events-none absolute -left-10 -top-10 h-24 w-24 rounded-full bg-[rgba(145,22,161,0.14)] blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                     <div className="pointer-events-none absolute -right-10 -bottom-10 h-24 w-24 rounded-full bg-[rgba(8,42,94,0.12)] blur-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 
-                    {/* subtle moving shine on hover */}
                     <div className="pointer-events-none absolute -left-1/2 top-0 h-full w-1/2 -skew-x-12 bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.55),transparent)] opacity-0 transition-all duration-500 group-hover:left-[110%] group-hover:opacity-70" />
 
                     <div className="flex items-start justify-between gap-3">
@@ -162,7 +158,6 @@ export default function QMatrixWayStats() {
                         <Icon className="h-5 w-5 text-[rgba(145,22,161,1)]" />
                       </span>
 
-                      {/* micro badge */}
                       <span className="rounded-full border border-black/10 bg-white px-2.5 py-1 text-[10px] font-semibold text-[rgba(8,42,94,0.75)]">
                         {s.badge ?? "Verified"}
                       </span>
@@ -178,6 +173,7 @@ export default function QMatrixWayStats() {
                             delay={0.08 + idx * 0.06}
                           />
                         </span>
+
                         {s.suffix ? (
                           <span className="pb-1 text-sm font-bold text-[rgba(145,22,161,1)] sm:text-base">
                             {s.suffix}
@@ -190,15 +186,13 @@ export default function QMatrixWayStats() {
                       </p>
                     </div>
 
-                    {/* bottom accent line */}
-                    <div className="mt-4 h-[2px] w-full rounded-full bg-[linear-gradient(90deg,rgba(145,22,161,0.55),rgba(8,42,94,0.45))] opacity-70" />
+                    <div className="mt-4 h-0.5 w-full rounded-full bg-[linear-gradient(90deg,rgba(145,22,161,0.55),rgba(8,42,94,0.45))] opacity-70" />
                   </motion.div>
                 );
               })}
             </div>
           </div>
 
-          {/* border polish */}
           <div
             aria-hidden="true"
             className="pointer-events-none absolute inset-0 rounded-[26px] ring-1 ring-black/10"

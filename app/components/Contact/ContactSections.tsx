@@ -2,15 +2,7 @@
 
 import React, { useState } from "react";
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
-import {
-  Mail,
-  Phone,
-  MessageCircle,
-  ArrowRight,
-  Facebook,
-  Instagram,
-  Twitter,
-} from "lucide-react";
+import { Mail, Phone, MessageCircle, Instagram } from "lucide-react";
 
 type FormState = {
   firstName: string;
@@ -19,6 +11,28 @@ type FormState = {
   countryCode: string;
   phone: string;
   message: string;
+};
+
+type InputChangeEvent = React.ChangeEvent<
+  HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+>;
+
+type LightInputProps = {
+  label: string;
+  name: keyof FormState;
+  placeholder: string;
+  value: string;
+  onChange: (e: InputChangeEvent) => void;
+};
+
+type HelpRowProps = {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+};
+
+type ApiErrorResponse = {
+  message?: string;
 };
 
 const initialForm: FormState = {
@@ -32,18 +46,22 @@ const initialForm: FormState = {
 
 export default function ContactLayout() {
   const [form, setForm] = useState<FormState>(initialForm);
-  const [loading, setLoading] = useState(false);
-  const [successMsg, setSuccessMsg] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const [successMsg, setSuccessMsg] = useState<string>("");
+  const [errorMsg, setErrorMsg] = useState<string>("");
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
+  const handleChange = (e: InputChangeEvent) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     e.preventDefault();
     setLoading(true);
     setSuccessMsg("");
@@ -60,15 +78,15 @@ export default function ContactLayout() {
         body: JSON.stringify(form),
       });
 
-      const data = await res.json();
+      const data: ApiErrorResponse = await res.json();
 
       if (!res.ok) {
-        throw new Error(data?.message || "Failed to send message");
+        throw new Error(data.message || "Failed to send message");
       }
 
       setSuccessMsg("Your message has been sent successfully.");
       setForm(initialForm);
-    } catch (error) {
+    } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : "Something went wrong";
       setErrorMsg(message);
@@ -85,12 +103,16 @@ export default function ContactLayout() {
             <h2 className="text-xl font-extrabold text-primary sm:text-2xl">
               Send us a message
             </h2>
+
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
               Do you have a question? Need help choosing the right course? Feel
               free to contact us.
             </p>
 
-            <form onSubmit={handleSubmit} className="mt-7 grid gap-5 sm:grid-cols-2">
+            <form
+              onSubmit={handleSubmit}
+              className="mt-7 grid gap-5 sm:grid-cols-2"
+            >
               <LightInput
                 label="First Name"
                 name="firstName"
@@ -107,35 +129,35 @@ export default function ContactLayout() {
                 onChange={handleChange}
               />
 
-              <div className="sm:col-span-1">
-                <LightInput
-                  label="Email"
-                  name="email"
-                  placeholder="Enter your email"
-                  value={form.email}
-                  onChange={handleChange}
-                />
-              </div>
+              <LightInput
+                label="Email"
+                name="email"
+                placeholder="Enter your email"
+                value={form.email}
+                onChange={handleChange}
+              />
 
-              <div className="sm:col-span-1">
+              <div>
                 <label className="mb-2 block text-sm font-semibold text-slate-800">
                   Contact Details
                 </label>
-                <div className="flex h-11 overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:ring-2 focus-within:ring-slate-200">
+
+                <div className="flex h-11 overflow-hidden rounded-xl border border-slate-200">
                   <select
                     name="countryCode"
-                    className="h-full w-23 border-r border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
+                    className="px-3 text-sm outline-none"
                     value={form.countryCode}
                     onChange={handleChange}
                   >
                     <option value="+91">+91</option>
                     <option value="+1">+1</option>
                     <option value="+44">+44</option>
-                    <option value="+971">+971</option>
                   </select>
+
                   <input
                     name="phone"
-                    className="h-full flex-1 bg-white px-3 text-sm text-slate-900 outline-none"
+                    type="tel"
+                    className="flex-1 px-3 text-sm outline-none"
                     placeholder="Enter your contact number"
                     value={form.phone}
                     onChange={handleChange}
@@ -150,75 +172,68 @@ export default function ContactLayout() {
                 <textarea
                   name="message"
                   rows={5}
-                  className="w-full rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-900 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+                  className="w-full rounded-xl border border-slate-200 p-3 text-sm outline-none"
                   placeholder="Enter your message"
                   value={form.message}
                   onChange={handleChange}
                 />
               </div>
 
-              {successMsg ? (
-                <div className="sm:col-span-2 rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-700">
+              {successMsg && (
+                <div className="sm:col-span-2 text-sm font-medium text-green-600">
                   {successMsg}
                 </div>
-              ) : null}
+              )}
 
-              {errorMsg ? (
-                <div className="sm:col-span-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+              {errorMsg && (
+                <div className="sm:col-span-2 text-sm font-medium text-red-600">
                   {errorMsg}
                 </div>
-              ) : null}
+              )}
 
-              <div className="sm:col-span-2 flex justify-end pt-2">
+              <div className="sm:col-span-2 flex justify-end">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="inline-flex items-center justify-center gap-2 rounded-full bg-primary px-7 py-3 text-sm font-bold text-white shadow-[0_14px_30px_rgba(8,42,94,0.25)] hover:brightness-110 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-70"
+                  className="rounded-full bg-primary px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {loading ? "Sending..." : "Send a Message"}
-                  <ArrowRight className="h-4 w-4" />
+                  {loading ? "Sending..." : "Send Message"}
                 </button>
               </div>
             </form>
           </div>
 
-          <aside className="rounded-[26px] bg-linear-to-b from-[#082a5e] via-[#a724e4] to-[#8121fb] p-6 text-white shadow-[0_18px_55px_rgba(2,6,23,0.25)] ring-1 ring-white/10 sm:p-7">
-            <h3 className="text-lg font-extrabold leading-snug">
-              Hi! We are always here <br /> to help you.
+          <aside className="rounded-[26px] bg-linear-to-b from-[#082a5e] via-[#a724e4] to-[#8121fb] p-6 text-white">
+            <h3 className="text-lg font-extrabold">
+              Hi! We are always here to help you.
             </h3>
 
             <div className="mt-6 space-y-4">
               <HelpRow
                 icon={<Phone className="h-5 w-5" />}
-                title="Hotline:"
+                title="Hotline"
                 value="+91 99435 32532"
               />
               <HelpRow
                 icon={<MessageCircle className="h-5 w-5" />}
-                title="SMS / Whatsapp"
+                title="WhatsApp"
                 value="+91 99435 32532"
               />
               <HelpRow
                 icon={<Mail className="h-5 w-5" />}
-                title="Email:"
-                value="info@Qmatrixtechnologies.in"
+                title="Email"
+                value="info@qmatrixtechnologies.in"
               />
             </div>
 
-            <div className="my-6 h-px bg-white/15" />
+            <div className="mt-6">
+              <p className="text-sm font-semibold">Connect with us</p>
 
-            <p className="text-sm font-semibold text-white/90">Connect with us</p>
-
-            <div className="mt-4 flex items-center gap-4">
-              <SocialIcon>
-                <Facebook className="h-5 w-5" />
-              </SocialIcon>
-              <SocialIcon>
-                <Instagram className="h-5 w-5" />
-              </SocialIcon>
-              <SocialIcon>
-                <Twitter className="h-5 w-5" />
-              </SocialIcon>
+              <div className="mt-4 flex gap-4">
+                <SocialIcon href="https://www.instagram.com/qmatrixtech/">
+                  <Instagram className="h-5 w-5" />
+                </SocialIcon>
+              </div>
             </div>
           </aside>
         </div>
@@ -233,13 +248,7 @@ function LightInput({
   placeholder,
   value,
   onChange,
-}: {
-  label: string;
-  name: string;
-  placeholder: string;
-  value: string;
-  onChange: React.ChangeEventHandler<HTMLInputElement>;
-}) {
+}: LightInputProps) {
   return (
     <div>
       <label className="mb-2 block text-sm font-semibold text-slate-800">
@@ -249,43 +258,45 @@ function LightInput({
         name={name}
         value={value}
         onChange={onChange}
-        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-900 outline-none focus:border-slate-300 focus:ring-2 focus:ring-slate-200"
+        className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm outline-none"
         placeholder={placeholder}
       />
     </div>
   );
 }
 
-function HelpRow({
-  icon,
-  title,
-  value,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  value: string;
-}) {
+function HelpRow({ icon, title, value }: HelpRowProps) {
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-white/12 p-4 ring-1 ring-white/10">
-      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-white/10 ring-1 ring-white/10">
-        {icon}
-      </div>
-      <div className="min-w-0">
-        <p className="text-sm font-bold text-white/90">{title}</p>
-        <p className="mt-0.5 text-sm font-semibold text-white">{value}</p>
+    <div className="flex items-center gap-3 rounded-xl bg-white/10 p-3">
+      <div className="shrink-0">{icon}</div>
+      <div>
+        <p className="text-sm text-white/80">{title}</p>
+        <p className="font-semibold">{value}</p>
       </div>
     </div>
   );
 }
 
-function SocialIcon({ children }: { children: React.ReactNode }) {
-  return (
-    <button
-      type="button"
-      className="grid h-11 w-11 place-items-center rounded-full bg-white/10 ring-1 ring-white/15 hover:bg-white/15 active:scale-[0.98]"
-      aria-label="social"
-    >
+function SocialIcon({
+  children,
+  href,
+}: {
+  children: React.ReactNode;
+  href?: string;
+}) {
+  const content = (
+    <div className="grid h-11 w-11 place-items-center rounded-full bg-white/10 transition hover:bg-white/20">
       {children}
+    </div>
+  );
+
+  return href ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+      {content}
+    </a>
+  ) : (
+    <button type="button" aria-label="Social icon">
+      {content}
     </button>
   );
 }

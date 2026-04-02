@@ -30,6 +30,9 @@ type HeaderVariant = "Qmatrix" | "luminar";
 const NAV_VARIANT =
   (process.env.NEXT_PUBLIC_HEADER_VARIANT as HeaderVariant) ?? "luminar";
 
+const CALL_NUMBER = "+919943532532";
+const CALL_LABEL = "BOOK NOW";
+
 export default function Navbar() {
   const pathname = usePathname();
   const variant = NAV_VARIANT;
@@ -57,12 +60,16 @@ export default function Navbar() {
 
   const SOCIALS = useMemo(
     () => [
-      { name: "Instagram", href: "https://instagram.com/", Icon: Instagram },
+      {
+        name: "Instagram",
+        href: "https://www.instagram.com/qmatrixtech/?hl=en",
+        Icon: Instagram,
+      },
       { name: "YouTube", href: "https://youtube.com/", Icon: Youtube },
       { name: "LinkedIn", href: "https://linkedin.com/", Icon: Linkedin },
       { name: "Facebook", href: "https://facebook.com/", Icon: Facebook },
-      { name: "Call", href: "tel:+919999999999", Icon: Phone },
-      { name: "Email", href: "mailto:info@Qmatrix.com", Icon: Mail },
+      { name: "Call", href: `tel:${CALL_NUMBER}`, Icon: Phone },
+      { name: "Email", href: "mailto:info@qmatrixtechnologies.in", Icon: Mail },
     ],
     []
   );
@@ -251,10 +258,10 @@ export default function Navbar() {
                     <span className="h-5 w-px bg-gray-200" />
 
                     <Link
-                      href="/callback"
+                      href={`tel:${CALL_NUMBER}`}
                       className="inline-flex items-center gap-2 text-[13px] font-semibold uppercase tracking-[0.08em] text-slate-800 transition hover:text-[var(--tg-theme-primary)]"
                     >
-                      BOOK A CALLBACK
+                      {CALL_LABEL}
                     </Link>
                   </div>
                 ) : (
@@ -270,8 +277,8 @@ export default function Navbar() {
                       ENQUIRE NOW
                     </Link>
 
-                    <Link href="/callback" className="btn btn-shine">
-                      BOOK A CALLBACK
+                    <Link href={`tel:${CALL_NUMBER}`} className="btn btn-shine">
+                      {CALL_LABEL}
                     </Link>
                   </div>
                 )}
@@ -396,7 +403,7 @@ export default function Navbar() {
               </Link>
 
               <Link
-                href="/callback"
+                href={`tel:${CALL_NUMBER}`}
                 onClick={() => setIsOpen(false)}
                 className="
                   inline-flex w-full items-center justify-center
@@ -411,7 +418,7 @@ export default function Navbar() {
                   transition-all duration-200
                 "
               >
-                BOOK CALLBACK
+                {CALL_LABEL}
               </Link>
             </div>
 

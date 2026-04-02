@@ -2,6 +2,7 @@
 
 import { cldPublic } from "@/app/lib/cloudinary";
 import Image from "next/image";
+import type { LucideIcon } from "lucide-react";
 import {
   GraduationCap,
   LaptopMinimal,
@@ -14,7 +15,7 @@ import {
 } from "lucide-react";
 
 type Item = {
-  icon: any;
+  icon: LucideIcon;
   text: string;
 };
 
@@ -26,7 +27,7 @@ const LEFT: Item[] = [
 ];
 
 const RIGHT: Item[] = [
-  { icon: Globe, text: "International Certificates" },
+  { icon: Globe, text: "Certificates" },
   { icon: BadgePercent, text: "Affordable Fees" },
   { icon: LayoutGrid, text: "Learning Management System" },
   { icon: Users, text: "Mentored by Industry Experts" },
@@ -62,17 +63,14 @@ function FeatureItem({ item }: { item: Item }) {
 }
 
 export default function WhyChooseSection() {
-  // ✅ Cloudinary student image (your file)
-  const studentImage = cldPublic(
-    "student_uvjfcw.png",
-  );
+  const studentImage = cldPublic("student_uvjfcw.png");
 
   return (
     <section className="relative overflow-hidden bg-white py-10 sm:py-20">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute -left-40 -top-24 h-130 w-130 rounded-full bg-[rgba(145,22,161,0.16)] blur-3xl" />
-        <div className="absolute -right-44 -bottom-28 h-140 w-140 rounded-full bg-[rgba(8,42,94,0.14)] blur-3xl" />
-        <div className="absolute left-1/2 top-10 h-155 w-155 -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(145,22,161,0.12),rgba(8,42,94,0.08),transparent_65%)] blur-2xl" />
+        <div className="absolute -left-40 -top-24 h-[520px] w-[520px] rounded-full bg-[rgba(145,22,161,0.16)] blur-3xl" />
+        <div className="absolute -right-44 -bottom-28 h-[560px] w-[560px] rounded-full bg-[rgba(8,42,94,0.14)] blur-3xl" />
+        <div className="absolute left-1/2 top-10 h-[620px] w-[620px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,rgba(145,22,161,0.12),rgba(8,42,94,0.08),transparent_65%)] blur-2xl" />
       </div>
 
       <div className="relative mx-auto max-w-7xl px-2 sm:px-6">
@@ -83,35 +81,34 @@ export default function WhyChooseSection() {
               Qmatrix Technologies?
             </span>
           </h2>
+
           <div className="mx-auto mt-4 h-1.5 w-20 rounded-full bg-[linear-gradient(90deg,#082a5e,#9116a1)]" />
+
           <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-600 sm:text-base">
             Industry-ready training with real projects, mentor support, and
             placement guidance — built for results.
           </p>
         </div>
 
-        <div className="mt-2 grid items-center gap-10 lg:grid-cols-3">
-          {/* LEFT */}
+        <div className="mt-2 hidden items-center gap-10 lg:grid lg:grid-cols-3">
           <div className="space-y-6">
             {LEFT.map((item, idx) => (
               <FeatureItem key={idx} item={item} />
             ))}
           </div>
 
-          {/* CENTER IMAGE */}
-          <div className="relative mx-auto w-full max-w-95 sm:max-w-110">
-         <div className="relative mt-0 ml-16 w-60 sm:w-85 lg:w-87.5 aspect-3/4">
+          <div className="relative mx-auto w-full max-w-[380px] sm:max-w-[440px]">
+            <div className="relative ml-16 aspect-[3/4] w-60 sm:w-[340px] lg:w-[350px]">
               <Image
-                src={studentImage} // ✅ Cloudinary URL
+                src={studentImage}
                 alt="Student"
                 fill
-                className="object-contain w-fit drop-shadow-[0_22px_60px_rgba(8,42,94,0.22)]"
                 priority
+                className="object-contain drop-shadow-[0_22px_60px_rgba(8,42,94,0.22)]"
               />
             </div>
           </div>
 
-          {/* RIGHT */}
           <div className="space-y-6">
             {RIGHT.map((item, idx) => (
               <FeatureItem key={idx} item={item} />
@@ -119,7 +116,6 @@ export default function WhyChooseSection() {
           </div>
         </div>
 
-        {/* Mobile compact grid */}
         <div className="mt-10 lg:hidden">
           <div className="grid gap-6 sm:grid-cols-2">
             {[...LEFT, ...RIGHT].map((item, idx) => (

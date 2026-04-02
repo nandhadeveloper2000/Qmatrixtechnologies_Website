@@ -35,35 +35,53 @@ export default function AboutSections() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.55, ease: "easeOut" }}
         >
-          <div className="inline-flex items-center gap-2 rounded-lg bg-[rgba(145,22,161,0.08)] px-4 py-2 text-sm font-semibold text-[rgba(145,22,161,1)]">
-            Who we are
-          </div>
+   <div className="inline-flex items-center gap-2 rounded-lg bg-[rgba(145,22,161,0.08)] px-4 py-2 text-sm font-semibold text-[rgba(145,22,161,1)]">
+  Who we are
+</div>
 
-          <h2 className="mt-5 text-3xl font-extrabold leading-tight text-[rgba(8,42,94,1)] md:text-4xl">
-            Provide{" "}
-            <span className="bg-[linear-gradient(90deg,#9116a1,#a724e4,#082a5e)] bg-clip-text text-transparent">
-              Quality Education
-            </span>{" "}
-            Services For You
-          </h2>
+<h2 className="mt-5 text-3xl font-extrabold leading-tight text-[rgba(8,42,94,1)] md:text-4xl">
+  Empowering Careers with{" "}
+  <span className="bg-[linear-gradient(90deg,#9116a1,#a724e4,#082a5e)] bg-clip-text text-transparent">
+    Quality IT Education
+  </span>
+</h2>
 
-          <p className="mt-4 text-base leading-relaxed text-black/70 md:text-lg">
-            Qmatrix Technologies shapes future tech talent with cutting-edge courses, structured
-            mentorship, and placement-focused training—so students step confidently into the IT
-            world.
-          </p>
+<p className="mt-4 text-base leading-relaxed text-black/70 md:text-lg text-justify">
+  Founded in{" "}
+  <span className="font-semibold text-[rgba(8,42,94,0.9)]">2020</span>, Qmatrix
+  Technologies has grown into one of the{" "}
+  <a
+    href="https://qmatrixtechnologies-website.vercel.app/"
+    target="_blank"
+    rel="noopener noreferrer"
+    className="font-semibold text-blue-600 hover:underline"
+  >
+    best software training institutes in Chennai
+  </a>. We deliver industry-focused courses that bridge the gap between
+  academic learning and real-world IT careers.
+</p>
 
-          <p className="mt-4 text-black/70">
-            <span className="font-semibold text-[rgba(8,42,94,0.9)]">Learn. Practice. Get Placed —</span>{" "}
-            the Qmatrix way: expert trainers, real-time projects, and career support.
-          </p>
+<p className="mt-4 text-black/70 leading-relaxed text-justify">
+  Our training approach is centered on{" "}
+  <span className="font-semibold text-[rgba(8,42,94,0.9)]">
+    hands-on learning, live projects, and expert mentorship
+  </span>. Every student gains practical experience, ensuring they are job-ready
+  with real-world skills and confidence.
+</p>
 
-          <div className="mt-4">
-            <Link href="/about" className="text-sm font-semibold text-[rgba(145,22,161,1)] hover:opacity-80">
-              read more
-            </Link>
-          </div>
+<p className="mt-4 text-black/70 leading-relaxed text-justify">
+  <span className="font-semibold text-[rgba(8,42,94,0.9)]">
+    Learn. Practice. Get Placed —
+  </span>{" "}
+  the Qmatrix way. We offer flexible schedules, affordable fees, and
+  dedicated placement support to help students launch successful IT careers.
+</p>
 
+<p className="mt-4 text-black/70 leading-relaxed text-justify">
+  With consistently high student satisfaction, strong mentorship, and
+  career-focused training, Qmatrix Technologies stands as a trusted destination
+  for IT education in Chennai.
+</p>
           {/* Accordion */}
           <div className="mt-8 overflow-hidden rounded-2xl border border-black/10 bg-white shadow-sm">
             <button
@@ -78,7 +96,10 @@ export default function AboutSections() {
               </span>
 
               <span className="grid h-10 w-10 place-items-center rounded-full border border-black/10 bg-white">
-                <motion.span animate={{ rotate: open ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                <motion.span
+                  animate={{ rotate: open ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
                   <ChevronDown className="h-5 w-5 text-[rgba(145,22,161,1)]" />
                 </motion.span>
               </span>
