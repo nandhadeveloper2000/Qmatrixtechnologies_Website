@@ -17,14 +17,27 @@ const pageMetaMap: Record<string, { title: string; description: string }> = {
     title: "Edit Placements Page SEO",
     description: "Manage metadata for the public placements page (/placements).",
   },
+  courses: {
+    title: "Edit Courses Listing SEO",
+    description: "Manage metadata for the public /courses listing page.",
+  },
+  blogs: {
+    title: "Edit Blog Listing SEO",
+    description:
+      "Manage metadata for the public /blogs page. Individual blog post SEO is managed inside each blog editor.",
+  },
 };
 
-export default async function AdminSEOEditPage({
+type AdminSEOEditPageProps = {
+  params: {
+    pageKey: string;
+  };
+};
+
+export default function AdminSEOEditPage({
   params,
-}: {
-  params: Promise<{ pageKey: string }>;
-}) {
-  const { pageKey } = await params;
+}: AdminSEOEditPageProps) {
+  const { pageKey } = params;
 
   const meta = pageMetaMap[pageKey] || {
     title: `Edit ${pageKey} SEO`,

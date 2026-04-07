@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Protected from "@/app/components/admin/Protected";
-import CourseForm from "@/app/components/admin/CourseForm";
+import CourseForm, {
+  type CourseSubmitPayload,
+} from "@/app/components/admin/CourseForm";
 import SummaryApi from "@/app/constants/SummaryApi";
 import { apiFetch } from "@/app/lib/apiFetch";
 import type { Course } from "@/app/types/course";
@@ -22,12 +24,16 @@ export default function EditCoursePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  async function loadCourse() {
+  const courseId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+
+  const loadCourse = useCallback(async () => {
+    if (!courseId) return;
+
     try {
       setLoading(true);
       setError("");
 
-      const endpoint = SummaryApi.admin_course_by_id(params.id);
+      const endpoint = SummaryApi.admin_course_by_id(courseId);
 
       const res = await apiFetch<CourseResponse>(endpoint.url, {
         method: endpoint.method,
@@ -40,15 +46,29 @@ export default function EditCoursePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [courseId]);
 
-  async function handleUpdate(payload: Partial<Course>) {
+  async function handleUpdate(payload: CourseSubmitPayload) {
+    if (!courseId) return;
+
     try {
-      const endpoint = SummaryApi.update_course(params.id);
+      setError("");
+
+      const endpoint = SummaryApi.update_course(courseId);
+
+      const normalizedPayload: Partial<Course> = {
+        ...payload,
+        seo: payload.seo
+          ? {
+              ...payload.seo,
+              schemaType: "Course",
+            }
+          : undefined,
+      };
 
       await apiFetch(endpoint.url, {
         method: endpoint.method,
-        json: payload,
+        json: normalizedPayload,
       });
 
       router.push("/admin/courses");
@@ -58,10 +78,8 @@ export default function EditCoursePage() {
   }
 
   useEffect(() => {
-    if (params?.id) {
-      loadCourse();
-    }
-  }, [params?.id]);
+    loadCourse();
+  }, [loadCourse]);
 
   return (
     <Protected allow={["ADMIN", "EDITOR"]}>

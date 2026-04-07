@@ -33,6 +33,19 @@ const seoPages = [
     description: "Manage SEO metadata for the public placements page (/placements).",
     icon: Briefcase,
   },
+  {
+    title: "Courses Listing SEO",
+    key: "courses",
+    description: "Manage SEO metadata for the public courses listing page (/courses).",
+    icon: BookOpen,
+  },
+  {
+    title: "Blog Listing SEO",
+    key: "blogs",
+    description:
+      "Manage SEO metadata for the public blog listing page (/blogs), not individual posts.",
+    icon: Search,
+  },
 ];
 
 export default function SEOManagerPage() {

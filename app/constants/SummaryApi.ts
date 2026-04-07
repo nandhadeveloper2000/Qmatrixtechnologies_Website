@@ -206,6 +206,20 @@ const SummaryApi = {
     url: `/contact/${id}/reply`,
     method: "POST",
   }),
+    admin_enquiries: {
+    url: "/enquiries",
+    method: "GET",
+  },
+
+  admin_enquiry_update: (id: string) => ({
+    url: `/enquiries/${id}`,
+    method: "PUT",
+  }),
+
+  admin_enquiry_delete: (id: string) => ({
+    url: `/enquiries/${id}`,
+    method: "DELETE",
+  }),
 };
 
 export default SummaryApi;
