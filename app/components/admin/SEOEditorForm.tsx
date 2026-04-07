@@ -24,11 +24,11 @@ type FormState = {
 };
 
 function getFallbackCanonical(pageKey: string) {
-  const SITE_URL =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://Qmatrixtechnologies.com";
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://qmatrixtechnologies.com";
 
-  if (pageKey === "home") return SITE_URL;
-  return `${SITE_URL}/${pageKey}`;
+  if (pageKey === "home") return siteUrl;
+  return `${siteUrl}/${pageKey}`;
 }
 
 function toFormState(pageKey: string, seo?: PageSEO | null): FormState {
@@ -43,6 +43,23 @@ function toFormState(pageKey: string, seo?: PageSEO | null): FormState {
     robots: seo?.robots || "index,follow",
     schemaType: seo?.schemaType || "WebPage",
   };
+}
+
+function getErrorMessage(err: unknown, fallback = "Something went wrong") {
+  if (err instanceof Error && err.message) {
+    return err.message;
+  }
+
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "message" in err &&
+    typeof (err as { message?: unknown }).message === "string"
+  ) {
+    return (err as { message: string }).message;
+  }
+
+  return fallback;
 }
 
 export default function SEOEditorForm({
@@ -72,6 +89,7 @@ export default function SEOEditorForm({
       try {
         setLoading(true);
         setError("");
+        setSuccess("");
 
         const endpoint = SummaryApi.admin_page_seo_by_key(pageKey);
 
@@ -80,7 +98,7 @@ export default function SEOEditorForm({
         });
 
         if (!ignore) {
-          setForm(toFormState(pageKey, res.data));
+          setForm(toFormState(pageKey, res?.data || null));
         }
       } catch {
         if (!ignore) {
@@ -120,10 +138,13 @@ export default function SEOEditorForm({
         throw new Error("Canonical URL is required");
       }
 
-      const endpoint = SummaryApi.upsert_page_seo(pageKey);
+      const endpoint = SummaryApi.admin_page_seo_upsert(pageKey);
 
       await apiFetch(endpoint.url, {
         method: endpoint.method,
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           metaTitle: form.metaTitle.trim(),
           metaDescription: form.metaDescription.trim(),
@@ -138,9 +159,6 @@ export default function SEOEditorForm({
           robots: form.robots.trim() || "index,follow",
           schemaType: form.schemaType,
         }),
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
 
       setSuccess("SEO saved successfully");
@@ -254,7 +272,7 @@ export default function SEOEditorForm({
                   setForm((prev) => ({ ...prev, keywordsText: e.target.value }))
                 }
                 className="input"
-                placeholder="seo, marketing, technology"
+                placeholder="seo, training institute, cloud, data engineering"
               />
             </div>
 
@@ -268,7 +286,7 @@ export default function SEOEditorForm({
                   setForm((prev) => ({ ...prev, canonicalUrl: e.target.value }))
                 }
                 className="input"
-                placeholder="https://Qmatrixtechnologies.com/page"
+                placeholder="https://qmatrixtechnologies.com/page"
               />
             </div>
 
@@ -321,14 +339,18 @@ export default function SEOEditorForm({
               <label className="mb-1.5 block text-sm font-medium text-slate-700">
                 Robots
               </label>
-              <input
+              <select
                 value={form.robots}
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, robots: e.target.value }))
                 }
                 className="input"
-                placeholder="index,follow"
-              />
+              >
+                <option value="index,follow">index,follow</option>
+                <option value="noindex,follow">noindex,follow</option>
+                <option value="index,nofollow">index,nofollow</option>
+                <option value="noindex,nofollow">noindex,nofollow</option>
+              </select>
             </div>
 
             <div>
@@ -455,9 +477,4 @@ export default function SEOEditorForm({
       </div>
     </section>
   );
-}
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getErrorMessage(err: unknown, _arg1: string): import("react").SetStateAction<string> {
-    throw new Error("Function not implemented.");
 }

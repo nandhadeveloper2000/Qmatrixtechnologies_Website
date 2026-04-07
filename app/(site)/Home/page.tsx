@@ -22,15 +22,21 @@ import HomePopupLauncher from "@/app/components/common/HomePopupLauncher";
 const HOME_FALLBACK = {
   title: "Best Software Training Institute in Chennai | Qmatrix Technologies",
   description:
-    "Qmatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
-  canonical: `${SITE_URL}/`,
+    "Qmatrix Technologies offers Cloud, Data Engineering & AI training in Chennai with real-time projects, expert trainers, and placement support.",
+  canonical: SITE_URL,
   keywords: [
     "software training institute in chennai",
     "best IT training institute in chennai",
     "cloud computing course in chennai",
     "data engineering training in chennai",
-    "Qmatrix technologies",
+    "snowflake training in chennai",
+    "aws training in chennai",
+    "azure training in chennai",
+    "etl testing course in chennai",
+    "qmatrix technologies",
   ],
+  ogImage:
+    "https://res.cloudinary.com/dfbbnzwmc/image/upload/f_auto,q_auto/v1/qmatrix/default-og.jpg",
   robots: "index,follow" as const,
   schemaType: "WebPage" as const,
 };
@@ -50,7 +56,9 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <HomePopupLauncher delay={0} onlyOncePerSession />
+
       <Hero />
       <CompanyLogos />
       <CoursesSection />

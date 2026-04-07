@@ -1,10 +1,14 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import { SpeedInsights } from '@vercel/speed-insights/next';
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
-  title: "Qmatrix Technologies",
-  description: "Best Software Training Institute in Chennai",
+  metadataBase: new URL("https://qmatrixtechnologies.com"),
+  title: {
+    default: "Qmatrix Technologies",
+    template: "%s",
+  },
+  description: "Qmatrix Technologies official website",
 };
 
 export default function RootLayout({
@@ -14,8 +18,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}        
-        <SpeedInsights /></body>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

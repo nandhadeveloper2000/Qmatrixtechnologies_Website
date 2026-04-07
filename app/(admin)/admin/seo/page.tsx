@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Search, Globe, FileText, BookOpen, FolderOpen } from "lucide-react";
+import {
+  Search,
+  Globe,
+  FileText,
+  BookOpen,
+  FolderOpen,
+  Briefcase,
+} from "lucide-react";
 
 const seoPages = [
   {
@@ -21,17 +28,10 @@ const seoPages = [
     icon: FolderOpen,
   },
   {
-    title: "Courses Listing SEO",
-    key: "courses",
-    description: "Manage SEO metadata for the courses listing page (/courses).",
-    icon: BookOpen,
-  },
-  {
-    title: "Blog Listing SEO",
-    key: "blogs",
-    description:
-      "Manage SEO metadata for the blog listing page (/blogs), not individual blog posts.",
-    icon: Search,
+    title: "Placements Page SEO",
+    key: "placements",
+    description: "Manage SEO metadata for the public placements page (/placements).",
+    icon: Briefcase,
   },
 ];
 
@@ -46,8 +46,9 @@ export default function SEOManagerPage() {
           Website SEO Dashboard
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600">
-          Manage SEO metadata for your main public website pages. For individual
-          blog post SEO, open that blog inside the Blogs section.
+          Manage SEO metadata for main public pages. Individual course SEO should
+          be managed inside each course editor, and individual blog SEO should be
+          managed inside each blog editor.
         </p>
       </div>
 

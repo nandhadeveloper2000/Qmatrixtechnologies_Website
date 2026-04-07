@@ -1,3 +1,11 @@
+export type SeoRobots =
+  | "index,follow"
+  | "noindex,follow"
+  | "index,nofollow"
+  | "noindex,nofollow";
+
+export type SeoSchemaType = "WebPage" | "Article" | "Course" | "FAQPage";
+
 export interface IBlogImage {
   url: string;
   public_id?: string | null;
@@ -28,8 +36,22 @@ export interface IBlogFaq {
 }
 
 export interface IBlogCreator {
+  _id?: string;
   name?: string;
+  email?: string;
   role?: string;
+}
+
+export interface IBlogSEO {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: IBlogImage | null;
+  robots?: SeoRobots;
+  schemaType?: SeoSchemaType;
 }
 
 export interface IBlog {
@@ -54,10 +76,24 @@ export interface IBlog {
   sections?: IBlogSection[];
   faqs?: IBlogFaq[];
 
+  seo?: IBlogSEO;
+
   isPublished?: boolean;
   publishedAt?: string | null;
 
   createdBy?: IBlogCreator | string | null;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface BlogsListResponse {
+  success?: boolean;
+  data?: IBlog[];
+  blogs?: IBlog[];
+}
+
+export interface BlogSingleResponse {
+  success?: boolean;
+  data?: IBlog | null;
+  blog?: IBlog | null;
 }

@@ -2,290 +2,163 @@ import type { Metadata } from "next";
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
 
 export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-  "https://qmatrixtechnologies-website.vercel.app";
+  process.env.NEXT_PUBLIC_SITE_URL?.trim() || "https://qmatrixtechnologies.com";
 
-export const DEFAULT_OG_IMAGE =
-  "https://res.cloudinary.com/dfbbnzwmc/image/upload/f_auto,q_auto/v1/qmatrix/default-og.jpg";
+export type SeoSchemaType = "WebPage" | "Article" | "Course" | "FAQPage";
 
-export type SEORecord = {
-  _id?: string;
-  pageKey: string;
-  metaTitle: string;
-  metaDescription: string;
-  keywords: string[];
-  canonicalUrl: string;
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string | { url?: string | null } | null;
-  robots?: string;
-  schemaType?: "WebPage" | "Article" | "Course" | "FAQPage";
-  createdAt?: string;
-  updatedAt?: string;
-};
-
-export type BuiltSEO = {
-  title: string;
-  description: string;
-  canonical: string;
-  keywords: string[];
-  ogTitle?: string;
-  ogDescription?: string;
-  ogImage?: string;
-  robots?: string;
-  schemaType?: "WebPage" | "Article" | "Course" | "FAQPage";
-};
-
-type SEOResponse = {
-  success: boolean;
-  data?: SEORecord;
-  message?: string;
-};
-
-type StaticSEOInput = {
-  title: string;
-  description: string;
-  canonical: string;
+export type PageSEO = {
+  metaTitle?: string;
+  metaDescription?: string;
   keywords?: string[];
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
   ogImage?: string;
   robots?: string;
-  schemaType?: "WebPage" | "Article" | "Course" | "FAQPage";
+  schemaType?: SeoSchemaType;
 };
 
-export const PAGE_SEO_FALLBACKS: Record<string, StaticSEOInput> = {
-  home: {
-    title: "Best Software Training Institute in Chennai | Qmatrix Technologies",
-    description:
-      "Qmatrix Technologies offers job-ready software training in Chennai with expert mentors, real-time projects, and placement support.",
-    canonical: `${SITE_URL}/`,
-    keywords: [
-      "software training institute in chennai",
-      "best IT training institute in chennai",
-      "cloud computing course in chennai",
-      "data engineering training in chennai",
-      "Qmatrix technologies",
-    ],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "WebPage",
-  },
-  about: {
-    title: "About Qmatrix Technologies",
-    description:
-      "Learn about Qmatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
-    canonical: `${SITE_URL}/about`,
-    keywords: [
-      "about Qmatrix technologies",
-      "software institute in chennai",
-      "IT training center in chennai",
-      "placement support institute",
-    ],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "WebPage",
-  },
-  contact: {
-    title: "Contact Qmatrix Technologies | Chennai",
-    description:
-      "Contact Qmatrix Technologies for course details, counseling, batch timings, fees, and placement support in Chennai.",
-    canonical: `${SITE_URL}/contact`,
-    keywords: [
-      "contact Qmatrix technologies",
-      "course enquiry chennai",
-      "IT training contact",
-      "software institute contact chennai",
-    ],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "WebPage",
-  },
-  blogs: {
-    title: "Blogs & Insights | Qmatrix Technologies",
-    description:
-      "Explore premium blogs on career guidance, AI, cloud, development, and future-ready technologies.",
-    canonical: `${SITE_URL}/blogs`,
-    keywords: [
-      "tech blog india",
-      "IT career blog",
-      "cloud computing blog",
-      "data engineering blog",
-      "software training blog",
-      "Qmatrix blog",
-    ],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "Article",
-  },
-  courses: {
-    title: "Software Courses in Chennai | Qmatrix Technologies",
-    description:
-      "Explore software training courses in Chennai with real-time projects, expert mentors, and placement support.",
-    canonical: `${SITE_URL}/courses`,
-    keywords: [
-      "software courses in chennai",
-      "IT courses in chennai",
-      "best software training institute",
-    ],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "Course",
-  },
+export type FallbackSEO = {
+  title: string;
+  description: string;
+  canonical: string;
+  keywords: string[];
+  ogImage: string;
+  robots: "index,follow" | "noindex,nofollow";
+  schemaType: SeoSchemaType;
 };
 
-export function getSafeSiteUrl(): string {
-  try {
-    return new URL(SITE_URL).toString().replace(/\/$/, "");
-  } catch {
-    return "https://Qmatrixtechnologies-website.vercel.app";
-  }
+function cleanString(value?: string | null) {
+  if (!value) return undefined;
+  const trimmed = value.trim();
+  return trimmed.length ? trimmed : undefined;
 }
 
-export function getSafeMetadataBase(): URL {
-  try {
-    return new URL(getSafeSiteUrl());
-  } catch {
-    return new URL("https://Qmatrixtechnologies-website.vercel.app");
-  }
+function cleanArray(value?: string[] | null) {
+  if (!Array.isArray(value)) return undefined;
+  const arr = value.map((item) => item?.trim()).filter(Boolean) as string[];
+  return arr.length ? arr : undefined;
 }
 
-export function normalizeKeywords(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((item): item is string => typeof item === "string" && item.trim().length > 0);
+function pick(value: string | undefined, fallback: string) {
+  return value && value.trim() ? value.trim() : fallback;
 }
 
-export async function getPageSEO(pageKey: string): Promise<SEORecord | null> {
-  try {
-    const endpoint = SummaryApi.public_page_seo(pageKey);
+function pickArray(value: string[] | undefined, fallback: string[]) {
+  return Array.isArray(value) && value.length > 0 ? value : fallback;
+}
 
-    const res = await fetch(`${baseURL}${endpoint.url}`, {
-      method: endpoint.method,
+function normalizeCanonical(url?: string) {
+  const value = cleanString(url);
+  if (!value) return undefined;
+  return value.endsWith("/") ? value.slice(0, -1) : value;
+}
+
+export async function getPageSEO(pageKey: string): Promise<PageSEO | null> {
+  try {
+    const url = `${baseURL}${SummaryApi.public_page_seo(pageKey).url}`;
+
+    const res = await fetch(url, {
+      method: "GET",
       cache: "no-store",
     });
 
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error(
+        `[SEO] Fetch failed for ${pageKey}: ${res.status} ${res.statusText}`
+      );
+      return null;
+    }
 
-    const data: SEOResponse = await res.json();
-    return data.data || null;
+    const json = await res.json();
+    const raw = json?.data ?? json;
+
+    if (!raw || typeof raw !== "object") {
+      console.error(`[SEO] Invalid response for ${pageKey}:`, json);
+      return null;
+    }
+
+    return {
+      metaTitle: cleanString(raw.metaTitle),
+      metaDescription: cleanString(raw.metaDescription),
+      keywords: cleanArray(raw.keywords),
+      canonicalUrl: normalizeCanonical(raw.canonicalUrl),
+      ogTitle: cleanString(raw.ogTitle),
+      ogDescription: cleanString(raw.ogDescription),
+      ogImage: cleanString(raw.ogImage),
+      robots: cleanString(raw.robots),
+      schemaType: raw.schemaType || undefined,
+    };
   } catch (error) {
-    console.error(`getPageSEO(${pageKey}) error:`, error);
+    console.error(`[SEO] getPageSEO(${pageKey}) failed:`, error);
     return null;
   }
 }
 
-export function normalizeDbSeo(
-  dbSeo: SEORecord | null | undefined,
-  pageKey: string
-): BuiltSEO {
-  const fallback = PAGE_SEO_FALLBACKS[pageKey] || {
-    title: "Qmatrix Technologies",
-    description: "Premium IT training institute in Chennai.",
-    canonical: getSafeSiteUrl(),
-    keywords: [],
-    ogImage: DEFAULT_OG_IMAGE,
-    robots: "index,follow",
-    schemaType: "WebPage" as const,
-  };
-
-  return {
-    title: dbSeo?.metaTitle || fallback.title,
-    description: dbSeo?.metaDescription || fallback.description,
-    canonical: dbSeo?.canonicalUrl || fallback.canonical,
-    keywords:
-      dbSeo?.keywords && dbSeo.keywords.length
-        ? normalizeKeywords(dbSeo.keywords)
-        : normalizeKeywords(fallback.keywords ?? []),
-    ogTitle: dbSeo?.ogTitle || dbSeo?.metaTitle || fallback.title,
-    ogDescription:
-      dbSeo?.ogDescription || dbSeo?.metaDescription || fallback.description,
-    ogImage: imageToUrl(dbSeo?.ogImage) || fallback.ogImage || DEFAULT_OG_IMAGE,
-    robots: dbSeo?.robots || fallback.robots || "index,follow",
-    schemaType: dbSeo?.schemaType || fallback.schemaType || "WebPage",
-  };
-}
-
 export function buildStaticMetadata(
-  dbSeo: SEORecord | null,
-  fallback: StaticSEOInput
+  seo: PageSEO | null,
+  fallback: FallbackSEO
 ): Metadata {
-  const normalized = normalizeDbSeo(dbSeo, "__custom__");
-
-  const title = dbSeo?.metaTitle || fallback.title || normalized.title;
-  const description =
-    dbSeo?.metaDescription || fallback.description || normalized.description;
-  const canonical =
-    dbSeo?.canonicalUrl || fallback.canonical || normalized.canonical;
-  const keywords =
-    dbSeo?.keywords && dbSeo.keywords.length
-      ? normalizeKeywords(dbSeo.keywords)
-      : normalizeKeywords(fallback.keywords ?? normalized.keywords ?? []);
-  const ogTitle = dbSeo?.ogTitle || title;
-  const ogDescription = dbSeo?.ogDescription || description;
-  const ogImage =
-    imageToUrl(dbSeo?.ogImage) ||
-    fallback.ogImage ||
-    DEFAULT_OG_IMAGE;
-  const robots = dbSeo?.robots || fallback.robots || "index,follow";
+  const title = pick(seo?.metaTitle, fallback.title);
+  const description = pick(seo?.metaDescription, fallback.description);
+  const canonical = pick(
+    normalizeCanonical(seo?.canonicalUrl),
+    normalizeCanonical(fallback.canonical) || fallback.canonical
+  );
+  const ogTitle = pick(seo?.ogTitle, title);
+  const ogDescription = pick(seo?.ogDescription, description);
+  const ogImage = pick(seo?.ogImage, fallback.ogImage);
+  const robots = pick(seo?.robots, fallback.robots);
+  const keywords = pickArray(seo?.keywords, fallback.keywords);
 
   return {
-    metadataBase: getSafeMetadataBase(),
     title,
     description,
     keywords,
     alternates: {
       canonical,
     },
-    robots,
+    robots: {
+      index: robots.includes("index"),
+      follow: robots.includes("follow"),
+    },
     openGraph: {
       title: ogTitle,
       description: ogDescription,
       url: canonical,
       siteName: "Qmatrix Technologies",
       type: "website",
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-              width: 1200,
-              height: 630,
-              alt: ogTitle,
-            },
-          ]
-        : [],
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: ogTitle,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: ogTitle,
       description: ogDescription,
-      images: ogImage ? [ogImage] : [],
+      images: [ogImage],
     },
   };
 }
 
-export function imageToUrl(
-  image?: string | { url?: string | null } | null
-): string {
-  if (!image) return "";
-  if (typeof image === "string") return image;
-  return typeof image.url === "string" ? image.url : "";
-}
-
 export function buildJsonLd(
-  pageKey: string,
-  dbSeo: SEORecord | null,
-  fallback?: StaticSEOInput
+  _pageKey: string,
+  seo: PageSEO | null,
+  fallback: FallbackSEO
 ) {
-  const title =
-    dbSeo?.metaTitle || fallback?.title || "Qmatrix Technologies";
-  const description =
-    dbSeo?.metaDescription ||
-    fallback?.description ||
-    "Premium IT training institute in Chennai.";
-  const canonical =
-    dbSeo?.canonicalUrl ||
-    fallback?.canonical ||
-    `${getSafeSiteUrl()}/${pageKey === "home" ? "" : pageKey}`;
-  const schemaType =
-    dbSeo?.schemaType || fallback?.schemaType || "WebPage";
+  const title = pick(seo?.metaTitle, fallback.title);
+  const description = pick(seo?.metaDescription, fallback.description);
+  const canonical = pick(
+    normalizeCanonical(seo?.canonicalUrl),
+    normalizeCanonical(fallback.canonical) || fallback.canonical
+  );
+  const image = pick(seo?.ogImage, fallback.ogImage);
+  const schemaType = seo?.schemaType || fallback.schemaType;
 
   return {
     "@context": "https://schema.org",
@@ -294,14 +167,15 @@ export function buildJsonLd(
     headline: title,
     description,
     url: canonical,
-    image: imageToUrl(dbSeo?.ogImage) || fallback?.ogImage || DEFAULT_OG_IMAGE,
+    image,
+    mainEntityOfPage: canonical,
     publisher: {
       "@type": "Organization",
       name: "Qmatrix Technologies",
-      url: getSafeSiteUrl(),
+      url: SITE_URL,
       logo: {
         "@type": "ImageObject",
-        url: DEFAULT_OG_IMAGE,
+        url: `${SITE_URL}/logo.png`,
       },
     },
   };

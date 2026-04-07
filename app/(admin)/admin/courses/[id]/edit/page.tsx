@@ -4,7 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
 import Protected from "@/app/components/admin/Protected";
-import CourseForm from "@/app/components/admin/CourseForm";
+import CourseForm, {
+  type CourseSubmitPayload,
+} from "@/app/components/admin/CourseForm";
 import SummaryApi from "@/app/constants/SummaryApi";
 import { apiFetch } from "@/app/lib/apiFetch";
 import type { Course } from "@/app/types/course";
@@ -22,6 +24,7 @@ export default function EditCoursePage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     async function loadCourse() {
@@ -49,15 +52,21 @@ export default function EditCoursePage() {
     loadCourse();
   }, [params?.id]);
 
-  async function handleUpdate(payload: Partial<Course>) {
-    const endpoint = SummaryApi.update_course(params.id);
+  async function handleUpdate(payload: CourseSubmitPayload) {
+    try {
+      setSubmitting(true);
 
-    await apiFetch(endpoint.url, {
-      method: endpoint.method,
-      json: payload,
-    });
+      const endpoint = SummaryApi.update_course(params.id);
 
-    router.push("/admin/courses");
+      await apiFetch(endpoint.url, {
+        method: endpoint.method,
+        json: payload,
+      });
+
+      router.push("/admin/courses");
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -71,7 +80,11 @@ export default function EditCoursePage() {
           {error}
         </div>
       ) : course ? (
-        <CourseForm initialData={course} onSubmit={handleUpdate} />
+        <CourseForm
+          initialData={course}
+          onSubmit={handleUpdate}
+          submitting={submitting}
+        />
       ) : (
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
           Course not found.

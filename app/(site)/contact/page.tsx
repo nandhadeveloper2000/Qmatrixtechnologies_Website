@@ -21,6 +21,7 @@ const CONTACT_FALLBACK = {
     "IT training contact",
     "software institute contact chennai",
   ],
+  ogImage: `${SITE_URL}/og-contact.png`,
   robots: "index,follow" as const,
   schemaType: "WebPage" as const,
 };

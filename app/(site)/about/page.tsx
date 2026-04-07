@@ -15,16 +15,20 @@ import {
 } from "@/app/lib/seo";
 
 const ABOUT_FALLBACK = {
-  title: "About Qmatrix Technologies",
+  title: "About Qmatrix Technologies | Best IT Training Institute in Chennai",
   description:
-    "Learn about Qmatrix Technologies, our mission, expert mentors, placement-focused training model, and future-ready IT programs.",
+    "Learn about Qmatrix Technologies, a top software training institute in Chennai offering Cloud, Data Engineering, and AI courses with placement support.",
   canonical: `${SITE_URL}/about`,
   keywords: [
-    "about Qmatrix technologies",
-    "software institute in chennai",
-    "IT training center in chennai",
-    "placement support institute",
+    "about qmatrix technologies",
+    "software training institute chennai",
+    "IT training institute chennai",
+    "data engineering institute chennai",
+    "cloud training institute chennai",
+    "placement training institute chennai",
   ],
+  ogImage:
+    "https://res.cloudinary.com/dfbbnzwmc/image/upload/f_auto,q_auto/v1/qmatrix/og-about.png",
   robots: "index,follow" as const,
   schemaType: "WebPage" as const,
 };
@@ -44,6 +48,7 @@ export default async function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+
       <AboutBanner />
       <AboutSections />
       <WhyChooseSection />

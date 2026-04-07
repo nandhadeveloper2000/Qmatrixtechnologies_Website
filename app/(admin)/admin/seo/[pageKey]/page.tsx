@@ -13,14 +13,9 @@ const pageMetaMap: Record<string, { title: string; description: string }> = {
     title: "Edit Contact Page SEO",
     description: "Manage metadata for the public contact page (/contact).",
   },
-  courses: {
-    title: "Edit Courses Listing SEO",
-    description: "Manage metadata for the public /courses listing page.",
-  },
-  blogs: {
-    title: "Edit Blog Listing SEO",
-    description:
-      "Manage metadata for the public /blogs page. Individual blog post SEO is managed inside each blog editor.",
+  placements: {
+    title: "Edit Placements Page SEO",
+    description: "Manage metadata for the public placements page (/placements).",
   },
 };
 

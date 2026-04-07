@@ -1,6 +1,14 @@
 export type CourseCategory = "New One" | "Recommended" | "Most Placed";
 export type CourseMode = "Online" | "Offline" | "Online/Offline";
 
+export type SeoRobots =
+  | "index,follow"
+  | "noindex,follow"
+  | "index,nofollow"
+  | "noindex,nofollow";
+
+export type SeoSchemaType = "Course";
+
 export interface CourseImage {
   url: string;
   public_id?: string | null;
@@ -30,7 +38,20 @@ export interface CourseFaq {
 export interface CourseCreator {
   _id?: string;
   name?: string;
+  email?: string;
   role?: string;
+}
+
+export interface CourseSEO {
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  canonicalUrl?: string;
+  ogTitle?: string;
+  ogDescription?: string;
+  ogImage?: CourseImage | null;
+  robots?: SeoRobots;
+  schemaType?: SeoSchemaType;
 }
 
 export interface Course {
@@ -64,10 +85,13 @@ export interface Course {
   interviewQuestions?: CourseInterviewQuestion[];
   faq?: CourseFaq[];
 
+  seo?: CourseSEO;
+
   isFeatured?: boolean;
   isPublished?: boolean;
 
   createdBy?: CourseCreator | string | null;
+  updatedBy?: CourseCreator | string | null;
 
   publishedAt?: string;
   createdAt?: string;

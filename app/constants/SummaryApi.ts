@@ -1,6 +1,5 @@
 export const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE || "https://qmatrixtechnologies.onrender.com/api";
-  // process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5000/api";
+ process.env.NEXT_PUBLIC_API_BASE?.trim() || "http://localhost:5000/api";
 
 const SummaryApi = {
   requestOtp: {
@@ -53,6 +52,7 @@ const SummaryApi = {
     method: "DELETE",
   }),
 
+  /* COURSES */
   admin_courses: {
     url: "/courses/admin/all",
     method: "GET",
@@ -98,8 +98,9 @@ const SummaryApi = {
     method: "GET",
   }),
 
+  /* BLOGS */
   admin_blogs: {
-    url: "/blogs/public",
+    url: "/blogs",
     method: "GET",
   },
 
@@ -119,7 +120,7 @@ const SummaryApi = {
   },
 
   update_blog: (id: string) => ({
-    url: `/blogs/update/${id}`,
+    url: `/blogs/${id}`,
     method: "PUT",
   }),
 
@@ -133,15 +134,21 @@ const SummaryApi = {
     method: "GET",
   }),
 
+  /* PAGE SEO */
   public_page_seo: (pageKey: string) => ({
     url: `/page-seo/public/${pageKey}`,
     method: "GET",
   }),
 
   admin_page_seo_list: {
-    url: `/page-seo/admin`,
+    url: "/page-seo/admin",
     method: "GET",
   },
+
+  admin_page_seo_by_key: (pageKey: string) => ({
+    url: `/page-seo/admin/${pageKey}`,
+    method: "GET",
+  }),
 
   admin_page_seo_upsert: (pageKey: string) => ({
     url: `/page-seo/admin/${pageKey}`,
@@ -153,16 +160,7 @@ const SummaryApi = {
     method: "DELETE",
   }),
 
-  admin_page_seo_by_key: (pageKey: string) => ({
-    url: `/page-seo/admin/${pageKey}`,
-    method: "GET",
-  }),
-
-  upsert_page_seo: (pageKey: string) => ({
-    url: `/page-seo/admin/${pageKey}`,
-    method: "PUT",
-  }),
-
+  /* ENQUIRIES */
   create_enquiry: {
     url: "/enquiries",
     method: "POST",
@@ -183,21 +181,7 @@ const SummaryApi = {
     method: "DELETE",
   }),
 
-  admin_enquiries: {
-    url: "/enquiries",
-    method: "GET",
-  },
-
-  admin_enquiry_update: (id: string) => ({
-    url: `/enquiries/${id}`,
-    method: "PUT",
-  }),
-
-  admin_enquiry_delete: (id: string) => ({
-    url: `/enquiries/${id}`,
-    method: "DELETE",
-  }),
-
+  /* CONTACT */
   contact_create: {
     url: "/contact/create",
     method: "POST",

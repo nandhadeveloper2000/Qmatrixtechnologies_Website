@@ -6,11 +6,17 @@ import AlumniWorkSection from "@/app/components/About/AlumniWorkSection";
 import NewsletterCTA from "@/app/components/Blogs/NewsletterCTA";
 import { SITE_URL } from "@/app/lib/seo";
 import SummaryApi, { baseURL } from "@/app/constants/SummaryApi";
-import type { Course, CourseSingleResponse, CoursesListResponse } from "@/app/types/course";
+import type {
+  Course,
+  CourseSingleResponse,
+  CoursesListResponse,
+  SeoRobots,
+} from "@/app/types/course";
 
 async function getPublishedCourses(): Promise<Course[]> {
   try {
     const endpoint = SummaryApi.public_courses;
+
     const res = await fetch(`${baseURL}${endpoint.url}`, {
       method: endpoint.method,
       cache: "no-store",
@@ -28,6 +34,7 @@ async function getPublishedCourses(): Promise<Course[]> {
 async function getCourse(slug: string): Promise<Course | null> {
   try {
     const endpoint = SummaryApi.public_course_by_slug(slug);
+
     const res = await fetch(`${baseURL}${endpoint.url}`, {
       method: endpoint.method,
       cache: "no-store",
@@ -47,9 +54,101 @@ function stripHtml(html?: string) {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function toAbsoluteUrl(url?: string | null) {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  return `${SITE_URL}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
+function normalizeKeywords(keywords?: string[]) {
+  if (!keywords?.length) return undefined;
+  const cleaned = keywords.map((k) => k.trim()).filter(Boolean);
+  return cleaned.length ? cleaned : undefined;
+}
+
+function mapRobots(robots?: SeoRobots) {
+  switch (robots) {
+    case "noindex,follow":
+      return { index: false, follow: true };
+    case "index,nofollow":
+      return { index: true, follow: false };
+    case "noindex,nofollow":
+      return { index: false, follow: false };
+    case "index,follow":
+    default:
+      return { index: true, follow: true };
+  }
+}
+
+function getSeoData(course: Course) {
+  const fallbackTitle = `${course.title} Course in Chennai | Qmatrix Technologies`;
+  const fallbackDescription =
+    stripHtml(course.shortDesc) ||
+    stripHtml(course.description) ||
+    `${course.title} training in Chennai with real-time projects and placement support.`;
+
+  const seo = course.seo;
+
+  const title = seo?.metaTitle?.trim() || fallbackTitle;
+  const description = seo?.metaDescription?.trim() || fallbackDescription;
+  const canonical =
+    seo?.canonicalUrl?.trim() || `${SITE_URL}/course-detail/${course.slug}`;
+  const ogTitle = seo?.ogTitle?.trim() || title;
+  const ogDescription = seo?.ogDescription?.trim() || description;
+  const ogImage =
+    toAbsoluteUrl(seo?.ogImage?.url) || toAbsoluteUrl(course.coverImage?.url);
+  const ogImageAlt =
+    seo?.ogImage?.alt || course.coverImage?.alt || course.title;
+
+  return {
+    title,
+    description,
+    canonical,
+    ogTitle,
+    ogDescription,
+    ogImage,
+    ogImageAlt,
+    keywords: normalizeKeywords(seo?.keywords),
+    robots: mapRobots(seo?.robots),
+  };
+}
+
+function buildCourseJsonLd(course: Course) {
+  const seo = getSeoData(course);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": course.seo?.schemaType || "Course",
+    name: course.title,
+    description: seo.description,
+    url: seo.canonical,
+    image: seo.ogImage ? [seo.ogImage] : undefined,
+    provider: {
+      "@type": "Organization",
+      name: "Qmatrix Technologies",
+      url: SITE_URL,
+    },
+    courseMode: course.mode,
+    timeRequired: course.duration,
+    hasCourseInstance: {
+      "@type": "CourseInstance",
+      courseMode: course.mode,
+      instructor: {
+        "@type": "Organization",
+        name: "Qmatrix Technologies",
+      },
+    },
+  };
+}
+
 export async function generateStaticParams() {
   const courses = await getPublishedCourses();
-  return courses.map((c) => ({ course: c.slug }));
+
+  return courses
+    .filter((course) => course.slug)
+    .map((course) => ({
+      course: course.slug,
+    }));
 }
 
 export const dynamicParams = true;
@@ -66,39 +165,45 @@ export async function generateMetadata({
     return {
       title: "Course Not Found | Qmatrix Technologies",
       description: "The requested course could not be found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
     };
   }
 
-  const title = `${course.title} Course in Chennai | Qmatrix Technologies`;
-  const description =
-    stripHtml(course.description) ||
-    `${course.title} training in Chennai with real-time projects and placement support.`;
-  const canonical = `${SITE_URL}/course-detail/${course.slug}`;
+  const seo = getSeoData(course);
 
   return {
     metadataBase: new URL(SITE_URL),
-    title,
-    description,
+    title: seo.title,
+    description: seo.description,
+    keywords: seo.keywords,
     alternates: {
-      canonical,
+      canonical: seo.canonical,
     },
     openGraph: {
-      title,
-      description,
-      url: canonical,
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+      url: seo.canonical,
       siteName: "Qmatrix Technologies",
-      images: course.coverImage?.url
-        ? [{ url: course.coverImage.url, alt: course.coverImage.alt || course.title }]
-        : [],
       type: "website",
+      images: seo.ogImage
+        ? [
+            {
+              url: seo.ogImage,
+              alt: seo.ogImageAlt,
+            },
+          ]
+        : [],
     },
     twitter: {
       card: "summary_large_image",
-      title,
-      description,
-      images: course.coverImage?.url ? [course.coverImage.url] : [],
+      title: seo.ogTitle,
+      description: seo.ogDescription,
+      images: seo.ogImage ? [seo.ogImage] : [],
     },
-    robots: "index,follow",
+    robots: seo.robots,
   };
 }
 
@@ -112,8 +217,17 @@ export default async function CourseDetailPage({
 
   if (!course) return notFound();
 
+  const jsonLd = buildCourseJsonLd(course);
+
   return (
     <main className="bg-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(jsonLd),
+        }}
+      />
+
       <CourseDetailsBanner course={course} />
       <CourseDetailsContent course={course} />
       <AlumniWorkSection />

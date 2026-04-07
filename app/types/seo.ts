@@ -1,8 +1,4 @@
-export type SeoImage = {
-  url: string;
-  public_id?: string | null;
-  alt?: string;
-};
+export type SeoSchemaType = "WebPage" | "Article" | "Course" | "FAQPage";
 
 export type PageSEO = {
   _id?: string;
@@ -15,7 +11,7 @@ export type PageSEO = {
   ogDescription?: string;
   ogImage?: string;
   robots?: string;
-  schemaType?: "WebPage" | "Article" | "Course" | "FAQPage";
+  schemaType?: SeoSchemaType;
   createdAt?: string;
   updatedAt?: string;
 };

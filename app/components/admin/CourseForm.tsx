@@ -38,6 +38,26 @@ type FeatureFormItem = {
   description: string;
 };
 
+type SeoSchemaType = "WebPage" | "Article" | "Course" | "FAQPage";
+type SeoRobots =
+  | "index,follow"
+  | "noindex,follow"
+  | "index,nofollow"
+  | "noindex,nofollow";
+
+type CourseSeoFormState = {
+  metaTitle: string;
+  metaDescription: string;
+  keywordsText: string;
+  canonicalUrl: string;
+  ogTitle: string;
+  ogDescription: string;
+  ogImage: CourseImage | null;
+  ogImageAlt: string;
+  robots: SeoRobots;
+  schemaType: SeoSchemaType;
+};
+
 type CourseFormState = {
   title: string;
   slug: string;
@@ -65,6 +85,8 @@ type CourseFormState = {
 
   curriculum: CurriculumFormItem[];
   interviewQuestions: InterviewQuestionFormItem[];
+
+  seo: CourseSeoFormState;
 
   isFeatured: boolean;
   isPublished: boolean;
@@ -107,6 +129,18 @@ export type CourseSubmitPayload = {
     answer: string;
   }[];
 
+  seo: {
+    metaTitle: string;
+    metaDescription: string;
+    keywords: string[];
+    canonicalUrl: string;
+    ogTitle: string;
+    ogDescription: string;
+    ogImage: CourseImage | null;
+    robots: SeoRobots;
+    schemaType: SeoSchemaType;
+  };
+
   isFeatured: boolean;
   isPublished: boolean;
 };
@@ -116,11 +150,6 @@ type Props = {
   onSubmit: (payload: CourseSubmitPayload) => Promise<void>;
   submitting?: boolean;
 };
-
-const DURATION_OPTIONS = Array.from({ length: 12 }, (_, index) => {
-  const month = index + 1;
-  return `${month} Month${month > 1 ? "s" : ""}`;
-});
 
 function slugify(value: string) {
   return String(value || "")
@@ -271,6 +300,34 @@ function toFeatureForm(
   }));
 }
 
+function getFallbackCanonical(slug: string) {
+  const siteUrl =
+    process.env.NEXT_PUBLIC_SITE_URL || "https://qmatrixtechnologies.com";
+
+  if (!slug) return `${siteUrl}/courses`;
+  return `${siteUrl}/courses/${slug}`;
+}
+
+function toSeoFormState(course?: Course | null): CourseSeoFormState {
+  const fallbackSlug = course?.slug || "";
+
+  return {
+    metaTitle: course?.seo?.metaTitle || "",
+    metaDescription: course?.seo?.metaDescription || "",
+    keywordsText: Array.isArray(course?.seo?.keywords)
+      ? course!.seo!.keywords.join(", ")
+      : "",
+    canonicalUrl:
+      course?.seo?.canonicalUrl || getFallbackCanonical(fallbackSlug),
+    ogTitle: course?.seo?.ogTitle || "",
+    ogDescription: course?.seo?.ogDescription || "",
+    ogImage: course?.seo?.ogImage || null,
+    ogImageAlt: course?.seo?.ogImage?.alt || "",
+    robots: (course?.seo?.robots as SeoRobots) || "index,follow",
+    schemaType: (course?.seo?.schemaType as SeoSchemaType) || "Course",
+  };
+}
+
 function toFormState(course?: Course | null): CourseFormState {
   return {
     title: course?.title || "",
@@ -300,6 +357,8 @@ function toFormState(course?: Course | null): CourseFormState {
     curriculum: toCurriculumForm(course?.curriculum),
     interviewQuestions: toInterviewQuestionForm(course?.interviewQuestions),
 
+    seo: toSeoFormState(course),
+
     isFeatured: Boolean(course?.isFeatured),
     isPublished: Boolean(course?.isPublished),
   };
@@ -324,6 +383,15 @@ export default function CourseForm({
     setForm(toFormState(initialData));
   }, [initialData]);
 
+  const seoPreviewKeywords = useMemo(
+    () =>
+      form.seo.keywordsText
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    [form.seo.keywordsText]
+  );
+
   const progressItems = useMemo(
     () => [
       {
@@ -331,8 +399,8 @@ export default function CourseForm({
         label: "Basic Info",
         done: Boolean(
           form.title.trim() &&
-          form.slug.trim() &&
-          htmlToLines(form.description).length
+            form.slug.trim() &&
+            htmlToLines(form.description).length
         ),
       },
       {
@@ -368,6 +436,15 @@ export default function CourseForm({
         label: "Interview Q&A",
         done: form.interviewQuestions.some(
           (item) => item.question.trim() && item.answer.trim()
+        ),
+      },
+      {
+        id: "section-seo",
+        label: "SEO",
+        done: Boolean(
+          form.seo.metaTitle.trim() &&
+            form.seo.metaDescription.trim() &&
+            form.seo.canonicalUrl.trim()
         ),
       },
       {
@@ -522,6 +599,58 @@ export default function CourseForm({
     }
   }
 
+  async function handleSeoOgImageUpload(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setUploading(true);
+      setError("");
+
+      const res = await uploadSingleImage(file);
+
+      setForm((prev) => ({
+        ...prev,
+        seo: {
+          ...prev.seo,
+          ogImage: {
+            ...res.data,
+            alt: prev.seo.ogImageAlt || res.data.alt || "",
+          },
+        },
+      }));
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Failed to upload SEO OG image"));
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
+  }
+
+  async function removeSeoOgImage() {
+    try {
+      setUploading(true);
+      setError("");
+
+      if (form.seo.ogImage?.public_id) {
+        await removeServerImage(form.seo.ogImage.public_id);
+      }
+
+      setForm((prev) => ({
+        ...prev,
+        seo: {
+          ...prev.seo,
+          ogImage: null,
+          ogImageAlt: "",
+        },
+      }));
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, "Failed to delete SEO OG image"));
+    } finally {
+      setUploading(false);
+    }
+  }
+
   function addCurriculumItem() {
     setForm((prev) => ({
       ...prev,
@@ -625,6 +754,8 @@ export default function CourseForm({
         throw new Error("Title is required");
       }
 
+      const finalSlug = form.slug.trim() || slugify(form.title);
+
       const curriculum = form.curriculum
         .map((item) => ({
           title: item.title.trim(),
@@ -654,16 +785,16 @@ export default function CourseForm({
 
       const payload: CourseSubmitPayload = {
         title: form.title.trim(),
-        slug: form.slug.trim() || slugify(form.title),
+        slug: finalSlug,
         category: form.category,
 
         description: form.description.trim(),
 
         coverImage: form.coverImage
           ? {
-            ...form.coverImage,
-            alt: form.coverImageAlt.trim(),
-          }
+              ...form.coverImage,
+              alt: form.coverImageAlt.trim(),
+            }
           : null,
         galleryImages: form.galleryImages,
 
@@ -683,6 +814,27 @@ export default function CourseForm({
 
         curriculum,
         interviewQuestions,
+
+        seo: {
+          metaTitle: form.seo.metaTitle.trim(),
+          metaDescription: form.seo.metaDescription.trim(),
+          keywords: form.seo.keywordsText
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean),
+          canonicalUrl:
+            form.seo.canonicalUrl.trim() || getFallbackCanonical(finalSlug),
+          ogTitle: form.seo.ogTitle.trim(),
+          ogDescription: form.seo.ogDescription.trim(),
+          ogImage: form.seo.ogImage
+            ? {
+                ...form.seo.ogImage,
+                alt: form.seo.ogImageAlt.trim(),
+              }
+            : null,
+          robots: form.seo.robots,
+          schemaType: form.seo.schemaType,
+        },
 
         isFeatured: form.isFeatured,
         isPublished: submitMode === "publish" ? true : form.isPublished,
@@ -740,7 +892,7 @@ export default function CourseForm({
                   </h2>
                   <p className="mt-1 text-sm text-slate-500">
                     Manage course information, curriculum, interview questions,
-                    features, and gallery.
+                    features, gallery, and SEO.
                   </p>
                 </div>
               </div>
@@ -767,13 +919,13 @@ export default function CourseForm({
                   type="submit"
                   disabled={submitting || uploading}
                   onClick={() => setSubmitMode("default")}
-                  className="inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="inline-flex items-center justify-center rounded-2xl bg-linear-to-r from-violet-600 to-fuchsia-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {submitting
                     ? "Saving..."
                     : isEdit
-                      ? "Update Course"
-                      : "Create Course"}
+                    ? "Update Course"
+                    : "Create Course"}
                 </button>
               </div>
             </div>
@@ -803,11 +955,24 @@ export default function CourseForm({
                 <input
                   value={form.title}
                   onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      title: e.target.value,
-                      slug: prev.slug ? prev.slug : slugify(e.target.value),
-                    }))
+                    setForm((prev) => {
+                      const nextTitle = e.target.value;
+                      const nextSlug = prev.slug ? prev.slug : slugify(nextTitle);
+
+                      return {
+                        ...prev,
+                        title: nextTitle,
+                        slug: nextSlug,
+                        seo: {
+                          ...prev.seo,
+                          canonicalUrl:
+                            prev.seo.canonicalUrl === getFallbackCanonical(prev.slug) ||
+                            !prev.seo.canonicalUrl
+                              ? getFallbackCanonical(nextSlug)
+                              : prev.seo.canonicalUrl,
+                        },
+                      };
+                    })
                   }
                   className="input"
                   placeholder="Enter course title"
@@ -819,10 +984,22 @@ export default function CourseForm({
                 <input
                   value={form.slug}
                   onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      slug: slugify(e.target.value),
-                    }))
+                    setForm((prev) => {
+                      const nextSlug = slugify(e.target.value);
+
+                      return {
+                        ...prev,
+                        slug: nextSlug,
+                        seo: {
+                          ...prev.seo,
+                          canonicalUrl:
+                            prev.seo.canonicalUrl === getFallbackCanonical(prev.slug) ||
+                            !prev.seo.canonicalUrl
+                              ? getFallbackCanonical(nextSlug)
+                              : prev.seo.canonicalUrl,
+                        },
+                      };
+                    })
                   }
                   className="input"
                   placeholder="course-slug"
@@ -1216,7 +1393,7 @@ export default function CourseForm({
                       supportAndCareerText: value,
                     }))
                   }
-                  placeholder="Add support and career details as bullet points or paragraphs"
+                  placeholder="Placement support, mentorship, resume guidance, mock interviews"
                   minHeight={220}
                 />
               </Field>
@@ -1227,16 +1404,26 @@ export default function CourseForm({
             id="section-curriculum"
             className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Curriculum
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Add modules and topics for the course.
-              </p>
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Curriculum
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Add course modules and topics.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addCurriculumItem}
+                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                + Add Module
+              </button>
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="space-y-4">
               {form.curriculum.map((item, index) => (
                 <div
                   key={index}
@@ -1263,7 +1450,7 @@ export default function CourseForm({
                           updateCurriculumItem(index, "title", e.target.value)
                         }
                         className="input"
-                        placeholder="Introduction to Snowflake"
+                        placeholder="Introduction to AWS"
                       />
                     </Field>
 
@@ -1273,23 +1460,13 @@ export default function CourseForm({
                         onChange={(value) =>
                           updateCurriculumItem(index, "topicsText", value)
                         }
-                        placeholder="Add topics as bullet points or paragraphs"
-                        minHeight={200}
+                        placeholder="Add module topics"
+                        minHeight={180}
                       />
                     </Field>
                   </div>
                 </div>
               ))}
-            </div>
-
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={addCurriculumItem}
-                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                + Add Module
-              </button>
             </div>
           </section>
 
@@ -1297,16 +1474,26 @@ export default function CourseForm({
             id="section-interview-questions"
             className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                Interview Questions
-              </h3>
-              <p className="mt-1 text-sm text-slate-500">
-                Add important interview questions and answers for this course.
-              </p>
+            <div className="mb-5 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900">
+                  Interview Q&A
+                </h3>
+                <p className="mt-1 text-sm text-slate-500">
+                  Add interview questions and answers.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={addInterviewQuestion}
+                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
+              >
+                + Add Question
+              </button>
             </div>
 
-            <div className="mt-5 space-y-4">
+            <div className="space-y-4">
               {form.interviewQuestions.map((item, index) => (
                 <div
                   key={index}
@@ -1330,40 +1517,307 @@ export default function CourseForm({
                       <input
                         value={item.question}
                         onChange={(e) =>
-                          updateInterviewQuestion(
-                            index,
-                            "question",
-                            e.target.value
-                          )
+                          updateInterviewQuestion(index, "question", e.target.value)
                         }
                         className="input"
-                        placeholder="What is AWS IAM?"
+                        placeholder="What is Snowflake?"
                       />
                     </Field>
 
                     <Field label="Answer">
-                      <CompactRichTextEditor
+                      <textarea
                         value={item.answer}
-                        onChange={(value) =>
-                          updateInterviewQuestion(index, "answer", value)
+                        onChange={(e) =>
+                          updateInterviewQuestion(index, "answer", e.target.value)
                         }
+                        className="textarea"
                         placeholder="Enter answer"
-                        minHeight={180}
                       />
                     </Field>
                   </div>
                 </div>
               ))}
             </div>
+          </section>
 
-            <div className="mt-6 flex justify-end">
-              <button
-                type="button"
-                onClick={addInterviewQuestion}
-                className="rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800"
-              >
-                + Add Question
-              </button>
+          <section
+            id="section-seo"
+            className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          >
+            <div className="mb-5">
+              <h3 className="text-lg font-semibold text-slate-900">SEO</h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Manage course detail page metadata, Open Graph, canonical URL,
+                robots, and schema configuration.
+              </p>
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                <Field label="Meta Title" full>
+                  <input
+                    value={form.seo.metaTitle}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, metaTitle: e.target.value },
+                      }))
+                    }
+                    className="input"
+                    placeholder="AWS Cloud Master Program in Chennai | QMatrix Technologies"
+                  />
+                </Field>
+
+                <Field label="Meta Description" full>
+                  <textarea
+                    value={form.seo.metaDescription}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, metaDescription: e.target.value },
+                      }))
+                    }
+                    className="textarea"
+                    placeholder="Write a strong meta description for this course page"
+                  />
+                </Field>
+
+                <Field label="Keywords" full>
+                  <input
+                    value={form.seo.keywordsText}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, keywordsText: e.target.value },
+                      }))
+                    }
+                    className="input"
+                    placeholder="aws course chennai, aws training chennai, cloud course chennai"
+                  />
+                </Field>
+
+                <Field label="Canonical URL" full>
+                  <input
+                    value={form.seo.canonicalUrl}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, canonicalUrl: e.target.value },
+                      }))
+                    }
+                    className="input"
+                    placeholder="https://qmatrixtechnologies.com/course-detail/course-slug"
+                  />
+                </Field>
+
+                <Field label="Open Graph Title" full>
+                  <input
+                    value={form.seo.ogTitle}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, ogTitle: e.target.value },
+                      }))
+                    }
+                    className="input"
+                    placeholder="Social sharing title"
+                  />
+                </Field>
+
+                <Field label="Open Graph Description" full>
+                  <textarea
+                    value={form.seo.ogDescription}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: { ...prev.seo, ogDescription: e.target.value },
+                      }))
+                    }
+                    className="textarea"
+                    placeholder="Social sharing description"
+                  />
+                </Field>
+
+                <Field label="Robots">
+                  <select
+                    value={form.seo.robots}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: {
+                          ...prev.seo,
+                          robots: e.target.value as SeoRobots,
+                        },
+                      }))
+                    }
+                    className="input"
+                  >
+                    <option value="index,follow">index,follow</option>
+                    <option value="noindex,follow">noindex,follow</option>
+                    <option value="index,nofollow">index,nofollow</option>
+                    <option value="noindex,nofollow">noindex,nofollow</option>
+                  </select>
+                </Field>
+
+                <Field label="Schema Type">
+                  <select
+                    value={form.seo.schemaType}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        seo: {
+                          ...prev.seo,
+                          schemaType: e.target.value as SeoSchemaType,
+                        },
+                      }))
+                    }
+                    className="input"
+                  >
+                    <option value="WebPage">WebPage</option>
+                    <option value="Article">Article</option>
+                    <option value="Course">Course</option>
+                    <option value="FAQPage">FAQPage</option>
+                  </select>
+                </Field>
+
+                <Field label="OG Image" full>
+                  <div className="space-y-4">
+                    <div className="overflow-hidden rounded-2xl border border-slate-300 bg-slate-50">
+                      {form.seo.ogImage?.url ? (
+                        <div className="relative h-56 w-full">
+                          <Image
+                            src={form.seo.ogImage.url}
+                            alt={
+                              form.seo.ogImageAlt ||
+                              form.seo.ogImage.alt ||
+                              "SEO OG image"
+                            }
+                            fill
+                            className="object-cover"
+                            unoptimized
+                          />
+                        </div>
+                      ) : (
+                        <div className="flex h-40 items-center justify-center text-sm text-slate-500">
+                          No OG image uploaded
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <label className="inline-flex cursor-pointer items-center rounded-2xl bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800">
+                        {uploading ? "Uploading..." : "Upload OG Image"}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleSeoOgImageUpload}
+                          disabled={uploading || submitting}
+                        />
+                      </label>
+
+                      {form.seo.ogImage ? (
+                        <button
+                          type="button"
+                          onClick={removeSeoOgImage}
+                          disabled={uploading || submitting}
+                          className="rounded-2xl border border-red-200 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          Remove OG Image
+                        </button>
+                      ) : null}
+                    </div>
+
+                    <input
+                      value={form.seo.ogImageAlt}
+                      onChange={(e) =>
+                        setForm((prev) => ({
+                          ...prev,
+                          seo: {
+                            ...prev.seo,
+                            ogImageAlt: e.target.value,
+                            ogImage: prev.seo.ogImage
+                              ? { ...prev.seo.ogImage, alt: e.target.value }
+                              : null,
+                          },
+                        }))
+                      }
+                      className="input"
+                      placeholder="OG image alt text"
+                    />
+                  </div>
+                </Field>
+              </div>
+
+              <aside className="rounded-3xl border border-slate-200 bg-slate-50 p-5">
+                <h4 className="text-lg font-semibold text-slate-900">
+                  Live SEO Preview
+                </h4>
+
+                <p className="mt-4 text-sm text-slate-500">
+                  {form.seo.metaTitle || "Meta title preview"}
+                </p>
+
+                <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                  <p className="text-sm text-green-700">
+                    {form.seo.canonicalUrl ||
+                      getFallbackCanonical(form.slug || slugify(form.title))}
+                  </p>
+
+                  <h5 className="mt-2 text-2xl text-blue-700">
+                    {form.seo.metaTitle || "Course page title preview"}
+                  </h5>
+
+                  <p className="mt-2 text-sm leading-7 text-slate-600">
+                    {form.seo.metaDescription ||
+                      "Course page meta description preview"}
+                  </p>
+                </div>
+
+                <div className="mt-6">
+                  <h5 className="text-sm font-semibold text-slate-900">
+                    Keywords
+                  </h5>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {seoPreviewKeywords.length ? (
+                      seoPreviewKeywords.map((keyword) => (
+                        <span
+                          key={keyword}
+                          className="rounded-full bg-violet-50 px-3 py-1 text-xs font-medium text-violet-700"
+                        >
+                          {keyword}
+                        </span>
+                      ))
+                    ) : (
+                      <p className="text-sm text-slate-500">
+                        No keywords added yet.
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h5 className="text-sm font-semibold text-slate-900">
+                    OG Image Preview
+                  </h5>
+                  <div className="mt-3 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+                    {form.seo.ogImage?.url ? (
+                      <Image
+                        src={form.seo.ogImage.url}
+                        alt={form.seo.ogImageAlt || "OG Preview"}
+                        className="h-48 w-full object-cover"
+                        width={720}
+                        height={400}
+                        unoptimized
+                      />
+                    ) : (
+                      <div className="flex h-32 items-center justify-center text-sm text-slate-500">
+                        No OG image
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </aside>
             </div>
           </section>
 
@@ -1371,26 +1825,17 @@ export default function CourseForm({
             id="section-publishing"
             className="scroll-mt-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
           >
-            <h3 className="text-lg font-semibold text-slate-900">
-              Publishing
-            </h3>
+            <div className="mb-5">
+              <h3 className="text-lg font-semibold text-slate-900">
+                Publishing
+              </h3>
+              <p className="mt-1 text-sm text-slate-500">
+                Control feature visibility and publish status.
+              </p>
+            </div>
 
-            <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
-              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
-                <input
-                  type="checkbox"
-                  checked={form.placementSupport}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      placementSupport: e.target.checked,
-                    }))
-                  }
-                />
-                Placement Support
-              </label>
-
-              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
+            <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-4">
                 <input
                   type="checkbox"
                   checked={form.isFeatured}
@@ -1400,11 +1845,17 @@ export default function CourseForm({
                       isFeatured: e.target.checked,
                     }))
                   }
+                  className="h-4 w-4"
                 />
-                Featured Course
+                <div>
+                  <p className="font-medium text-slate-900">Featured Course</p>
+                  <p className="text-sm text-slate-500">
+                    Show this course in featured sections.
+                  </p>
+                </div>
               </label>
 
-              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-3 text-sm text-slate-700">
+              <label className="flex items-center gap-3 rounded-2xl border border-slate-200 px-4 py-4">
                 <input
                   type="checkbox"
                   checked={form.isPublished}
@@ -1414,30 +1865,50 @@ export default function CourseForm({
                       isPublished: e.target.checked,
                     }))
                   }
+                  className="h-4 w-4"
                 />
-                Publish Course
+                <div>
+                  <p className="font-medium text-slate-900">Published</p>
+                  <p className="text-sm text-slate-500">
+                    Make this course publicly visible.
+                  </p>
+                </div>
               </label>
             </div>
           </section>
-
-          <style jsx>{`
-            .input {
-              width: 100%;
-              border: 1px solid #cbd5e1;
-              border-radius: 1rem;
-              padding: 0.82rem 0.95rem;
-              font-size: 0.95rem;
-              outline: none;
-              background: #fff;
-            }
-
-            .input:focus {
-              border-color: #7c3aed;
-              box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
-            }
-          `}</style>
         </div>
       </div>
+
+      <style jsx>{`
+        .input {
+          width: 100%;
+          border: 1px solid #cbd5e1;
+          border-radius: 1rem;
+          padding: 0.82rem 0.95rem;
+          font-size: 0.95rem;
+          outline: none;
+          background: #fff;
+        }
+        .input:focus {
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+        }
+        .textarea {
+          width: 100%;
+          min-height: 140px;
+          border: 1px solid #cbd5e1;
+          border-radius: 1rem;
+          padding: 0.9rem 0.95rem;
+          font-size: 0.95rem;
+          outline: none;
+          resize: vertical;
+          background: #fff;
+        }
+        .textarea:focus {
+          border-color: #7c3aed;
+          box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.08);
+        }
+      `}</style>
     </form>
   );
 }
