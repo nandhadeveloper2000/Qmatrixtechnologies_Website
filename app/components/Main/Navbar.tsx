@@ -180,7 +180,7 @@ export default function Navbar() {
       { name: "LinkedIn", href: "https://linkedin.com/", Icon: Linkedin },
       { name: "Facebook", href: "https://facebook.com/", Icon: Facebook },
       { name: "Call", href: `tel:${CALL_NUMBER}`, Icon: Phone },
-      { name: "Email", href: "mailto:info@qmatrixtechnologies.in", Icon: Mail },
+      { name: "Email", href: "mailto:info@qmatrixtechnologies.com", Icon: Mail },
     ],
     []
   );
@@ -326,12 +326,12 @@ export default function Navbar() {
                 </a>
 
                 <a
-                  href="mailto:info@qmatrixtechnologies.in"
+                  href="mailto:info@qmatrixtechnologies.com"
                   className="inline-flex items-center gap-2 transition-opacity hover:opacity-90"
                   aria-label="Email Qmatrix Technologies"
                 >
                   <Mail size={14} />
-                  <span>info@qmatrixtechnologies.in</span>
+                  <span>info@qmatrixtechnologies.com</span>
                 </a>
               </div>
 

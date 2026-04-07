@@ -124,10 +124,8 @@ export default function Footer() {
               />
             </Link>
 
-            <p className="text-[14px] leading-8 text-white/80 text-justify">
-              Founded in 2020, Qmatrix Technologies delivers industry-focused
-              software training in Cloud, Data Engineering, AI, and Full Stack
-              Development with real-world projects and placement support.
+            <p className="text-[13px] leading-8 text-white/80 text-justify">
+              Founded in 2020, Qmatrix Technologies specializes in industry-focused training across Cloud, Data Engineering, and AI. Our flagship programs—Snowflake Data Engineering, ETL Testing, Microsoft Azure, AWS Cloud, Databricks, and Data Analyst—are designed with real-time projects and 100% placement support to prepare you for high-demand tech careers.
             </p>
 
             <div className="mt-6 flex items-center gap-3">
@@ -170,9 +168,9 @@ export default function Footer() {
 
               <InfoRow
                 icon={<FaEnvelope />}
-                href="mailto:info@qmatrixtechnologies.in"
+                href="mailto:info@qmatrixtechnologies.com"
               >
-                <span className="break-all">info@qmatrixtechnologies.in</span>
+                <span className="break-all">info@qmatrixtechnologies.com</span>
               </InfoRow>
 
               <InfoRow icon={<FaMapMarkerAlt />}>
