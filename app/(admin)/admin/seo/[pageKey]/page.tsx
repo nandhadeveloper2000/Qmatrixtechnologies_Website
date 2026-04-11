@@ -29,15 +29,15 @@ const pageMetaMap: Record<string, { title: string; description: string }> = {
 };
 
 type AdminSEOEditPageProps = {
-  params: {
+  params: Promise<{
     pageKey: string;
-  };
+  }>;
 };
 
-export default function AdminSEOEditPage({
+export default async function AdminSEOEditPage({
   params,
 }: AdminSEOEditPageProps) {
-  const { pageKey } = params;
+  const { pageKey } = await params;
 
   const meta = pageMetaMap[pageKey] || {
     title: `Edit ${pageKey} SEO`,

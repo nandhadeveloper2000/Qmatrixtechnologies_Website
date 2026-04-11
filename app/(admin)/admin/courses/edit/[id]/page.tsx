@@ -23,11 +23,15 @@ export default function EditCoursePage() {
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const courseId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
   const loadCourse = useCallback(async () => {
-    if (!courseId) return;
+    if (!courseId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -52,6 +56,7 @@ export default function EditCoursePage() {
     if (!courseId) return;
 
     try {
+      setSubmitting(true);
       setError("");
 
       const endpoint = SummaryApi.update_course(courseId);
@@ -74,6 +79,8 @@ export default function EditCoursePage() {
       router.push("/admin/courses");
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Failed to update course");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -100,7 +107,11 @@ export default function EditCoursePage() {
             {error}
           </div>
         ) : course ? (
-          <CourseForm initialData={course} onSubmit={handleUpdate} />
+          <CourseForm
+            initialData={course}
+            onSubmit={handleUpdate}
+            submitting={submitting}
+          />
         ) : (
           <div className="rounded-[28px] border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
             Course not found.

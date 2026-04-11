@@ -280,7 +280,7 @@ export default function AdminCoursesPage() {
                           <div className="flex justify-end gap-2">
                             {course._id ? (
                               <Link
-                                href={`/admin/courses/${course._id}/edit`}
+                                href={`/admin/courses/edit/${course._id}`}
                                 className="rounded-xl border border-slate-200 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
                               >
                                 Edit

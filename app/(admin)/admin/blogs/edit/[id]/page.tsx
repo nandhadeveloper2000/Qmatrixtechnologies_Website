@@ -17,11 +17,12 @@ export default function EditBlogPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
 
-  const blogId = params?.id;
+  const blogId = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
   const [blog, setBlog] = useState<IBlog | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string>("");
+  const [submitting, setSubmitting] = useState<boolean>(false);
 
   const loadBlog = useCallback(async () => {
     if (!blogId) {
@@ -55,14 +56,25 @@ export default function EditBlogPage() {
     async (payload: Partial<IBlog>) => {
       if (!blogId) return;
 
-      const endpoint = SummaryApi.update_blog(blogId);
+      try {
+        setSubmitting(true);
+        setError("");
 
-      await apiFetch(endpoint.url, {
-        method: endpoint.method,
-        json: payload,
-      });
+        const endpoint = SummaryApi.update_blog(blogId);
 
-      router.push("/admin/blogs");
+        await apiFetch(endpoint.url, {
+          method: endpoint.method,
+          json: payload,
+        });
+
+        router.push("/admin/blogs");
+      } catch (error: unknown) {
+        const message =
+          error instanceof Error ? error.message : "Failed to update blog";
+        setError(message);
+      } finally {
+        setSubmitting(false);
+      }
     },
     [blogId, router]
   );
@@ -82,7 +94,11 @@ export default function EditBlogPage() {
           {error}
         </div>
       ) : blog ? (
-        <BlogForm initialData={blog} onSubmit={handleUpdate} />
+        <BlogForm
+          initialData={blog}
+          onSubmit={handleUpdate}
+          submitting={submitting}
+        />
       ) : (
         <div className="rounded-[28px] border border-slate-200 bg-white p-6 text-sm text-slate-500 shadow-sm">
           Blog not found.

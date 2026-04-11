@@ -378,7 +378,7 @@ export default function UsersPage() {
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
                           <NextLink
-                            href={`/admin/users/${u._id}/edit`}
+                            href={`/admin/users/edit/${u._id}`}
                             className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
                           >
                             <Pencil className="h-4 w-4" />
