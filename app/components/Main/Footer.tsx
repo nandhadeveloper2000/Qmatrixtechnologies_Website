@@ -15,7 +15,7 @@ const quickLinks = [
   { name: "About Us", path: "/about" },
   { name: "Courses", path: "/courses" },
   { name: "Blog", path: "/blog" },
-  { name: "Contact", path: "/contact" },
+  { name: "Contact", path: "/contact-us" },
 ];
 
 const policies = [

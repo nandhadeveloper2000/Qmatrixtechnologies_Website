@@ -156,7 +156,7 @@ export default function AboutSections() {
           {/* CTA */}
           <div className="mt-8">
             <Link
-              href="/contact"
+              href="/contact-us"
               className="inline-flex items-center gap-3 rounded-xl bg-[linear-gradient(90deg,#9116a1,#a724e4,#7c1fc4)] px-6 py-4 text-sm font-bold text-white shadow-[0_18px_50px_rgba(145,22,161,0.25)] transition hover:scale-[1.02] active:scale-[0.98]"
             >
               BECOME A STUDENT

@@ -232,7 +232,7 @@ export default function FeaturedBlogSlider({
               </Link>
 
               <Link
-                href="/contact"
+                href="/contact-us"
                 className="inline-flex items-center rounded-full border border-slate-200 px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-fuchsia-200 hover:bg-fuchsia-50 hover:text-fuchsia-700"
               >
                 Enquire Now

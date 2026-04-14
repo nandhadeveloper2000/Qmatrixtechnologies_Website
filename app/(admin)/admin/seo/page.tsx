@@ -24,7 +24,7 @@ const seoPages = [
   {
     title: "Contact Page SEO",
     key: "contact",
-    description: "Manage SEO metadata for the public contact page (/contact).",
+    description: "Manage SEO metadata for the public contact page (/contact-us.",
     icon: FolderOpen,
   },
   {

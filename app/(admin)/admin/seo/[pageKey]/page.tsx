@@ -1,3 +1,4 @@
+import { notFound } from "next/navigation";
 import SEOEditorForm from "@/app/components/admin/SEOEditorForm";
 
 const pageMetaMap: Record<string, { title: string; description: string }> = {
@@ -11,7 +12,7 @@ const pageMetaMap: Record<string, { title: string; description: string }> = {
   },
   contact: {
     title: "Edit Contact Page SEO",
-    description: "Manage metadata for the public contact page (/contact).",
+    description: "Manage metadata for the public contact page (/contact-us).",
   },
   placements: {
     title: "Edit Placements Page SEO",
@@ -28,21 +29,30 @@ const pageMetaMap: Record<string, { title: string; description: string }> = {
   },
 };
 
+const allowedPageKeys = Object.keys(pageMetaMap);
+
 type AdminSEOEditPageProps = {
   params: Promise<{
     pageKey: string;
   }>;
 };
 
+export function generateStaticParams() {
+  return allowedPageKeys.map((pageKey) => ({
+    pageKey,
+  }));
+}
+
 export default async function AdminSEOEditPage({
   params,
 }: AdminSEOEditPageProps) {
   const { pageKey } = await params;
 
-  const meta = pageMetaMap[pageKey] || {
-    title: `Edit ${pageKey} SEO`,
-    description: "Manage SEO metadata for this public page.",
-  };
+  if (!allowedPageKeys.includes(pageKey)) {
+    notFound();
+  }
+
+  const meta = pageMetaMap[pageKey];
 
   return (
     <SEOEditorForm

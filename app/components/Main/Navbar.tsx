@@ -158,7 +158,7 @@ export default function Navbar() {
       { name: "Placements", path: "/placements" },
       { name: "Blogs", path: "/blogs" },
       { name: "About Us", path: "/about" },
-      { name: "Contact", path: "/contact" },
+      { name: "Contact", path: "/contact-us" },
     ],
     [courseMenuItems]
   );
