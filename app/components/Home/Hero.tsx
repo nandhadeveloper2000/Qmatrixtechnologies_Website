@@ -15,38 +15,37 @@ import { GrOracle } from "react-icons/gr";
 export default function Hero() {
   return (
     <section className="relative flex min-h-screen items-center overflow-hidden">
-      {/* ✅ FULL Background */}
+      {/* FULL Background - keep original visual feel */}
       <div className="absolute inset-0 -z-10">
         <Image
-          src={cldPublic("/qmatrix/download.webp", "f_auto,q_auto,w_1600")}
+          src={cldPublic("/qmatrix/download.webp", "f_auto,q_auto,w_1800")}
           alt="Hero background"
           fill
           priority
-          className="object-cover object-center"
           sizes="100vw"
+          className="object-cover object-center"
         />
-        <div className="absolute inset-0 bg-white/45" />
+        <div className="absolute inset-0 bg-white/45 sm:bg-white/40" />
       </div>
 
-      {/* ✅ CONTENT CONTAINER */}
-      <div className="relative mx-auto w-full max-w-[1200px] px-4 sm:px-8 lg:px-10 xl:px-14 2xl:px-10">
-        <div className="grid items-center gap-10 py-10 sm:gap-12 sm:py-12 md:gap-14 md:py-14 lg:grid-cols-2 lg:gap-16 lg:py-16">
-          {/* ================= LEFT ================= */}
-          <div className="text-center lg:text-left lg:pr-6 xl:pr-10">
+      {/* Content */}
+      <div className="relative mx-auto w-full max-w-[1280px] px-4 pt-8 pb-10 sm:px-6 sm:pt-10 sm:pb-12 md:px-8 md:pt-12 md:pb-14 lg:px-10 lg:pt-14 lg:pb-16 xl:px-12">
+        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-10 xl:gap-14">
+          {/* LEFT */}
+          <div className="order-1 text-center lg:text-left">
             {/* Badge */}
-            <div className="relative mb-5 inline-flex items-center gap-3 rounded-full bg-secondary/10 px-5 py-2 pr-11 text-sm font-medium text-secondary">
-              🏆 Leaders in Education Since 6 Years
+            <div className="relative mb-5 inline-flex max-w-full items-center justify-center gap-2 rounded-full bg-secondary/10 px-4 py-2 pr-10 text-[11px] font-medium text-secondary sm:gap-3 sm:px-5 sm:py-2.5 sm:pr-11 sm:text-sm">
+              <span className="truncate">🏆 Leaders in Education Since 6 Years</span>
 
-              {/* ✅ Robot (fixed: width/height required) */}
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <Image
-                  style={{ animation: "spin 6s linear infinite" }}
                   src={cldPublic("/qmatrix/robot.png", "f_auto,q_auto,w_64")}
                   alt="robot"
                   width={30}
                   height={30}
-                  className="w-7 animate-spin"
                   priority
+                  className="h-6 w-6 animate-spin object-contain sm:h-7 sm:w-7"
+                  style={{ animation: "spin 6s linear infinite" }}
                 />
               </div>
             </div>
@@ -54,37 +53,35 @@ export default function Hero() {
             {/* Heading */}
             <h1 className="font-lexend text-[30px] font-bold leading-[1.12] text-[#082A5E] sm:text-[38px] md:text-[42px] lg:text-[46px] xl:text-[54px] 2xl:text-[60px]">
               Best Software{" "}
-              <span className="text-secondary">
-                Training Institute in Chennai
-              </span>
+              <span className="text-secondary">Training Institute in Chennai</span>
             </h1>
 
             {/* Paragraph */}
-            <p className="mx-auto mt-5 max-w-xl font-body text-[15px] text-primary sm:text-[16px] md:text-[17px] lg:mx-0 lg:text-[18px]">
+            <p className="mx-auto mt-5 max-w-xl font-body text-[15px] leading-8 text-primary sm:text-[16px] md:text-[17px] lg:mx-0 lg:text-[18px]">
               Best software training institute in Chennai, delivering job-ready
               tech skills through hands-on learning, expert trainers, and
               industry-aligned courses.
             </p>
 
             {/* CTA */}
-            <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center lg:justify-start">
+            <div className="mt-8 flex flex-col items-center gap-4 sm:mt-9 sm:flex-row sm:justify-center sm:gap-5 lg:justify-start">
               <Link
                 href="/courses"
-                className="btn btn-shine inline-flex h-[48px] items-center justify-center px-7 font-bold"
+                className="btn btn-shine inline-flex h-[48px] min-w-[205px] items-center justify-center rounded-[14px] px-6 text-sm font-bold uppercase tracking-[0.03em] sm:h-[52px] sm:min-w-[220px] sm:px-7"
               >
                 Explore Course →
               </Link>
 
               <a
-                href="tel:+917395953532"
-                className="flex items-center gap-3 text-gray-800 transition hover:text-primary"
+                href="tel:+919943532532"
+                className="flex items-center gap-3 text-left text-gray-800 transition hover:text-primary"
               >
-                <Phone className="h-6 w-6 text-primary" />
-                <div className="text-left leading-tight">
+                <Phone className="h-6 w-6 shrink-0 text-primary" />
+                <div className="leading-tight">
                   <p className="text-[13px] text-gray-600 sm:text-[14px]">
                     Have any questions?
                   </p>
-                  <p className="text-[18px] font-extrabold text-[#082A5E] sm:text-[20px]">
+                  <p className="text-[17px] font-extrabold text-[#082A5E] sm:text-[20px]">
                     (+91) 99435 32532
                   </p>
                 </div>
@@ -92,110 +89,80 @@ export default function Hero() {
             </div>
           </div>
 
-          {/* ================= RIGHT ================= */}
-          <div className="relative flex min-h-[340px] items-center justify-center sm:min-h-[420px] md:min-h-[460px] lg:min-h-[520px] lg:justify-end xl:min-h-[560px]">
-            {/* Floating Icons */}
-            <div className="pointer-events-none absolute inset-0 hidden md:block">
-              <SiSnowflake className="floating absolute left-6 top-12 text-5xl text-blue-500" />
-              <TbSql className="floating absolute left-8 top-1/2 -translate-y-1/2 text-5xl text-blue-400" />
-              <SiDbt className="floating absolute bottom-10 left-10 text-5xl text-orange-500" />
+          {/* RIGHT */}
+          <div className="order-2">
+            <div className="relative mx-auto flex min-h-[420px] w-full max-w-[560px] items-end justify-center sm:min-h-[500px] sm:max-w-[620px] md:min-h-[560px] md:max-w-[680px] lg:min-h-[620px] lg:max-w-[720px] xl:min-h-[660px]">
+              {/* All icons visible on all screens */}
+              <div className="pointer-events-none absolute inset-0 z-10">
+                <SiSnowflake className="floating absolute left-[8%] top-[12%] text-[24px] text-blue-500 sm:text-[28px] md:text-[34px] lg:text-[40px]" />
+                <TbSql className="floating absolute left-[7%] top-[52%] text-[24px] text-blue-400 sm:text-[28px] md:text-[34px] lg:text-[40px]" />
+                <SiDbt className="floating absolute bottom-[14%] left-[10%] text-[22px] text-orange-500 sm:text-[26px] md:text-[32px] lg:text-[38px]" />
 
-              <FaAws className="floating absolute left-[48%] -top-6 text-5xl text-orange-400" />
-              <FaPython className="floating absolute right-6 top-16 text-5xl text-yellow-500" />
+                <FaAws className="floating absolute left-[53%] top-[5%] text-[24px] text-orange-400 sm:text-[28px] md:text-[34px] lg:text-[40px]" />
+                <FaPython className="floating absolute right-[8%] top-[18%] text-[22px] text-yellow-500 sm:text-[26px] md:text-[32px] lg:text-[38px]" />
+                <VscAzure className="floating absolute right-[8%] top-[54%] text-[24px] text-sky-500 sm:text-[28px] md:text-[34px] lg:text-[40px]" />
+                <GrOracle className="floating absolute bottom-[14%] right-[9%] text-[22px] text-red-500 sm:text-[26px] md:text-[32px] lg:text-[38px]" />
+              </div>
 
-              <VscAzure className="floating absolute right-4 top-1/2 -translate-y-1/2 text-5xl text-sky-500" />
-              <GrOracle className="floating absolute bottom-10 right-6 text-5xl text-red-500" />
-            </div>
-
-            {/* Main Image */}
-            <div className="relative z-10">
-              {/* ✅ fixed: width/height required */}
-              <Image
-                src={cldPublic("/qmatrix/1-1.png", "f_auto,q_auto,w_1000")}
-                alt="Student"
-                width={520}
-                height={640}
-                priority
-                className="
-                  object-contain drop-shadow-2xl
-                  w-[200px]
-                  sm:w-[250px]
-                  md:w-[300px]
-                  lg:w-[400px]
-                  xl:w-[400px]
-                  2xl:w-[400px]
-                  -ml-4 sm:-ml-6 lg:-ml-10
-                  mr-6 sm:mr-8 lg:mr-10
-                "
-              />
-
-              {/* Shadow */}
-              <div className="absolute -bottom-2 left-1/2 h-10 w-56 -translate-x-1/2 rounded-full bg-black/15 blur-2xl" />
-            </div>
-
-            {/* LEFT CARD */}
-            <div
-              className="
-                absolute z-20
-                left-2 top-6
-                sm:left-4 sm:top-8
-                md:left-6 md:top-10
-                lg:left-0 lg:top-24
-                rounded-2xl bg-white/90 p-4 shadow-xl backdrop-blur-md
-              "
-            >
-              <div className="flex items-center gap-4">
+              {/* Main image */}
+              <div className="relative z-20 flex w-full items-end justify-center">
                 <Image
-                  src={cldPublic(
-                    "qmatrix/Frame-1171277216-1-1.png",
-                    "f_auto,q_auto,w_120"
-                  )}
-                  alt="students"
-                  width={40}
-                  height={40}
+                  src={cldPublic("/qmatrix/1-1.png", "f_auto,q_auto,w_1100")}
+                  alt="Student"
+                  width={520}
+                  height={640}
+                  priority
+                  className="h-auto w-[180px] object-contain drop-shadow-2xl sm:w-[230px] md:w-[300px] lg:w-[390px] xl:w-[430px]"
                 />
-                <div>
-                  <p className="text-[12px] font-medium text-gray-500">
-                    Placements
-                  </p>
-                  <p className="text-[26px] font-extrabold text-[#082A5E]">
-                    1500+
-                  </p>
+
+                <div className="absolute bottom-3 left-1/2 h-10 w-[62%] -translate-x-1/2 rounded-full bg-black/15 blur-2xl sm:w-[56%]" />
+              </div>
+
+              {/* Placements card */}
+              <div className="absolute left-[0%] top-[26%] z-30 rounded-2xl bg-white/92 px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur-md sm:left-[2%] sm:top-[22%] sm:px-4 sm:py-4 md:left-[5%] md:top-[22%] lg:left-[2%]">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Image
+                    src={cldPublic(
+                      "qmatrix/Frame-1171277216-1-1.png",
+                      "f_auto,q_auto,w_120"
+                    )}
+                    alt="placements"
+                    width={40}
+                    height={40}
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                  />
+                  <div>
+                    <p className="text-[11px] font-medium text-gray-500 sm:text-[12px]">
+                      Placements
+                    </p>
+                    <p className="text-[22px] font-extrabold leading-none text-[#082A5E] sm:text-[24px] md:text-[26px]">
+                      1500+
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* RIGHT CARD */}
-            <div
-              className="
-                absolute z-20
-                right-2 bottom-6
-                sm:right-4 sm:bottom-8
-                md:right-6 md:bottom-10
-                lg:bottom-auto lg:top-[62%] lg:-translate-y-1/2
-                lg:right-0 lg:translate-x-[70px]
-                xl:translate-x-[95px]
-                2xl:translate-x-[120px]
-                rounded-2xl bg-white/90 p-4 shadow-xl backdrop-blur-md
-              "
-            >
-              <div className="flex items-center gap-4">
-                <Image
-                  src={cldPublic(
-                    "/qmatrix/Frame-1171277216-2.png",
-                    "f_auto,q_auto,w_120"
-                  )}
-                  alt="success"
-                  width={40}
-                  height={40}
-                />
-                <div>
-                  <p className="text-[12px] font-medium text-gray-500">
-                    Total Technologies
-                  </p>
-                  <p className="text-[26px] font-extrabold text-[#082A5E]">
-                    5+
-                  </p>
+              {/* Total technologies card */}
+              <div className="absolute bottom-[10%] right-[0%] z-30 rounded-2xl bg-white/92 px-3 py-3 shadow-[0_18px_40px_rgba(15,23,42,0.12)] backdrop-blur-md sm:right-[2%] sm:bottom-[10%] sm:px-4 sm:py-4 md:right-[5%] lg:right-[1%]">
+                <div className="flex items-center gap-3 sm:gap-4">
+                  <Image
+                    src={cldPublic(
+                      "/qmatrix/Frame-1171277216-2.png",
+                      "f_auto,q_auto,w_120"
+                    )}
+                    alt="success"
+                    width={40}
+                    height={40}
+                    className="h-9 w-9 sm:h-10 sm:w-10"
+                  />
+                  <div>
+                    <p className="text-[11px] font-medium text-gray-500 sm:text-[12px]">
+                      Total Technologies
+                    </p>
+                    <p className="text-[22px] font-extrabold leading-none text-[#082A5E] sm:text-[24px] md:text-[26px]">
+                      5+
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

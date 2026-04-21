@@ -31,7 +31,6 @@ export default function CourseControls({
   const [open, setOpen] = useState(false);
   const ddRef = useRef<HTMLDivElement | null>(null);
 
-  // Close dropdown outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (!ddRef.current) return;
@@ -39,14 +38,15 @@ export default function CourseControls({
         setOpen(false);
       }
     };
+
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   return (
-    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      {/* ================= SEARCH ================= */}
-      <div className="w-full sm:max-w-[420px]">
+    <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+      {/* Search */}
+      <div className="w-full lg:max-w-[420px]">
         <input
           type="text"
           placeholder="Search"
@@ -56,27 +56,26 @@ export default function CourseControls({
         />
       </div>
 
-      {/* ================= RIGHT SIDE ================= */}
-      <div className="flex items-center justify-end gap-3">
-        {/* ================= DROPDOWN ================= */}
-        <div ref={ddRef} className="relative">
+      {/* Right side */}
+      <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:w-auto">
+        {/* Dropdown */}
+        <div ref={ddRef} className="relative w-full sm:w-auto">
           <button
             type="button"
             onClick={() => setOpen((v) => !v)}
-            className="inline-flex h-11 min-w-[190px] items-center justify-between gap-3 rounded-md bg-[#eaf2ff] px-4 text-sm font-medium text-[#1e2a55] shadow-sm ring-1 ring-[#d7e6ff] transition hover:bg-[#e3eeff]"
+            className="inline-flex h-11 w-full min-w-0 items-center justify-between gap-3 rounded-md bg-[#eaf2ff] px-4 text-sm font-medium text-[#1e2a55] shadow-sm ring-1 ring-[#d7e6ff] transition hover:bg-[#e3eeff] sm:min-w-[190px] sm:w-auto"
           >
-            <span>{activeFilter}</span>
+            <span className="truncate text-left">{activeFilter}</span>
             <ChevronDown
               size={18}
-              className={`text-secondary transition-transform duration-200 ${
+              className={`shrink-0 text-secondary transition-transform duration-200 ${
                 open ? "rotate-180" : ""
               }`}
             />
           </button>
 
-          {/* Dropdown Menu */}
           <div
-            className={`absolute right-0 z-30 mt-2 w-[190px] origin-top overflow-hidden rounded-md border border-[#d7e6ff] bg-[#eaf2ff] shadow-xl transition-all duration-200 ${
+            className={`absolute left-0 right-0 z-30 mt-2 origin-top overflow-hidden rounded-md border border-[#d7e6ff] bg-[#eaf2ff] shadow-xl transition-all duration-200 sm:left-auto sm:right-0 sm:w-[190px] ${
               open
                 ? "scale-100 opacity-100"
                 : "pointer-events-none scale-95 opacity-0"
@@ -84,6 +83,7 @@ export default function CourseControls({
           >
             {filters.map((f) => {
               const active = f === activeFilter;
+
               return (
                 <button
                   key={f}
@@ -105,32 +105,34 @@ export default function CourseControls({
           </div>
         </div>
 
-        {/* ================= VIEW TOGGLE ================= */}
-        <button
-          type="button"
-          onClick={() => setViewMode("grid")}
-          className={`grid h-11 w-11 place-items-center rounded-md border transition ${
-            viewMode === "grid"
-              ? "border-secondary bg-secondary text-white"
-              : "border-[#d7e6ff] bg-white text-secondary hover:bg-[#f3f7ff]"
-          }`}
-          aria-label="Grid view"
-        >
-          <LayoutGrid size={18} />
-        </button>
+        {/* View toggle */}
+        <div className="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            onClick={() => setViewMode("grid")}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-md border transition ${
+              viewMode === "grid"
+                ? "border-secondary bg-secondary text-white"
+                : "border-[#d7e6ff] bg-white text-secondary hover:bg-[#f3f7ff]"
+            }`}
+            aria-label="Grid view"
+          >
+            <LayoutGrid size={18} />
+          </button>
 
-        <button
-          type="button"
-          onClick={() => setViewMode("list")}
-          className={`grid h-11 w-11 place-items-center rounded-md border transition ${
-            viewMode === "list"
-              ? "border-secondary bg-secondary text-white"
-              : "border-[#d7e6ff] bg-white text-secondary hover:bg-[#f3f7ff]"
-          }`}
-          aria-label="List view"
-        >
-          <List size={18} />
-        </button>
+          <button
+            type="button"
+            onClick={() => setViewMode("list")}
+            className={`grid h-11 w-11 shrink-0 place-items-center rounded-md border transition ${
+              viewMode === "list"
+                ? "border-secondary bg-secondary text-white"
+                : "border-[#d7e6ff] bg-white text-secondary hover:bg-[#f3f7ff]"
+            }`}
+            aria-label="List view"
+          >
+            <List size={18} />
+          </button>
+        </div>
       </div>
     </div>
   );

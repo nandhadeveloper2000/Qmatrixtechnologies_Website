@@ -68,8 +68,10 @@ const NAV_VARIANT =
   (process.env.NEXT_PUBLIC_HEADER_VARIANT as HeaderVariant) ?? "luminar";
 
 const CALL_NUMBER = "+919943532532";
-const CALL_LABEL = "BOOK NOW";
-const TOPBAR_HEIGHT = 40;
+const MOBILE_HEADER_HEIGHT = 76;
+const DESKTOP_HEADER_HEIGHT = 84;
+const DESKTOP_HEADER_HEIGHT_SCROLLED = 72;
+const DESKTOP_TOPBAR_HEIGHT = 40;
 
 const cleanText = (value?: string): string =>
   typeof value === "string" ? value.replace(/^"+|"+$/g, "").trim() : "";
@@ -93,21 +95,12 @@ const getCourseSortValue = (course: ApiCourse): number => {
   return Number.MAX_SAFE_INTEGER;
 };
 
-/**
- * DB order fix:
- * 1. If displayOrder/order/position exists, use ascending.
- * 2. Otherwise use createdAt ascending (oldest first),
- *    which matches MongoDB Compass row order better.
- * 3. If no createdAt, keep original relative order as much as possible.
- */
 const sortCourses = (courses: ApiCourse[]): ApiCourse[] => {
   return [...courses].sort((a, b) => {
     const aOrder = getCourseSortValue(a);
     const bOrder = getCourseSortValue(b);
 
-    if (aOrder !== bOrder) {
-      return aOrder - bOrder;
-    }
+    if (aOrder !== bOrder) return aOrder - bOrder;
 
     const aCreated = a.createdAt ? new Date(a.createdAt).getTime() : 0;
     const bCreated = b.createdAt ? new Date(b.createdAt).getTime() : 0;
@@ -152,7 +145,7 @@ export default function Navbar() {
       { name: "Home", path: "/" },
       {
         name: "Courses",
-        path: "/course-detail",
+        path: "/courses",
         children: courseMenuItems,
       },
       { name: "Placements", path: "/placements" },
@@ -176,9 +169,6 @@ export default function Navbar() {
         href: "https://www.instagram.com/qmatrixtech/",
         Icon: Instagram,
       },
-      { name: "YouTube", href: "https://youtube.com/", Icon: Youtube },
-      { name: "LinkedIn", href: "https://linkedin.com/", Icon: Linkedin },
-      { name: "Facebook", href: "https://facebook.com/", Icon: Facebook },
       { name: "Call", href: `tel:${CALL_NUMBER}`, Icon: Phone },
       { name: "Email", href: "mailto:info@qmatrixtechnologies.com", Icon: Mail },
     ],
@@ -201,6 +191,17 @@ export default function Navbar() {
     setIsOpen(false);
     setDesktopMenuOpen(null);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     let ticking = false;
@@ -230,13 +231,10 @@ export default function Navbar() {
       try {
         setCoursesLoading(true);
 
-        const response = await fetch(
-          `${baseURL}${SummaryApi.public_courses.url}`,
-          {
-            method: SummaryApi.public_courses.method,
-            cache: "no-store",
-          }
-        );
+        const response = await fetch(`${baseURL}${SummaryApi.public_courses.url}`, {
+          method: SummaryApi.public_courses.method,
+          cache: "no-store",
+        });
 
         if (!response.ok) {
           throw new Error(`Failed to fetch courses: ${response.status}`);
@@ -274,14 +272,9 @@ export default function Navbar() {
         }
       } catch (error) {
         console.error("Failed to fetch public courses:", error);
-
-        if (active) {
-          setCourseMenuItems([]);
-        }
+        if (active) setCourseMenuItems([]);
       } finally {
-        if (active) {
-          setCoursesLoading(false);
-        }
+        if (active) setCoursesLoading(false);
       }
     };
 
@@ -296,23 +289,23 @@ export default function Navbar() {
     <>
       <header
         className={[
-          "fixed inset-x-0 top-0 z-50 transition-all duration-300 ease-out will-change-transform",
+          "fixed inset-x-0 top-0 z-50 transition-all duration-300 ease-out",
           scrolled
-            ? "bg-white/80 backdrop-blur-xl shadow-[0_16px_40px_rgba(2,6,23,0.10)]"
-            : "bg-white/70 backdrop-blur-md shadow-[0_10px_28px_rgba(2,6,23,0.06)]",
+            ? "bg-white/90 shadow-[0_16px_40px_rgba(2,6,23,0.10)] backdrop-blur-xl"
+            : "bg-white/80 shadow-[0_10px_28px_rgba(2,6,23,0.06)] backdrop-blur-md",
         ].join(" ")}
       >
         <div
           className={[
-            "hidden lg:block overflow-hidden transition-all duration-300 ease-out",
+            "hidden overflow-hidden transition-all duration-300 ease-out lg:block",
             scrolled
-              ? "max-h-0 opacity-0 -translate-y-2 pointer-events-none"
-              : "max-h-12 opacity-100 translate-y-0",
+              ? "pointer-events-none max-h-0 -translate-y-2 opacity-0"
+              : "max-h-12 translate-y-0 opacity-100",
           ].join(" ")}
         >
           <div
             className="h-10 bg-[linear-gradient(90deg,#082a5e_0%,#9116a1_100%)] text-white shadow-[0_6px_20px_rgba(8,42,94,0.18)]"
-            style={{ height: TOPBAR_HEIGHT }}
+            style={{ height: DESKTOP_TOPBAR_HEIGHT }}
           >
             <div className="mx-auto flex h-full max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-6 text-[13px] font-medium">
@@ -361,24 +354,24 @@ export default function Navbar() {
           >
             <div
               className={[
-                "flex items-center gap-4 transition-all duration-300 ease-out",
-                scrolled ? "h-[72px]" : "h-[84px]",
+                "flex items-center gap-3 transition-all duration-300 ease-out lg:gap-4",
+                scrolled ? "h-[72px]" : "h-[76px] lg:h-[84px]",
               ].join(" ")}
             >
-              <Link href="/" className="flex shrink-0 items-center">
+              <Link href="/" className="flex min-w-0 shrink-0 items-center">
                 <Image
                   src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
                   alt="Qmatrix Technologies Logo"
                   width={250}
                   height={70}
                   priority
-                  className="h-auto w-[200px] object-contain sm:w-[250px] lg:w-[300px]"
+                  className="h-auto w-[160px] object-contain xs:w-[170px] sm:w-[200px] md:w-[220px] lg:w-[280px]"
                 />
               </Link>
 
               <div className="hidden min-w-0 flex-1 items-center justify-center lg:flex">
                 <nav className="min-w-0">
-                  <ul className="flex items-center gap-2 whitespace-nowrap">
+                  <ul className="flex items-center gap-1 xl:gap-2 whitespace-nowrap">
                     {navItems.map((item) => {
                       const active =
                         isActive(item.path) ||
@@ -430,14 +423,14 @@ export default function Navbar() {
 
                             <div
                               className={[
-                                "absolute left-1/2 top-full z-50 mt-4 w-[1100px] -translate-x-1/3 transition-all duration-300",
+                                "absolute left-1/2 top-full z-50 mt-4 w-[960px] xl:w-[1100px] -translate-x-[34%] transition-all duration-300",
                                 isMegaOpen
                                   ? "visible translate-y-0 opacity-100"
                                   : "invisible translate-y-3 opacity-0",
                               ].join(" ")}
                             >
                               <div className="overflow-hidden rounded-[28px] border border-white/60 bg-white/90 shadow-[0_28px_80px_rgba(2,6,23,0.16)] backdrop-blur-xl">
-                                <div className="grid grid-cols-[250px_minmax(0,1fr)]">
+                                <div className="grid grid-cols-[240px_minmax(0,1fr)] xl:grid-cols-[250px_minmax(0,1fr)]">
                                   <div className="bg-[linear-gradient(180deg,rgba(8,42,94,1)_0%,rgba(145,22,161,1)_100%)] p-7 text-white">
                                     <p className="text-xs font-semibold uppercase tracking-[0.22em] text-white/70">
                                       Explore
@@ -462,22 +455,20 @@ export default function Navbar() {
                                   <div className="grid grid-cols-2 gap-4 p-6">
                                     {coursesLoading ? (
                                       <>
-                                        {Array.from({ length: 6 }).map(
-                                          (_, index) => (
-                                            <div
-                                              key={index}
-                                              className="rounded-2xl border border-slate-200 bg-white p-3"
-                                            >
-                                              <div className="flex items-center gap-3">
-                                                <div className="h-16 w-24 shrink-0 animate-pulse rounded-xl bg-slate-100" />
-                                                <div className="min-w-0 flex-1">
-                                                  <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
-                                                  <div className="mt-2 h-3 w-20 animate-pulse rounded bg-slate-100" />
-                                                </div>
+                                        {Array.from({ length: 6 }).map((_, index) => (
+                                          <div
+                                            key={index}
+                                            className="rounded-2xl border border-slate-200 bg-white p-3"
+                                          >
+                                            <div className="flex items-center gap-3">
+                                              <div className="h-16 w-24 shrink-0 animate-pulse rounded-xl bg-slate-100" />
+                                              <div className="min-w-0 flex-1">
+                                                <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
+                                                <div className="mt-2 h-3 w-20 animate-pulse rounded bg-slate-100" />
                                               </div>
                                             </div>
-                                          )
-                                        )}
+                                          </div>
+                                        ))}
                                       </>
                                     ) : courseMenuItems.length > 0 ? (
                                       courseMenuItems.map((child) => {
@@ -621,50 +612,35 @@ export default function Navbar() {
                 </nav>
               </div>
 
-              <div className="hidden shrink-0 items-center lg:flex lg:-mr-10">
+              <div className="hidden shrink-0 items-center lg:flex">
                 {variant === "Qmatrix" ? (
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setOpenEnquiry(true);
-                      }}
-                      className="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
-                    >
-                      ENQUIRE NOW
-                    </Link>
-
-                    <Link
-                      href={`tel:${CALL_NUMBER}`}
-                      className="inline-flex h-11 items-center justify-center rounded-full bg-[linear-gradient(90deg,#082a5e_0%,#9116a1_100%)] px-5 text-[12px] font-semibold uppercase tracking-[0.14em] text-white shadow-[0_14px_34px_rgba(145,22,161,0.28)] transition-all duration-300 hover:-translate-y-0.5 hover:brightness-110"
-                    >
-                      {CALL_LABEL}
-                    </Link>
-                  </div>
+                  <Link
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpenEnquiry(true);
+                    }}
+                    className="inline-flex h-11 items-center justify-center rounded-full border border-slate-200 bg-white px-5 text-[12px] font-semibold uppercase tracking-[0.14em] text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    ENQUIRE NOW
+                  </Link>
                 ) : (
-                  <div className="flex items-center gap-3">
-                    <Link
-                      href="#"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setOpenEnquiry(true);
-                      }}
-                      className="btn btn-shine"
-                    >
-                      ENQUIRE NOW
-                    </Link>
-
-                    <Link href={`tel:${CALL_NUMBER}`} className="btn btn-shine">
-                      {CALL_LABEL}
-                    </Link>
-                  </div>
+                  <Link
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setOpenEnquiry(true);
+                    }}
+                    className="btn btn-shine"
+                  >
+                    ENQUIRE NOW
+                  </Link>
                 )}
               </div>
 
               <button
                 onClick={() => setIsOpen(true)}
-                className="ml-auto rounded-xl p-2.5 transition hover:bg-white/60 active:scale-[0.98] lg:hidden"
+                className="ml-auto inline-flex items-center justify-center rounded-xl p-2.5 transition hover:bg-white/60 active:scale-[0.98] lg:hidden"
                 aria-label="Open menu"
               >
                 <Menu size={28} style={{ color: "var(--tg-theme-primary)" }} />
@@ -676,7 +652,7 @@ export default function Navbar() {
 
       <div
         className={[
-          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-200",
+          "fixed inset-0 z-40 bg-black/50 transition-opacity duration-300 lg:hidden",
           isOpen ? "opacity-100" : "pointer-events-none opacity-0",
         ].join(" ")}
         onClick={() => setIsOpen(false)}
@@ -684,163 +660,142 @@ export default function Navbar() {
 
       <aside
         className={[
-          "fixed right-0 top-0 z-50 h-full w-[86%] max-w-sm bg-white shadow-2xl transition-transform duration-300",
+          "fixed right-0 top-0 z-50 h-dvh w-[92vw] max-w-[380px] bg-white shadow-2xl transition-transform duration-300 lg:hidden",
           isOpen ? "translate-x-0" : "translate-x-full",
         ].join(" ")}
+        aria-hidden={!isOpen}
       >
-        <div className="flex items-center justify-between border-b border-black/5 px-5 py-4">
-          <Image
-            src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
-            alt="Qmatrix Technologies Logo"
-            width={200}
-            height={60}
-            className="h-auto w-[150px] object-contain sm:w-[170px]"
-          />
-          <button
-            onClick={() => setIsOpen(false)}
-            className="rounded-xl p-2.5 hover:bg-gray-100"
-            aria-label="Close menu"
-          >
-            <X size={26} style={{ color: "var(--tg-theme-primary)" }} />
-          </button>
-        </div>
+        <div className="flex h-full flex-col">
+          <div className="flex items-center justify-between border-b border-black/5 px-4 py-4 sm:px-5">
+            <Image
+              src={cldPublic("qmatrix/logo.png", "f_auto,q_auto,w_1000")}
+              alt="Qmatrix Technologies Logo"
+              width={200}
+              height={60}
+              className="h-auto w-[135px] object-contain xs:w-[145px] sm:w-[160px]"
+            />
+            <button
+              onClick={() => setIsOpen(false)}
+              className="rounded-xl p-2.5 transition hover:bg-gray-100"
+              aria-label="Close menu"
+            >
+              <X size={24} style={{ color: "var(--tg-theme-primary)" }} />
+            </button>
+          </div>
 
-        <div className="flex h-[calc(100%-72px)] flex-col">
-          <div className="px-5 py-5">
-            <div className="flex flex-col gap-1">
-              {navItems.map((item) => {
-                if (item.children?.length) {
-                  return (
-                    <div key={item.name} className="pt-2">
-                      <p className="px-3 text-xs font-bold tracking-widest text-slate-400">
-                        {item.name.toUpperCase()}
-                      </p>
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="px-4 py-5 sm:px-5">
+              <div className="flex flex-col gap-1">
+                {navItems.map((item) => {
+                  if (item.name === "Courses") {
+                    return (
+                      <div key={item.name} className="pt-1">
+                        <Link
+                          href="/courses"
+                          onClick={() => setIsOpen(false)}
+                          className={[
+                            "block rounded-xl px-3 py-2.5 text-[16px] font-semibold transition hover:bg-black/5",
+                            isActive("/courses") ||
+                            item.children?.some((child) => isActive(child.path))
+                              ? "text-[var(--tg-theme-primary)]"
+                              : "text-slate-800",
+                          ].join(" ")}
+                        >
+                          Courses
+                        </Link>
 
-                      <div className="mt-2 flex flex-col gap-1">
-                        {coursesLoading && item.name === "Courses" ? (
-                          <div className="space-y-2 px-3 py-2">
-                            {Array.from({ length: 4 }).map((_, index) => (
-                              <div
-                                key={index}
-                                className="h-11 animate-pulse rounded-xl bg-slate-100"
-                              />
-                            ))}
-                          </div>
-                        ) : item.children.length > 0 ? (
-                          item.children.map((child) => (
-                            <Link
-                              key={child.path}
-                              href={child.path}
-                              onClick={() => setIsOpen(false)}
-                              className={[
-                                "rounded-xl px-3 py-3 text-[16px] font-semibold transition",
-                                isActive(child.path)
-                                  ? "bg-black/5 text-[var(--tg-theme-primary)]"
-                                  : "text-slate-800 hover:bg-black/5",
-                              ].join(" ")}
-                            >
-                              {child.name}
-                            </Link>
-                          ))
-                        ) : (
-                          <div className="px-3 py-3 text-sm text-slate-500">
-                            No courses available
-                          </div>
-                        )}
+                        <div className="mt-2 rounded-2xl bg-slate-50/90 p-2">
+                          <p className="px-2 pb-2 text-[11px] font-bold tracking-[0.18em] text-slate-400">
+                            COURSE LIST
+                          </p>
+
+                          {coursesLoading ? (
+                            <div className="space-y-2 px-2 pb-2">
+                              {Array.from({ length: 5 }).map((_, index) => (
+                                <div
+                                  key={index}
+                                  className="h-11 animate-pulse rounded-xl bg-slate-200/70"
+                                />
+                              ))}
+                            </div>
+                          ) : item.children && item.children.length > 0 ? (
+                            <div className="flex flex-col gap-1">
+                              {item.children.map((child) => (
+                                <Link
+                                  key={child.path}
+                                  href={child.path}
+                                  onClick={() => setIsOpen(false)}
+                                  className={[
+                                    "rounded-xl px-3 py-3 text-[15px] font-semibold leading-6 transition",
+                                    isActive(child.path)
+                                      ? "bg-white text-[var(--tg-theme-primary)] shadow-sm"
+                                      : "text-slate-800 hover:bg-white",
+                                  ].join(" ")}
+                                >
+                                  {child.name}
+                                </Link>
+                              ))}
+                            </div>
+                          ) : (
+                            <div className="px-3 py-3 text-sm text-slate-500">
+                              No courses available
+                            </div>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  );
-                }
+                    );
+                  }
 
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.path!}
-                    onClick={() => setIsOpen(false)}
-                    className={[
-                      "rounded-xl px-3 py-2 text-[16px] font-semibold transition hover:bg-black/5",
-                      isActive(item.path)
-                        ? "text-[var(--tg-theme-primary)]"
-                        : "text-slate-800",
-                    ].join(" ")}
-                  >
-                    {item.name}
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.path!}
+                      onClick={() => setIsOpen(false)}
+                      className={[
+                        "rounded-xl px-3 py-2.5 text-[16px] font-semibold transition hover:bg-black/5",
+                        isActive(item.path)
+                          ? "text-[var(--tg-theme-primary)]"
+                          : "text-slate-800",
+                      ].join(" ")}
+                    >
+                      {item.name}
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
           </div>
 
-          <div className="mt-auto border-t border-black/5 bg-linear-to-b from-white to-slate-50 px-7 py-2">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <Link
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setIsOpen(false);
-                  setOpenEnquiry(true);
-                }}
-                className="
-                  inline-flex w-full items-center justify-center
-                  min-h-12.5 rounded-2xl
-                  px-6 text-[13px] font-semibold
-                  uppercase tracking-[0.12em] whitespace-nowrap
-                  text-white bg-[var(--tg-theme-primary)]
-                  shadow-[0_16px_36px_rgba(2,6,23,0.18)]
-                  hover:brightness-110
-                  active:scale-[0.98]
-                  transition-all duration-200
-                "
-              >
-                ENQUIRE NOW
-              </Link>
-
-              <Link
-                href={`tel:${CALL_NUMBER}`}
-                onClick={() => setIsOpen(false)}
-                className="
-                  inline-flex w-full items-center justify-center
-                  min-h-12.5 rounded-2xl
-                  px-6 text-[13px] font-semibold
-                  uppercase tracking-[0.12em] whitespace-nowrap
-                  border border-slate-200
-                  bg-white text-slate-900
-                  shadow-[0_14px_28px_rgba(2,6,23,0.08)]
-                  hover:bg-slate-50 hover:border-slate-300
-                  active:scale-[0.98]
-                  transition-all duration-200
-                "
-              >
-                {CALL_LABEL}
-              </Link>
-            </div>
+          <div className="border-t border-black/5 bg-gradient-to-b from-white to-slate-50 px-4 pb-[calc(env(safe-area-inset-bottom)+12px)] pt-4 sm:px-5">
+            <Link
+              href="#"
+              onClick={(e) => {
+                e.preventDefault();
+                setIsOpen(false);
+                setOpenEnquiry(true);
+              }}
+              className="inline-flex min-h-12 w-full items-center justify-center rounded-2xl bg-[var(--tg-theme-primary)] px-6 text-center text-[13px] font-semibold uppercase tracking-[0.12em] text-white shadow-[0_16px_36px_rgba(2,6,23,0.18)] transition-all duration-200 hover:brightness-110 active:scale-[0.98]"
+            >
+              ENQUIRE NOW
+            </Link>
 
             <div className="mt-4">
               <p className="text-[11px] font-bold tracking-[0.2em] text-slate-400">
                 FOLLOW US
               </p>
 
-              <div className="mt-4 flex flex-wrap gap-3">
+              <div className="mt-3 flex flex-wrap gap-3">
                 {SOCIALS.map(({ name, href, Icon }) => (
                   <a
                     key={name}
                     href={href}
                     target={href.startsWith("http") ? "_blank" : undefined}
                     rel={href.startsWith("http") ? "noreferrer" : undefined}
-                    className="
-                      inline-flex h-11 w-11 items-center justify-center
-                      rounded-2xl border border-slate-200 bg-white
-                      shadow-[0_12px_28px_rgba(2,6,23,0.10)]
-                      transition-all duration-200
-                      hover:-translate-y-0.5 hover:border-slate-300
-                    "
+                    className="inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-[0_12px_28px_rgba(2,6,23,0.10)] transition-all duration-200 hover:-translate-y-0.5 hover:border-slate-300"
                     aria-label={name}
                     title={name}
                   >
-                    <Icon
-                      size={20}
-                      style={{ color: "var(--tg-theme-primary)" }}
-                    />
+                    <Icon size={19} style={{ color: "var(--tg-theme-primary)" }} />
                   </a>
                 ))}
               </div>
@@ -849,12 +804,14 @@ export default function Navbar() {
         </div>
       </aside>
 
-      <EnquiryPopup
-        open={openEnquiry}
-        onClose={() => setOpenEnquiry(false)}
-      />
+      <EnquiryPopup open={openEnquiry} onClose={() => setOpenEnquiry(false)} />
 
-      <div className="h-[76px] lg:h-[124px]" />
+      <div
+        className="h-[76px] lg:h-[124px]"
+        style={{
+          height: undefined,
+        }}
+      />
     </>
   );
 }

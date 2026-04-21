@@ -86,7 +86,6 @@ function getObjectIdTimestamp(id?: string) {
   const timestamp = Number.parseInt(hex, 16);
 
   if (Number.isNaN(timestamp)) return 0;
-
   return timestamp * 1000;
 }
 
@@ -155,7 +154,6 @@ export default function CoursesSection() {
 
         const data: CoursesListResponse = await res.json();
         const list = data.data || data.courses || [];
-
         const normalizedCourses = Array.isArray(list) ? sortCoursesOldestFirst(list) : [];
 
         if (!ignore) {
@@ -206,52 +204,52 @@ export default function CoursesSection() {
 
   return (
     <MotionConfig reducedMotion="never">
-      <section className="relative overflow-hidden bg-[#f6f8fc] py-16 sm:py-20 lg:py-24">
+      <section className="relative overflow-hidden bg-[#f6f8fc] py-12 sm:py-16 lg:py-20 xl:py-24">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute left-[-80px] top-12 h-72 w-72 rounded-full bg-[#7C3AED]/10 blur-3xl" />
-          <div className="absolute right-[-60px] top-28 h-72 w-72 rounded-full bg-[#0EA5E9]/10 blur-3xl" />
-          <div className="absolute bottom-0 left-1/3 h-72 w-72 rounded-full bg-[#A724E4]/10 blur-3xl" />
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,42,94,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(8,42,94,0.03)_1px,transparent_1px)] bg-[size:42px_42px]" />
+          <div className="absolute left-[-80px] top-12 h-48 w-48 rounded-full bg-[#7C3AED]/10 blur-3xl sm:h-60 sm:w-60 lg:h-72 lg:w-72" />
+          <div className="absolute right-[-60px] top-28 h-48 w-48 rounded-full bg-[#0EA5E9]/10 blur-3xl sm:h-60 sm:w-60 lg:h-72 lg:w-72" />
+          <div className="absolute bottom-0 left-1/3 h-48 w-48 rounded-full bg-[#A724E4]/10 blur-3xl sm:h-60 sm:w-60 lg:h-72 lg:w-72" />
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(8,42,94,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(8,42,94,0.03)_1px,transparent_1px)] bg-[size:34px_34px] sm:bg-[size:42px_42px]" />
         </div>
 
-        <div ref={sectionRef} className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
+        <div ref={sectionRef} className="relative z-10 mx-auto max-w-7xl px-3 sm:px-4 md:px-6">
           <motion.div
             variants={fadeUp}
             initial="hidden"
             animate={inView ? "show" : "hidden"}
-            className="mb-10 rounded-[24px] border border-white/70 bg-white/80 p-4 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:p-5"
+            className="mb-8 rounded-[20px] border border-white/70 bg-white/80 p-3 shadow-[0_20px_70px_rgba(15,23,42,0.08)] backdrop-blur sm:mb-10 sm:rounded-[24px] sm:p-4 lg:p-5"
           >
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               <div className="relative w-full lg:max-w-md">
                 <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="Search courses, categories, duration..."
-                  className="h-12 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10"
+                  className="h-11 w-full rounded-2xl border border-slate-200 bg-white pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-secondary focus:ring-4 focus:ring-secondary/10 sm:h-12"
                 />
               </div>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-end">
-                <div ref={ddRef} className="relative">
+                <div ref={ddRef} className="relative w-full sm:w-auto">
                   <button
                     type="button"
                     onClick={() => setOpen((v) => !v)}
-                    className="inline-flex h-12 min-w-[190px] items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300"
+                    className="inline-flex h-11 w-full min-w-0 items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:border-slate-300 sm:h-12 sm:min-w-[190px] sm:w-auto"
                     aria-haspopup="menu"
                     aria-expanded={open}
                   >
-                    <span>{activeFilter}</span>
+                    <span className="truncate">{activeFilter}</span>
                     <ChevronDown
                       size={18}
-                      className={`transition duration-300 ${open ? "rotate-180" : ""}`}
+                      className={`shrink-0 transition duration-300 ${open ? "rotate-180" : ""}`}
                     />
                   </button>
 
                   {open && (
                     <div
                       role="menu"
-                      className="absolute right-0 z-30 mt-2 w-[220px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.12)]"
+                      className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white p-2 shadow-[0_20px_60px_rgba(15,23,42,0.12)] sm:left-auto sm:right-0 sm:w-[220px]"
                     >
                       {filters.map((f) => {
                         const active = f === activeFilter;
@@ -279,11 +277,11 @@ export default function CoursesSection() {
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-end gap-2">
                   <button
                     type="button"
                     onClick={() => setViewMode("grid")}
-                    className={`grid h-12 w-12 place-items-center rounded-2xl border transition ${
+                    className={`grid h-11 w-11 place-items-center rounded-2xl border transition sm:h-12 sm:w-12 ${
                       viewMode === "grid"
                         ? "border-secondary bg-secondary text-white shadow-lg shadow-secondary/20"
                         : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
@@ -296,7 +294,7 @@ export default function CoursesSection() {
                   <button
                     type="button"
                     onClick={() => setViewMode("list")}
-                    className={`grid h-12 w-12 place-items-center rounded-2xl border transition ${
+                    className={`grid h-11 w-11 place-items-center rounded-2xl border transition sm:h-12 sm:w-12 ${
                       viewMode === "list"
                         ? "border-secondary bg-secondary text-white shadow-lg shadow-secondary/20"
                         : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
@@ -311,20 +309,20 @@ export default function CoursesSection() {
           </motion.div>
 
           {loading && (
-            <div className="rounded-[24px] border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-sm sm:rounded-[24px] sm:p-12">
               <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-slate-200 border-t-secondary" />
               <p className="mt-4 text-sm text-slate-600">Loading courses...</p>
             </div>
           )}
 
           {!loading && error && (
-            <div className="rounded-[24px] border border-red-200 bg-red-50 p-12 text-center shadow-sm">
+            <div className="rounded-[20px] border border-red-200 bg-red-50 p-8 text-center shadow-sm sm:rounded-[24px] sm:p-12">
               <p className="text-sm font-medium text-red-600">{error}</p>
             </div>
           )}
 
           {!loading && !error && filteredCourses.length === 0 && (
-            <div className="rounded-[24px] border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <div className="rounded-[20px] border border-slate-200 bg-white p-8 text-center shadow-sm sm:rounded-[24px] sm:p-12">
               <p className="text-sm text-slate-600">No courses found.</p>
             </div>
           )}
@@ -334,7 +332,7 @@ export default function CoursesSection() {
               variants={container}
               initial="hidden"
               animate={inView ? "show" : "hidden"}
-              className="grid grid-cols-1 gap-7 sm:grid-cols-2 xl:grid-cols-3"
+              className="grid grid-cols-1 gap-5 sm:grid-cols-2 sm:gap-6 xl:grid-cols-3 xl:gap-7"
             >
               {filteredCourses.map((course, index) => (
                 <motion.div
@@ -347,8 +345,8 @@ export default function CoursesSection() {
                     className="block h-full"
                     aria-label={`Open ${course.title}`}
                   >
-                    <article className="flex h-full flex-col overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(15,23,42,0.14)]">
-                      <div className="relative h-60 overflow-hidden">
+                    <article className="flex h-full flex-col overflow-hidden rounded-[22px] border border-white/70 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_28px_70px_rgba(15,23,42,0.14)] sm:rounded-[24px] xl:rounded-[26px]">
+                      <div className="relative h-52 overflow-hidden sm:h-56 lg:h-60">
                         <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#08152f]/60 via-[#08152f]/10 to-transparent" />
                         <div className="absolute inset-0 z-[3] translate-x-[-100%] bg-[linear-gradient(120deg,transparent_0%,rgba(255,255,255,0.20)_35%,transparent_60%)] opacity-0 transition duration-500 group-hover:translate-x-[100%] group-hover:opacity-100" />
 
@@ -363,7 +361,7 @@ export default function CoursesSection() {
 
                         {course.category && (
                           <span
-                            className={`absolute left-4 top-4 z-[4] rounded-full px-3.5 py-1.5 text-[11px] font-semibold tracking-wide text-white shadow-lg ${badgeClass(
+                            className={`absolute left-3 top-3 z-[4] rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-wide text-white shadow-lg sm:left-4 sm:top-4 sm:px-3.5 ${badgeClass(
                               course.category
                             )}`}
                           >
@@ -372,8 +370,8 @@ export default function CoursesSection() {
                         )}
                       </div>
 
-                      <div className="flex flex-1 flex-col p-6">
-                        <div className="mb-4 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                      <div className="flex flex-1 flex-col p-4 sm:p-5 lg:p-6">
+                        <div className="mb-4 flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:gap-3">
                           <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5">
                             <BookOpen size={13} />
                             {course.modulesCount || "Modules TBA"}
@@ -390,7 +388,7 @@ export default function CoursesSection() {
                           </span>
                         </div>
 
-                        <h3 className="line-clamp-2 text-lg font-bold leading-snug text-[#082A5E] transition-colors duration-300 group-hover:text-secondary">
+                        <h3 className="line-clamp-2 text-base font-bold leading-snug text-[#082A5E] transition-colors duration-300 group-hover:text-secondary sm:text-lg">
                           {course.title}
                         </h3>
 
@@ -399,12 +397,12 @@ export default function CoursesSection() {
                             "Practical industry-ready course with expert mentorship and strong career guidance."}
                         </p>
 
-                        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                          <span className="inline-flex items-center gap-2 text-xs font-medium text-slate-500">
+                        <div className="mt-5 flex items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                          <span className="inline-flex min-w-0 items-center gap-2 text-xs font-medium text-slate-500 sm:text-sm">
                             🏆 {course.placementSupport ? "Placement assistance" : "Career guidance"}
                           </span>
 
-                          <span className="inline-flex items-center gap-2 text-sm font-semibold text-secondary">
+                          <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-secondary">
                             Explore
                             <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                           </span>
@@ -422,7 +420,7 @@ export default function CoursesSection() {
               variants={container}
               initial="hidden"
               animate={inView ? "show" : "hidden"}
-              className="flex flex-col gap-6"
+              className="flex flex-col gap-5 sm:gap-6"
             >
               {filteredCourses.map((course, index) => (
                 <motion.div
@@ -434,9 +432,9 @@ export default function CoursesSection() {
                     className="block"
                     aria-label={`Open ${course.title}`}
                   >
-                    <article className="group overflow-hidden rounded-[26px] border border-white/70 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.13)]">
-                      <div className="flex flex-col gap-6 p-5 sm:p-6 lg:flex-row lg:items-center">
-                        <div className="relative h-56 w-full shrink-0 overflow-hidden rounded-[22px] sm:h-48 lg:h-44 lg:w-[320px]">
+                    <article className="group overflow-hidden rounded-[22px] border border-white/70 bg-white shadow-[0_12px_45px_rgba(15,23,42,0.08)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_24px_65px_rgba(15,23,42,0.13)] sm:rounded-[24px] xl:rounded-[26px]">
+                      <div className="flex flex-col gap-5 p-4 sm:p-5 lg:flex-row lg:items-center lg:gap-6 lg:p-6">
+                        <div className="relative h-52 w-full shrink-0 overflow-hidden rounded-[18px] sm:h-56 sm:rounded-[20px] lg:h-44 lg:w-[300px] xl:w-[320px] xl:rounded-[22px]">
                           <div className="absolute inset-0 z-[2] bg-gradient-to-t from-[#08152f]/45 via-transparent to-transparent" />
 
                           <Image
@@ -450,7 +448,7 @@ export default function CoursesSection() {
 
                           {course.category && (
                             <span
-                              className={`absolute left-4 top-4 z-[4] rounded-full px-3.5 py-1.5 text-[11px] font-semibold tracking-wide text-white shadow-lg ${badgeClass(
+                              className={`absolute left-3 top-3 z-[4] rounded-full px-3 py-1.5 text-[11px] font-semibold tracking-wide text-white shadow-lg sm:left-4 sm:top-4 sm:px-3.5 ${badgeClass(
                                 course.category
                               )}`}
                             >
@@ -459,8 +457,8 @@ export default function CoursesSection() {
                           )}
                         </div>
 
-                        <div className="flex flex-1 flex-col">
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                        <div className="flex min-w-0 flex-1 flex-col">
+                          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 sm:gap-3">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-50 px-3 py-1.5">
                               <BookOpen size={13} />
                               {course.modulesCount || "Modules TBA"}
@@ -477,7 +475,7 @@ export default function CoursesSection() {
                             </span>
                           </div>
 
-                          <h3 className="mt-4 text-xl font-bold tracking-tight text-[#082A5E] transition-colors duration-300 group-hover:text-secondary">
+                          <h3 className="mt-4 text-lg font-bold tracking-tight text-[#082A5E] transition-colors duration-300 group-hover:text-secondary sm:text-xl">
                             {course.title}
                           </h3>
 
@@ -494,7 +492,7 @@ export default function CoursesSection() {
                                 : "Career guidance support"}
                             </span>
 
-                            <span className="inline-flex items-center gap-2 text-sm font-semibold text-secondary">
+                            <span className="inline-flex shrink-0 items-center gap-2 text-sm font-semibold text-secondary">
                               View Course Details
                               <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
                             </span>
